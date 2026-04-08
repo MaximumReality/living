@@ -823,7 +823,8 @@ async function callCohere(userMessage) {
   };
 
   try {
-    const res = await fetch('/api/cohere', {
+    const res = await fetch('https://living-brown.vercel.app/api/cohere', {
+
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
