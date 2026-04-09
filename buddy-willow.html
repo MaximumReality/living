@@ -86,6 +86,23 @@ body {
     font-size: 7px; letter-spacing: 1px;
     color: var(--green); opacity: 0; transition: opacity 0.4s;
   }
+  .sound-btn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--cyan);
+  opacity: 0.7;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.sound-btn:active {
+  transform: scale(0.9);
+}
+
+.sound-btn.muted {
+  opacity: 0.4;
+}
   .save-indicator.show { opacity: 1; }
   .status-dot {
     width: 7px; height: 7px; border-radius: 50%;
@@ -282,6 +299,7 @@ body {
   <div class="header">
     <div class="title">WILLOW.EXE</div>
     <div class="header-right">
+      <button id="soundToggle" class="sound-btn">🔊</button>
       <span class="save-indicator" id="saveIndicator">SAVED</span>
       <div class="status-dot"></div>
     </div>
@@ -737,6 +755,30 @@ if (prevLastSaved) {
 } else {
   setTimeout(() => addLog('CAT: *opens one eye at you*'), 1800);
 }
+  const snackSound = new Audio('https://maximumreality.github.io/living/afternoon_snack_surprise.mp3');
+snackSound.volume = 0.4;
+snackSound.loop = true;
+
+let soundOn = false; // start OFF
+
+const soundBtn = document.getElementById('soundToggle');
+soundBtn.textContent = '🔇'; // initial icon
+
+soundBtn.onclick = () => {
+  soundOn = !soundOn;
+
+  if (soundOn) {
+  soundBtn.textContent = '🔊';
+  soundBtn.classList.remove('muted');
+  snackSound.currentTime = 0;
+  snackSound.play();
+}
+  } else {
+    soundBtn.textContent = '🔇';
+    soundBtn.classList.add('muted');
+    snackSound.pause();
+  }
+};
 </script>
 </body>
 </html>
