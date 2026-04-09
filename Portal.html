@@ -650,33 +650,47 @@ async function loadWeather() {
 async function loadAPOD() {
   termLog('ESTABLISHING LINK TO NASA APOD...');
   try {
-    const res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${NASA_KEY}`);
+    const res = await fetch(`https://api.nasa.gov/planetary/apod?api_key=${NASA_KEY}&thumbs=True`);
     const data = await res.json();
 
     if (data.error) throw new Error(data.error.message || 'API error');
 
     let mediaHTML = '';
+    
     if (data.media_type === 'video') {
-      // Handle YouTube or other video embeds gracefully
+      // 1. Check for standard YouTube IDs
       const videoId = data.url.match(/embed\/([^?]+)/)?.[1]
                    || data.url.match(/youtube\.com\/watch\?v=([^&]+)/)?.[1]
                    || null;
+
       if (videoId) {
         mediaHTML = `
           <div class="apod-video-wrap">
-            <iframe src="https://www.youtube.com/embed/${videoId}" 
+            <iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1" 
                     allowfullscreen title="${data.title}"></iframe>
           </div>`;
-      } else {
+      } 
+      // 2. Handle direct MP4 files (like today's Comet plunge)
+      else if (data.url.endsWith('.mp4') || data.url.includes('apod.nasa.gov/apod/image')) {
+        mediaHTML = `
+          <div class="apod-video-wrap">
+            <video autoplay loop muted playsinline style="width:100%; border-radius:4px;">
+              <source src="${data.url}" type="video/mp4">
+              <a href="${data.url}" style="color:var(--cyan)">View Feed</a>
+            </video>
+          </div>`;
+      }
+      // 3. Generic fallback for other video types
+      else {
         mediaHTML = `
           <div class="apod-video-wrap">
             <a href="${data.url}" target="_blank" style="color:var(--cyan);font-size:10px;letter-spacing:2px;text-decoration:none;">
-              ▶ OPEN VIDEO FEED [EXTERNAL LINK]
+              ▶ OPEN VIDEO FEED [EXTERNAL]
             </a>
-            <div style="font-size:8px;color:var(--muted);margin-top:6px;letter-spacing:1px;">VIDEO STREAM — CLICK TO VIEW</div>
           </div>`;
       }
     } else {
+      // Handle standard Images
       const imgSrc = data.hdurl || data.url;
       mediaHTML = `<img class="apod-img" src="${imgSrc}" alt="${data.title}" loading="lazy">`;
     }
@@ -704,6 +718,7 @@ async function loadAPOD() {
     termLog('APOD: SIGNAL LOST — FALLBACK MODE', 'warn');
   }
 }
+
 
 // ── DAILY DIRECTIVE (Advice Slip) ────────────────────────────
 async function loadDirective() {
