@@ -100,7 +100,7 @@ position:fixed; inset:0; background:var(–void); z-index:9999;
 display:flex; flex-direction:column; align-items:center; justify-content:center;
 gap:14px; cursor:pointer;
 }
-#boot-screen.out { animation:boot-out 0.7s ease forwards; }
+#boot-screen.out { animation:boot-out 0.7s ease forwards; pointer-events:none; }
 @keyframes boot-out {
 0%{opacity:1;transform:scaleY(1)}
 60%{opacity:1;transform:scaleY(0.003)}
@@ -120,19 +120,10 @@ animation:title-glitch 3.5s infinite;
 }
 .boot-sub { font-size:9px; color:var(–green-dim); letter-spacing:4px; text-align:center; }
 .boot-log { font-size:9px; color:var(–green-dim); letter-spacing:1px; text-align:center; line-height:2; }
-.boot-init {
-font-family:‘VT323’,monospace; font-size:26px; color:var(–amber);
-letter-spacing:4px; border:1px solid var(–amber); padding:7px 22px;
-text-shadow:0 0 10px var(–amber); margin-top:12px;
-animation:init-pulse 1.4s ease-in-out infinite;
-}
-@keyframes init-pulse {
-0%,100%{box-shadow:0 0 5px var(–amber),inset 0 0 5px rgba(255,170,0,0.08)}
-50%{box-shadow:0 0 18px var(–amber),inset 0 0 18px rgba(255,170,0,0.18)}
-}
 .boot-input-wrap {
 display:flex; align-items:center; gap:8px;
 border:1px solid rgba(0,255,65,0.3); padding:6px 14px;
+background:rgba(0,0,0,0.6);
 }
 .boot-input-label {
 font-size:9px; color:var(–green-dim); letter-spacing:2px; white-space:nowrap;
@@ -140,9 +131,19 @@ font-size:9px; color:var(–green-dim); letter-spacing:2px; white-space:nowrap;
 .boot-input {
 background:transparent; border:none; outline:none;
 color:var(–green); font-family:‘Share Tech Mono’,monospace;
-font-size:13px; letter-spacing:2px; width:140px; caret-color:var(–green);
+font-size:13px; letter-spacing:2px; width:130px; caret-color:var(–green);
 }
 .boot-input::placeholder { color:var(–green-dim); opacity:0.5; }
+.boot-init {
+font-family:‘VT323’,monospace; font-size:26px; color:var(–amber);
+letter-spacing:4px; border:1px solid var(–amber); padding:7px 22px;
+text-shadow:0 0 10px var(–amber);
+animation:init-pulse 1.4s ease-in-out infinite;
+}
+@keyframes init-pulse {
+0%,100%{box-shadow:0 0 5px var(–amber),inset 0 0 5px rgba(255,170,0,0.08)}
+50%{box-shadow:0 0 18px var(–amber),inset 0 0 18px rgba(255,170,0,0.18)}
+}
 
 /* ── LAYOUT ── */
 #app {
@@ -337,14 +338,11 @@ body.music-active #terminal  { animation: border-pulse 2s infinite ease-in-out; 
 0%,100%{border-color:var(–border)}
 50%{border-color:var(–cyan);box-shadow:0 0 10px rgba(0,238,255,0.1)}
 }
-
-/* ── AI error banner ── */
 #ai-error-banner {
 display:none; padding:6px 12px;
 background:rgba(255,0,51,0.08); border-top:1px solid rgba(255,0,51,0.3);
 color:var(–red); font-size:9px; letter-spacing:1px;
 }
-
 @media(max-width:600px){
 main{grid-template-columns:115px 1fr}
 .stat-grid{grid-template-columns:1fr}
@@ -366,15 +364,14 @@ aside{flex-direction:row;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap}
     TERMINAL OFFLINE<br>
     SCANNING FOR UPLINK...<br>
     REF: VHS_GLITCH_ANCHOR_01<br>
-    ENTITY "LORI" DETECTED<br>
+    ENTITY DETECTED<br>
     STATUS: REALITY_LEAKING<br>
     AI_NARRATIVE_ENGINE: ONLINE
   </div>
   <div class="boot-input-wrap">
-  <span class="boot-input-label">IDENTIFY_CITIZEN://</span>
-  <input type="text" id="playerName" class="boot-input" maxlength="20" placeholder="LORI" autocomplete="off" autocorrect="off" spellcheck="false">
-</div>
-
+    <span class="boot-input-label">IDENTIFY_CITIZEN://</span>
+    <input type="text" id="playerName" class="boot-input" maxlength="20" placeholder="LORI" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+  </div>
   <div class="boot-init">[ CLICK TO INITIALIZE ]</div>
 </div>
 
@@ -438,7 +435,7 @@ aside{flex-direction:row;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap}
       </div>
     </aside>
 
-
+```
 <section id="terminal">
   <div id="terminal-header">
     <div class="term-title">VOID_TERMINAL v3.0 // AI_UPLINK_ACTIVE</div>
@@ -467,7 +464,7 @@ aside{flex-direction:row;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap}
 
 <script>
 // ══════════════════════════════════════════════════════
-//  ENTITY PORTRAIT — ResizeObserver for CSS Grid layout
+//  ENTITY PORTRAIT
 // ══════════════════════════════════════════════════════
 (function initPortrait() {
   const canvas = document.getElementById('entity-canvas');
@@ -523,10 +520,8 @@ aside{flex-direction:row;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap}
     ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
 
     const cx = W/2, scale = W/155, headR = 22*scale, headY = H*0.28;
-
     ctx.save();
     ctx.shadowBlur = 18; ctx.shadowColor = '#00ff41';
-
     const glitchX = (Math.sin(t*31) > 0.92) ? (Math.random()-0.5)*6 : 0;
     const glitchY = (Math.sin(t*17) > 0.94) ? (Math.random()-0.5)*4 : 0;
     ctx.translate(glitchX, glitchY);
@@ -623,9 +618,8 @@ const state = {
   entityName: 'LORI',
   rl: 100, beauty: 0, comply: 0, chaos: 0, turn: 0,
   rules: ['REPORT_GLITCHES','NO_SMILING','TRUST_THE_SYSTEM'],
-  conversationHistory: [],   // Cohere chat history [{role,message}]
-  currentChoices: [],        // last AI-returned choices
-  lastNarrative: '',
+  conversationHistory: [],
+  currentChoices: [],
   flags: [],
   gameOver: false,
   timeOff: 2512,
@@ -633,11 +627,10 @@ const state = {
 };
 
 // ══════════════════════════════════════════════════════
-//  COHERE SYSTEM PROMPT
+//  SYSTEM PROMPT
 // ══════════════════════════════════════════════════════
 function getSystemPrompt() {
   return `You are the narrative engine for MAXIMUM REALITY — a Kafka-meets-cyberpunk interactive fiction set inside a sentient Bureaucratic void simulation. The player character is ENTITY: ${state.entityName}. The aesthetic is VHS glitch, green terminal phosphor, dark cosmic humor, and genuine emotional depth. Tone: surreal, poetic, slightly menacing, occasionally beautiful.
-
 
 GAME RULES:
 - Each response must advance the story with 2-4 sentences of vivid narrative.
@@ -647,6 +640,7 @@ GAME RULES:
 - After ~12-15 turns of BEAUTY choices, offer a transcendent escape ending.
 - After ~8+ CHAOS choices, offer a void dissolution ending.
 - After ~10+ COMPLY choices, offer an obedient machinery ending.
+- Always address the player as ENTITY: ${state.entityName} when the Bureaucracy speaks directly.
 
 RESPONSE FORMAT — return ONLY valid JSON, no markdown, no preamble:
 {
@@ -676,7 +670,6 @@ The Bureaucracy issues directives like: REPORT_GLITCHES, DENY_THE_VOID, BEAUTY_R
 
 This is a personal universe. Play it with love and strangeness.`;
 }
-
 
 // ══════════════════════════════════════════════════════
 //  CLOCK
@@ -834,7 +827,6 @@ function unlockChoices() {
 //  COHERE API CALL
 // ══════════════════════════════════════════════════════
 async function callCohere(userMessage) {
-  // Cohere v2 API: messages array format
   state.conversationHistory.push({ role: 'user', content: userMessage });
   if (state.conversationHistory.length > 20) {
     state.conversationHistory = state.conversationHistory.slice(-20);
@@ -852,7 +844,6 @@ async function callCohere(userMessage) {
 
   try {
     const res = await fetch('https://living-brown.vercel.app/api/cohere', {
-
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -864,14 +855,11 @@ async function callCohere(userMessage) {
     }
 
     const data = await res.json();
-    // Cohere v2 response: data.message.content[0].text
     const rawText = data?.message?.content?.[0]?.text || '';
     if (!rawText) throw new Error('Empty response from Cohere');
 
-    // Add assistant reply to history
     state.conversationHistory.push({ role: 'assistant', content: rawText });
 
-    // Strip markdown fences if model wraps output in ```json
     const cleaned = rawText.replace(/```json\s*|```\s*/g, '').trim();
     const parsed = JSON.parse(cleaned);
     document.getElementById('ai-error-banner').style.display = 'none';
@@ -885,7 +873,6 @@ async function callCohere(userMessage) {
   }
 }
 
-// Fallback node when AI fails
 function buildFallback(context) {
   return {
     narrative: [
@@ -912,7 +899,6 @@ async function handleChoice(choice, index) {
   if (state.gameOver) return;
   lockChoices();
 
-  // Apply stat effects
   if (choice.type === 'comply')  { state.comply++;  state.rl = Math.max(0, state.rl-3); state.currentPath = 'COMPLY'; }
   if (choice.type === 'chaos')   { state.chaos++;   state.rl = Math.max(0, state.rl-8); state.currentPath = 'CHAOS'; triggerRealityLeak(); }
   if (choice.type === 'beauty')  { state.beauty++;  state.rl = Math.min(100, state.rl+5); state.currentPath = 'BEAUTY'; }
@@ -921,14 +907,8 @@ async function handleChoice(choice, index) {
 
   addMsg('echo','///','SELECTED: ' + choice.text);
 
-  // Build context message for AI
-  const contextMsg = buildContextMessage(choice);
-
-  // Call Cohere
-  const response = await callCohere(contextMsg);
+  const response = await callCohere(buildContextMessage(choice));
   unlockChoices();
-
-  // Process response
   await processAIResponse(response);
 }
 
@@ -952,24 +932,18 @@ function buildContextMessage(choice) {
 //  PROCESS AI RESPONSE
 // ══════════════════════════════════════════════════════
 async function processAIResponse(response) {
-  // Apply VFX
   const vfx = response?.effects?.vfx || 'none';
   if (vfx === 'bloom')  triggerBloom();
   if (vfx === 'crunch') triggerCrunch();
   if (vfx === 'leak')   triggerRealityLeak();
 
-  // Apply RL delta from AI
   if (response?.effects?.rl_delta) {
     state.rl = Math.max(0, Math.min(100, state.rl + response.effects.rl_delta));
     updateStats();
   }
 
-  // Add directive
-  if (response?.effects?.add_directive) {
-    addRule(response.effects.add_directive);
-  }
+  if (response?.effects?.add_directive) addRule(response.effects.add_directive);
 
-  // Type out narrative
   const narrative = response?.narrative || ['The void continues.'];
   const types     = response?.narrative_types || [];
   for (let i = 0; i < narrative.length; i++) {
@@ -978,32 +952,23 @@ async function processAIResponse(response) {
     await typeMsg(t, prefix, narrative[i], i * 80);
   }
 
-  // Handle ending
   if (response?.is_ending) {
     state.gameOver = true;
-    if (response.ending_type) {
-      addMsg('system','SYS',`ENDING LOGGED: ${response.ending_type}`);
-    }
+    if (response.ending_type) addMsg('system','SYS',`ENDING LOGGED: ${response.ending_type}`);
     document.getElementById('restart-btn').style.display = 'block';
     return;
   }
 
-  // Render choices
   const choices = response?.choices;
-  if (!choices || choices.length === 0) {
-    // AI gave no choices — generate a recovery prompt
-    await handleRecovery();
-    return;
-  }
+  if (!choices || choices.length === 0) { await handleRecovery(); return; }
   state.currentChoices = choices;
   renderChoices(choices);
 }
 
-// Recovery if AI returns malformed data
 async function handleRecovery() {
   addMsg('warn','SYS','NARRATIVE_THREAD_UNSTABLE — RECALIBRATING');
   const fallback = await callCohere(JSON.stringify({
-    system_note: 'The previous response was malformed. Please continue the story with a fresh narrative beat and exactly 3 choices.',
+    system_note: 'Previous response malformed. Continue story with fresh narrative and exactly 3 choices.',
     current_stats: { reality_level: state.rl, turn: state.turn }
   }));
   await processAIResponse(fallback);
@@ -1020,9 +985,8 @@ async function beginStory() {
     context: `The game begins. Entity ${state.entityName} materializes in the void. A bureaucratic form drifts down from nowhere. The void hums at a frequency that should not exist.`,
     current_stats: { reality_level: 100, beauty: 0, comply: 0, chaos: 0, turn: 0 },
     active_directives: state.rules,
-    instruction: 'Set the opening scene. Be evocative. End with exactly 3 choices.'
+    instruction: 'Set the opening scene. Be evocative. Address the entity by name. End with exactly 3 choices.'
   });
-
 
   const response = await callCohere(openingPrompt);
   document.getElementById('thinking').classList.remove('visible');
@@ -1050,7 +1014,6 @@ async function bootSequence() {
 
 async function initGame() {
   state.entityName = document.getElementById('playerName').value.trim().toUpperCase() || 'LORI';
-
   updateStats(); updateDirectives(); startClock();
   await bootSequence();
 }
@@ -1075,14 +1038,16 @@ async function restartGame() {
 // ══════════════════════════════════════════════════════
 //  BOOT CLICK
 // ══════════════════════════════════════════════════════
-document.getElementById('boot-screen').addEventListener('click', function() {
-  this.classList.add('out');
-  setTimeout(() => { this.style.display='none'; initGame(); }, 700);
-});
 document.getElementById('playerName').addEventListener('click', function(e) {
   e.stopPropagation();
 });
-
+document.getElementById('playerName').addEventListener('touchstart', function(e) {
+  e.stopPropagation();
+}, { passive: true });
+document.getElementById('boot-screen').addEventListener('click', function() {
+  this.classList.add('out');
+  setTimeout(() => { this.style.display = 'none'; initGame(); }, 700);
+});
 
 // ══════════════════════════════════════════════════════
 //  AUDIO
