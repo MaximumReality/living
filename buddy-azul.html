@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>BUDDY.EXE [AZUL_UNIT]</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+
+  :root {
+    --void: #02040a;    /* Darker, pure void */
+    --deep: #050a18;    /* Deep space base */
+    --panel: #0a1228;   /* Panel color */
+    --border: #102048;  /* Blue-tinted border */
+    --cyan: #00ffe5;    /* Keep the bright cyan accents */
+    --azul: #0066ff;    /* The New "Azul" - Core Blue */
+    --amber: #ffb300;   /* Keep amber for warning states */
+    --green: #00ff88;   /* Pure neon green */
+    --dim: #1a3060;     /* Dimmed blue */
+    --text: #a8d4e8;    /* Lighter blue-tinted text */
+    --muted: #4a6090;   /* Muted blue */
+    --glow-cyan: 0 0 10px #00ffe5, 0 0 25px #00ffe530;
+    --glow-azul: 0 0 10px #0066ff, 0 0 25px #0066ff30;
+    --glow-amber: 0 0 8px #ffb300, 0 0 16px #ffb30040;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--void);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0px,
+      transparent 3px,
+      rgba(0,0,0,0.15) 3px,
+      rgba(0,0,0,0.15) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  .device {
+    width: 320px;
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 28px;
+    padding: 20px 18px 24px;
+    box-shadow:
+      0 0 0 1px #000a,
+      0 0 70px #0066ff15, /* Blue glow for the device */
+      inset 0 1px 0 #ffffff0a;
+    position: relative;
+  }
+  .device::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 28px;
+    background: linear-gradient(135deg, #ffffff06 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .title {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--cyan);
+    text-shadow: var(--glow-cyan);
+    letter-spacing: 3px;
+    animation: glitch 6s infinite;
+  }
+  @keyframes glitch {
+    0%,91%,100% { clip-path: none; transform: none; }
+    92% { clip-path: inset(30% 0 40% 0); transform: translateX(-3px); }
+    93% { clip-path: inset(60% 0 10% 0); transform: translateX(3px); }
+    94% { clip-path: none; transform: none; }
+  }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .save-indicator {
+    font-size: 7px; letter-spacing: 1px;
+    color: var(--green); opacity: 0; transition: opacity 0.4s;
+  }
+  .save-indicator.show { opacity: 1; }
+  .status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green); box-shadow: 0 0 8px var(--green);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .screen {
+    background: #000208; /* Darker blue-black screen */
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 14px;
+    box-shadow: inset 0 0 50px #00000090, 0 0 0 1px #00ffe508;
+  }
+
+  .grid-floor {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 70px;
+    pointer-events: none;
+    display: block;
+  }
+
+  .stars { position: absolute; inset: 0; }
+  .star {
+    position: absolute; width: 2px; height: 2px;
+    background: #fff; border-radius: 50%; opacity: 0;
+    animation: twinkle var(--d,3s) var(--delay,0s) ease-in-out infinite;
+  }
+  @keyframes twinkle { 0%,100%{opacity:0} 50%{opacity:var(--o,0.6)} }
+
+  .cat-wrap {
+    position: absolute; bottom: 34px; left: 50%;
+    transform: translateX(-50%);
+  }
+  .cat-wrap.jump { animation: jump-anim 0.5s ease-out; }
+  @keyframes jump-anim {
+    0%{bottom:34px} 40%{bottom:90px} 100%{bottom:34px}
+  }
+
+  .cat { width:64px; height:64px; position:relative; animation:idle-bob 2.2s ease-in-out infinite; }
+  @keyframes idle-bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+  .cat.happy  { animation:happy-wiggle 0.4s ease-in-out 3; }
+  @keyframes happy-wiggle { 0%,100%{transform:rotate(0) translateY(0)} 25%{transform:rotate(-9deg) translateY(-2px)} 75%{transform:rotate(9deg) translateY(-2px)} }
+  .cat.eating { animation:nom-nom 0.18s steps(1) 6; }
+  @keyframes nom-nom { 0%,100%{transform:scale(1)} 50%{transform:scale(1.07) translateY(-3px)} }
+  .cat.sleeping { opacity:0.65; animation:sleep-breathe 3.5s ease-in-out infinite; }
+  @keyframes sleep-breathe { 0%,100%{transform:scaleY(1)} 50%{transform:scaleY(0.93)} }
+
+  .cat-svg { width:64px; height:64px; }
+
+  .bubble {
+    position:absolute; top:-30px; left:50%;
+    transform:translateX(-50%); font-size:20px;
+    opacity:0; transition:opacity 0.3s; pointer-events:none;
+  }
+  .bubble.show { opacity:1; animation:bubble-pop 0.3s ease-out; }
+  @keyframes bubble-pop {
+    0%{transform:translateX(-50%) scale(0)}
+    70%{transform:translateX(-50%) scale(1.2)}
+    100%{transform:translateX(-50%) scale(1)}
+  }
+
+  .zzz {
+    position:absolute; top:2px; right:-14px;
+    font-family:'Orbitron',monospace; font-size:9px;
+    color:var(--cyan); opacity:0; pointer-events:none;
+  }
+  .zzz.show { animation:float-z 2.2s ease-in-out infinite; }
+  @keyframes float-z {
+    0%{opacity:0;transform:translateY(0) scale(0.7)}
+    35%{opacity:1}
+    100%{opacity:0;transform:translateY(-22px) scale(1.1)}
+  }
+
+  .screen-msg {
+    position:absolute; top:10px; left:0; right:0;
+    text-align:center; font-size:9px; color:var(--cyan);
+    opacity:0; letter-spacing:2px; transition:opacity 0.4s;
+    text-shadow:var(--glow-cyan); z-index:2;
+  }
+  .screen-msg.show { opacity:1; }
+
+  .stats {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:8px; margin-bottom:14px;
+  }
+  .stat {
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:8px; padding:7px 10px;
+  }
+  .stat-label { font-size:8px; letter-spacing:2px; color:var(--muted); margin-bottom:4px; text-transform:uppercase; }
+  .stat-bar { height:5px; background:var(--dim); border-radius:3px; overflow:hidden; }
+  .stat-fill { height:100%; border-radius:3px; transition:width 0.5s cubic-bezier(0.4,0,0.2,1); }
+  .stat-fill.hunger    { background:linear-gradient(90deg,var(--amber),#ff6b35); box-shadow:var(--glow-amber); }
+  .stat-fill.happy-bar { background:linear-gradient(90deg,var(--cyan),#00a8ff);  box-shadow:var(--glow-cyan); } /* Swapped to cyan-blue */
+  .stat-fill.energy    { background:linear-gradient(90deg,var(--azul),#00a8ff);  box-shadow:var(--glow-azul); } /* Core Azul-Blue */
+  .stat-fill.health    { background:linear-gradient(90deg,var(--green),#7dff6b); }
+  .stat-val { font-size:8px; color:var(--muted); margin-top:3px; text-align:right; }
+
+  .actions {
+    display:grid; grid-template-columns:1fr 1fr 1fr 1fr;
+    gap:8px; margin-bottom:14px;
+  }
+  .btn {
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:10px; padding:9px 4px 7px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    transition:all 0.15s; -webkit-tap-highlight-color:transparent; user-select:none;
+  }
+  .btn:active, .btn.active {
+    background:#0a1a3a; border-color:var(--cyan);
+    box-shadow:var(--glow-cyan); transform:scale(0.94);
+  }
+  .btn-icon { font-size:16px; }
+  .btn-label { font-size:7px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; }
+  .btn:hover .btn-label { color:var(--cyan); }
+
+  .log {
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:8px; padding:8px 10px; height:44px; overflow:hidden;
+  }
+  .log-line { font-size:9px; color:var(--muted); letter-spacing:1px; line-height:1.7; }
+  .log-line.new { color:var(--cyan); text-shadow:var(--glow-cyan); }
+
+  .footer {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-top:10px; padding-top:10px; border-top:1px solid var(--border);
+  }
+  .buddy-name {
+    font-family:'Orbitron',monospace; font-size:10px;
+    color:var(--azul); text-shadow:var(--glow-azul); letter-spacing:2px; /* Blue name */
+  }
+  .footer-right { display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
+  .buddy-age { font-size:8px; color:var(--muted); letter-spacing:1px; }
+  .reset-btn {
+    font-size:7px; letter-spacing:1px; color:#2a3a60;
+    background:none; border:none; cursor:pointer;
+    font-family:'Share Tech Mono',monospace; padding:0;
+  }
+  .reset-btn:hover { color:var(--red); } /* Red for the reset button hover */
+</style>
+</head>
+<body>
+
+<div class="device">
+  <div class="header">
+    <div class="title">BUDDY.EXE</div>
+    <div class="header-right">
+      <span class="save-indicator" id="saveIndicator">SAVED</span>
+      <div class="status-dot"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen">
+    <canvas class="grid-floor" id="gridCanvas"></canvas>
+    <div class="stars" id="stars"></div>
+    <div class="screen-msg" id="screenMsg"></div>
+    <div class="cat-wrap" id="catWrap">
+      <div class="cat" id="cat">
+        <svg class="cat-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="32" cy="47" rx="15" ry="11" fill="#e0f2fe" opacity="0.9"/> <circle cx="32" cy="30" r="15" fill="#000a1f"/> <polygon points="17,15 8,2 24,14" fill="#000a1f"/>
+  <polygon points="47,15 56,2 40,14" fill="#000a1f"/>
+  
+  <path d="M 26 32 Q 32 38 38 32 L 35 26 Q 32 28 29 26 Z" fill="#000208" opacity="0.8"/>
+  
+  <g id="eyeGroup">
+    <ellipse id="eyeL" cx="24" cy="28" rx="4.5" ry="4.5" fill="#00a8ff"/>
+    <ellipse id="eyeR" cx="40" cy="28" rx="4.5" ry="4.5" fill="#00a8ff"/>
+    <circle cx="24" cy="28" r="1.5" fill="#000208"/>
+    <circle cx="40" cy="28" r="1.5" fill="#000208"/>
+    <circle cx="25" cy="26" r="1" fill="white" opacity="0.6"/>
+  </g>
+  
+  <line x1="12" y1="32" x2="22" y2="34" stroke="#2a3a60" stroke-width="0.8"/>
+  <line x1="52" y1="32" x2="42" y2="34" stroke="#2a3a60" stroke-width="0.8"/>
+</svg>
+
+        <div class="bubble" id="bubble">💫</div>
+        <div class="zzz" id="zzz">z z z</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-label">HUNGER</div>
+      <div class="stat-bar"><div class="stat-fill hunger" id="hungerBar"></div></div>
+      <div class="stat-val" id="hungerVal">70</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">HAPPY</div>
+      <div class="stat-bar"><div class="stat-fill happy-bar" id="happyBar"></div></div>
+      <div class="stat-val" id="happyVal">80</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">ENERGY</div>
+      <div class="stat-bar"><div class="stat-fill energy" id="energyBar"></div></div>
+      <div class="stat-val" id="energyVal">65</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">HEALTH</div>
+      <div class="stat-bar"><div class="stat-fill health" id="healthBar"></div></div>
+      <div class="stat-val" id="healthVal">90</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn" id="btnFeed"  onclick="feed()">
+      <span class="btn-icon">🍜</span><span class="btn-label">FEED</span>
+    </button>
+    <button class="btn" id="btnPlay"  onclick="play()">
+      <span class="btn-icon">⚡</span><span class="btn-label">PLAY</span>
+    </button>
+    <button class="btn" id="btnSleep" onclick="sleepToggle()">
+      <span class="btn-icon">🌙</span><span class="btn-label">SLEEP</span>
+    </button>
+    <button class="btn" id="btnHeal"  onclick="heal()">
+      <span class="btn-icon">💊</span><span class="btn-label">HEAL</span>
+    </button>
+  </div>
+
+  <div class="log">
+    <div class="log-line" id="logLine1">SYSTEM: buddy.exe initialized...</div>
+    <div class="log-line" id="logLine2">CAT: *stares into the void*</div>
+  </div>
+
+  <div class="footer">
+    <div class="buddy-name" id="buddyName">AZUL-UNIT</div>
+    <div class="footer-right">
+      <div class="buddy-age" id="buddyAge">AGE: 0d 0h</div>
+      <button class="reset-btn" onclick="confirmReset()">[ RESET ]</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SAVE_KEY = 'buddyexe_v1_azul'; // New save key for Azul unit
+const TICK_MS  = 3000;
+const SAVE_MS  = 10000;
+const NAMES = ['AZUL-UNIT','GLITCH-PAW','NULL.EXE','PHASE-CAT','DATA-PURR','MOCHI.SYS']; // Renamed first entry
+
+function freshState() {
+  return {
+    hunger: 70, happy: 80, energy: 65, health: 90,
+    sleeping: false,
+    birthTime: Date.now(),
+    lastSaved: Date.now(),
+    name: NAMES[Math.floor(Math.random() * NAMES.length)]
+  };
+}
+
+// ── LOAD + OFFLINE DECAY ─────────────────────────────────────
+function loadState() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return freshState();
+    const s = JSON.parse(raw);
+    const now = Date.now();
+    const ticks = Math.min(Math.floor((now - (s.lastSaved || now)) / TICK_MS), 600);
+    if (ticks > 0) {
+      if (!s.sleeping) {
+        s.hunger = Math.max(0, s.hunger - ticks * 1.2);
+        s.happy  = Math.max(0, s.happy  - ticks * 0.8);
+        s.energy = Math.max(0, s.energy - ticks * 0.5);
+        if (s.hunger < 20 || s.energy < 10)
+          s.health = Math.max(0, s.health - ticks * 0.4);
+      } else {
+        s.energy = Math.min(100, s.energy + ticks * 2);
+        s.health = Math.min(100, s.health + ticks * 0.3);
+      }
+    }
+    s.lastSaved = now;
+    s.busy = false;
+    return s;
+  } catch(e) { return freshState(); }
+}
+
+function saveState() {
+  try {
+    state.lastSaved = Date.now();
+    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    const el = document.getElementById('saveIndicator');
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 1200);
+  } catch(e) {}
+}
+
+// ── STATE ────────────────────────────────────────────────────
+const prevSaved = localStorage.getItem(SAVE_KEY);
+const prevLastSaved = prevSaved ? JSON.parse(prevSaved).lastSaved : null;
+const state = loadState();
+let busy = false;
+
+// ── CANVAS GRID ──────────────────────────────────────────────
+function drawGrid() {
+  const canvas = document.getElementById('gridCanvas');
+  const dpr = window.devicePixelRatio || 1; // Sharpen for iPhone
+  const parentWidth = canvas.parentElement.clientWidth;
+  const W = parentWidth - 2; 
+  const H = 70;
+  
+  // Set the logical size and the physical (CSS) size
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr); // Scale all context drawing operations
+
+  const COLS = 14;
+  const cellW = W / COLS;
+
+  // Horizontal lines — 5 rows, perspective scaled
+  // Drawing rows first puts them "under" the vertical lines
+  for (let r = 0; r <= 5; r++) {
+    const t = r / 5;
+    const y = H - t * H;
+    const halfW = (W / 2) * (0.15 + 0.85 * t);
+    const x0 = W / 2 - halfW;
+    const x1 = W / 2 + halfW;
+    const alpha = 0.07 + 0.22 * t;
+    ctx.beginPath();
+    ctx.moveTo(x0, y);
+    ctx.lineTo(x1, y);
+    // Draw horizontal lines using a rich azul glow
+    ctx.strokeStyle = `rgba(0,102,255,${alpha})`;
+    ctx.lineWidth = r === 5 ? 1.5 : 0.7;
+    ctx.stroke();
+  }
+
+  // Perspective vertical lines converging to center top
+  const vx = W / 2;
+  for (let i = 0; i <= COLS; i++) {
+    const bx = i * cellW;
+    const tx = vx + (bx - vx) * 0.1;
+    const alpha = i === 0 || i === COLS ? 0.06 : 0.2;
+    const grad = ctx.createLinearGradient(bx, H, tx, 0);
+    // Gradient from Azul-Blue to Transparent
+    grad.addColorStop(0, `rgba(0,102,255,${alpha})`);
+    grad.addColorStop(1, 'rgba(0,102,255,0)');
+    ctx.beginPath();
+    ctx.moveTo(bx, H);
+    ctx.lineTo(tx, 0);
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 0.7;
+    ctx.stroke();
+  }
+
+  // Bottom glow in pure Azul
+  const glow = ctx.createLinearGradient(0, H - 4, 0, H);
+  glow.addColorStop(0, 'rgba(0,102,255,0)');
+  glow.addColorStop(1, 'rgba(0,102,255,0.18)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, H - 4, W, 4);
+}
+
+// ── STARS ────────────────────────────────────────────────────
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 20; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  s.style.cssText = `left:${Math.random()*96}%;top:${8+Math.random()*52}%;--d:${2+Math.random()*4}s;--delay:${Math.random()*4}s;--o:${0.25+Math.random()*0.65};`;
+  starsEl.appendChild(s);
+}
+
+// ── UI HELPERS ───────────────────────────────────────────────
+function updateBars() {
+  const map = {hunger:'hungerBar', happy:'happyBar', energy:'energyBar', health:'healthBar'};
+  Object.entries(map).forEach(([k, barId]) => {
+    const v = Math.max(0, Math.min(100, state[k]));
+    document.getElementById(barId).style.width = v + '%';
+    document.getElementById(k+'Val').textContent = Math.round(v);
+    document.getElementById(barId).style.filter = v < 20 ? 'brightness(0.55) saturate(0.5)' : '';
+  });
+}
+
+// Fixed function: mouth colors are now all Cyan to match Azul style
+function setCatFace(mood) {
+  const mouth  = document.getElementById('mouth');
+  const eyeL   = document.getElementById('eyeL');
+  const eyeR   = document.getElementById('eyeR');
+  const pupilL = document.getElementById('pupilL');
+  const pupilR = document.getElementById('pupilR');
+  const eyes = (ry, fill) => {
+    eyeL.setAttribute('ry',ry); eyeR.setAttribute('ry',ry);
+    eyeL.setAttribute('fill',fill); eyeR.setAttribute('fill',fill);
+  };
+  const pupils = r => { pupilL.setAttribute('r',r); pupilR.setAttribute('r',r); };
+  
+  // Set all dynamic colors (mouth/eyes) to match new cyan/azul theme
+  const coreCyan = "#00ffe5"; 
+  
+  switch(mood) {
+    case 'happy':
+      mouth.setAttribute('d','M 27 37 Q 32 43 37 37');
+      eyes('4.8',coreCyan); pupils('2.6'); break;
+    case 'sad':
+      mouth.setAttribute('d','M 27 40 Q 32 36 37 40');
+      eyes('3',coreCyan); pupils('2.6'); break;
+    case 'sleep':
+      mouth.setAttribute('d','M 29 38 Q 32 40 35 38');
+      // Dark blue-grey for sleeping eyes
+      eyes('1','#102048'); pupils('0'); break;
+    case 'nom':
+      mouth.setAttribute('d','M 28 35 Q 32 43 36 35 Q 32 46 28 35');
+      eyes('5',coreCyan); pupils('2.6'); break;
+    default: // neutral
+      mouth.setAttribute('d','M 28 38 Q 32 41 36 38');
+      eyes('4.2',coreCyan); pupils('2.6');
+  }
+}
+
+function getMood() {
+  if (state.sleeping) return 'sleep';
+  if (state.happy > 60 && state.hunger > 40) return 'happy';
+  if (state.happy < 30 || state.hunger < 20) return 'sad';
+  return 'neutral';
+}
+
+function showBubble(emoji) {
+  const b = document.getElementById('bubble');
+  b.textContent = emoji;
+  b.classList.add('show');
+  setTimeout(() => b.classList.remove('show'), 1600);
+}
+
+function showMsg(msg) {
+  const el = document.getElementById('screenMsg');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function addLog(msg, isNew = true) {
+  const l1 = document.getElementById('logLine1');
+  const l2 = document.getElementById('logLine2');
+  l1.textContent = l2.textContent;
+  l1.classList.remove('new');
+  l2.textContent = msg;
+  l2.className = 'log-line' + (isNew ? ' new' : '');
+}
+
+function btnFlash(id) {
+  const b = document.getElementById(id);
+  b.classList.add('active');
+  setTimeout(() => b.classList.remove('active'), 220);
+}
+
+function updateAge() {
+  const h = Math.floor((Date.now() - state.birthTime) / 3600000);
+  // Renamed to 'CONTAINED' to fit the Bureau theme
+  document.getElementById('buddyAge').textContent = `CONTAINED: ${Math.floor(h/24)}d ${h%24}h`;
+}
+
+// ── ACTIONS ──────────────────────────────────────────────────
+function feed() {
+  if (busy || state.sleeping) { addLog('SYS: azul.unit is occupied...'); return; }
+  if (state.hunger >= 96) { addLog('CAT: *looks away* still full'); showBubble('😑'); return; }
+  busy = true; btnFlash('btnFeed');
+  document.getElementById('cat').className = 'cat eating'; setCatFace('nom');
+  state.hunger = Math.min(100, state.hunger + 26);
+  state.energy = Math.min(100, state.energy + 5);
+  state.health = Math.min(100, state.health + 3);
+  showBubble('😋'); showMsg('NOM NOM NOM');
+  addLog('CAT: *devours the data-noodles*');
+  setTimeout(() => {
+    document.getElementById('cat').className = 'cat';
+    setCatFace(getMood()); busy = false; updateBars();
+  }, 1100);
+}
+
+function play() {
+  if (busy || state.sleeping) { addLog('SYS: azul.unit is occupied...'); return; }
+  if (state.energy < 15) { addLog('CAT: *too drained to play*'); showBubble('😴'); return; }
+  busy = true; btnFlash('btnPlay');
+  document.getElementById('cat').className = 'cat happy';
+  document.getElementById('catWrap').classList.add('jump'); setCatFace('happy');
+  state.happy  = Math.min(100, state.happy  + 22);
+  state.energy = Math.max(0,   state.energy - 16);
+  state.hunger = Math.max(0,   state.hunger - 9);
+  showBubble('⚡'); // Swapped to bolt emoji for Blue style
+  showMsg('> AZUL_PLAYING.SYS');
+  const m = ['CAT: *glitches through the blue firewall*','CAT: *chases an azul-pixel*','CAT: *boots up azul_chaos.mode*','CAT: *fragments across 3 blue dimensions*'];
+  addLog(m[Math.floor(Math.random()*m.length)]);
+  setTimeout(() => {
+    document.getElementById('cat').className = 'cat';
+    document.getElementById('catWrap').classList.remove('jump');
+    setCatFace(getMood()); busy = false; updateBars();
+  }, 950);
+}
+
+function sleepToggle() {
+  if (busy) { addLog('SYS: busy...'); return; }
+  btnFlash('btnSleep');
+  const cat = document.getElementById('cat');
+  const zzz = document.getElementById('zzz');
+  if (state.sleeping) {
+    state.sleeping = false;
+    cat.className = 'cat'; zzz.classList.remove('show');
+    setCatFace('happy'); showBubble('⚡'); showMsg('REBOOTING...');
+    addLog('CAT: *reboots azul.mode*');
+  } else {
+    state.sleeping = true;
+    cat.className = 'cat sleeping'; zzz.classList.add('show');
+    setCatFace('sleep'); showMsg('SLEEP MODE ON');
+    addLog('CAT: *enters azul_sleep.exe*');
+  }
+  updateBars();
+}
+
+function heal() {
+  if (busy || state.sleeping) { addLog('SYS: azul.unit is occupied...'); return; }
+  if (state.health >= 96) { addLog('SYS: health optimal'); showBubble('💙'); return; } // Blue heart
+  busy = true; btnFlash('btnHeal');
+  document.getElementById('cat').className = 'cat happy'; setCatFace('happy');
+  state.health = Math.min(100, state.health + 22);
+  state.happy  = Math.min(100, state.happy  + 5);
+  showBubble('💊'); showMsg('PATCHING...');
+  addLog('SYS: running repairs on azul.unit');
+  setTimeout(() => {
+    document.getElementById('cat').className = 'cat';
+    setCatFace(getMood()); busy = false; updateBars();
+  }, 900);
+}
+
+function confirmReset() {
+  if (confirm('Delete azul.unit profile?\nAll progress will be fragmented.')) {
+    localStorage.removeItem(SAVE_KEY);
+    location.reload();
+  }
+}
+
+// ── DECAY LOOP ───────────────────────────────────────────────
+setInterval(() => {
+  if (!state.sleeping && !busy) {
+    state.hunger = Math.max(0, state.hunger - 1.2);
+    state.happy  = Math.max(0, state.happy  - 0.8);
+    state.energy = Math.max(0, state.energy - 0.5);
+    if (state.hunger < 20 || state.energy < 10)
+      state.health = Math.max(0, state.health - 0.4);
+  } else if (state.sleeping) {
+    state.energy = Math.min(100, state.energy + 2.2);
+    state.health = Math.min(100, state.health + 0.3);
+  }
+  setCatFace(getMood());
+  updateBars();
+}, TICK_MS);
+
+// ── AUTOSAVE ─────────────────────────────────────────────────
+setInterval(saveState, SAVE_MS);
+document.addEventListener('visibilitychange', () => { if (document.hidden) saveState(); });
+window.addEventListener('pagehide', saveState);
+window.addEventListener('beforeunload', saveState);
+
+// ── AMBIENT ──────────────────────────────────────────────────
+const catMsgs = [
+  'CAT: *stares at blue screen corner*',
+  'CAT: *detects azul-shift fluctuation*',
+  'CAT: *knocks azul-pixel off the edge*',
+  'CAT: *phases through the azul_firewall*',
+  'CAT: *azul_tail.exe not responding*',
+  'CAT: *hacks into azul_nap dimension*',
+  'CAT: *finds the azul_void comfortable*',
+  'CAT: *recalibrates reality buffer to azul.sys*',
+  'CAT: *runs diagnostics on azul.link*',
+];
+setInterval(() => {
+  if (!busy && !state.sleeping && Math.random() > 0.45)
+    addLog(catMsgs[Math.floor(Math.random()*catMsgs.length)], false);
+}, 8000);
+
+setInterval(() => {
+  if (state.hunger < 20 && !state.sleeping) {
+    showBubble('😿'); addLog('CAT: *azul_hunger.signal critical*'); setCatFace('sad');
+  }
+}, 14000);
+
+setInterval(updateAge, 60000);
+
+// ── INIT ─────────────────────────────────────────────────────
+document.getElementById('buddyName').textContent = state.name;
+updateBars();
+updateAge();
+setCatFace(getMood());
+
+if (state.sleeping) {
+  document.getElementById('cat').className = 'cat sleeping';
+  document.getElementById('zzz').classList.add('show');
+}
+
+// Initial perspective grid draw
+requestAnimationFrame(() => requestAnimationFrame(drawGrid));
+
+// Offline return message (adjusted text)
+if (prevLastSaved) {
+  const goneMs = Date.now() - prevLastSaved;
+  if (goneMs > 60000) {
+    const mins = Math.round(goneMs / 60000);
+    setTimeout(() => {
+      addLog(`SYS: azul.unit unmonitored for ${mins}m`);
+      showMsg('MISSED THE AZUL_LINK');
+      showBubble(state.hunger < 30 ? '😿' : '💙');
+    }, 1200);
+  } else {
+    setTimeout(() => addLog('CAT: *opens one blue eye at you*'), 1800);
+  }
+} else {
+  setTimeout(() => addLog('CAT: *opens one blue eye at you*'), 1800);
+}
+</script>
+</body>
+</html>
