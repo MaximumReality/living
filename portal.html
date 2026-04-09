@@ -54,15 +54,22 @@
 
 
 
-        /* The Netlify App */
-        iframe {
-            width: 90%;
-            height: 100%;
-            border: none;
-            /* Makes the app look like a retro display */
-            filter: brightness(1.1) contrast(1.1) saturate(1.2);
-            opacity: 0.95;
-        }
+       /* The Netlify App */
+iframe {
+    width: 100%;
+    height: 100%;
+    border: none !important;
+    
+    /* Pulls the edges in so the seconds aren't cut off */
+    transform: scale(0.9); 
+    /* Ensures the app stays centered while shrinking */
+    transform-origin: center; 
+
+    /* Makes the app look like a retro display */
+    filter: brightness(1.1) contrast(1.1) saturate(1.2);
+    opacity: 0.95;
+}
+
 
         /* Retro CRT Overlay Effect */
         .screen-area::after {
