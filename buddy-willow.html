@@ -768,11 +768,10 @@ soundBtn.onclick = () => {
   soundOn = !soundOn;
 
   if (soundOn) {
-  soundBtn.textContent = '🔊';
-  soundBtn.classList.remove('muted');
-  snackSound.currentTime = 0;
-  snackSound.play();
-}
+    soundBtn.textContent = '🔊';
+    soundBtn.classList.remove('muted');
+    snackSound.currentTime = 0;
+    snackSound.play();
   } else {
     soundBtn.textContent = '🔇';
     soundBtn.classList.add('muted');
