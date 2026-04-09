@@ -27,22 +27,13 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
 
- body {
+body {
   perspective: 800px;
-  background:
-    linear-gradient(145deg, #0a0a0f, #140a24),
-    repeating-linear-gradient(
-      0deg,
-      transparent 0px,
-      transparent 39px,
-      rgba(255,255,255,0.03) 40px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      transparent 0px,
-      transparent 39px,
-      rgba(255,255,255,0.03) 40px
-    );
+
+  background-image: url('wood.JPG'); /* or paste full URL */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 
   display: flex;
   align-items: center;
@@ -50,7 +41,6 @@
   min-height: 100vh;
   font-family: 'Share Tech Mono', monospace;
   color: var(--text);
-  overflow: hidden;
 }
 
 .device {
