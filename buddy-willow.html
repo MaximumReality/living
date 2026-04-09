@@ -95,7 +95,12 @@ body {
   @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
   .screen {
-    background: #06060f;
+    background: radial-gradient(
+  circle at 50% 20%,
+  #0a1a3a 0%,
+  #050814 60%,
+  #02030a 100%
+);
     border: 1px solid var(--border);
     border-radius: 12px;
     height: 200px;
