@@ -379,6 +379,60 @@ header {
 }
 @keyframes cursor-blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
+  .work-link-container {
+    margin: 20px 0;
+    padding: 10px;
+    border: 1px solid rgba(0, 102, 255, 0.2);
+    background: rgba(0, 5, 15, 0.5);
+    border-radius: 4px;
+}
+
+.system-tag {
+    font-size: 8px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
+
+.report-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-decoration: none;
+    padding: 12px 15px;
+    background: linear-gradient(90deg, rgba(0, 102, 255, 0.1) 0%, transparent 100%);
+    border-left: 3px solid #0066ff;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.report-link:hover {
+    background: linear-gradient(90deg, rgba(0, 255, 229, 0.15) 0%, transparent 100%);
+    border-left-color: #00ffe5; /* Cyan flash on hover */
+    transform: translateX(5px);
+}
+
+.report-text {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #e0f2fe;
+    text-shadow: 0 0 10px rgba(0, 102, 255, 0.5);
+}
+
+.protocol-id {
+    font-size: 7px;
+    color: var(--muted);
+    opacity: 0.6;
+}
+
+.glitch-icon {
+    font-size: 16px;
+    filter: drop-shadow(0 0 5px rgba(0, 102, 255, 0.8));
+}
+
+
 /* ── FOOTER ── */
 footer {
   border-top: 1px solid var(--border);
@@ -467,6 +521,16 @@ footer {
       <div class="loading">AWAITING_ASSIGNMENT</div>
     </div>
   </div>
+
+  <div class="work-link-container">
+    <div class="system-tag">EMPLOYEE_PROTOCOL</div>
+    <a href="https://maximumreality.github.io/living/index.html" class="report-link">
+        <span class="glitch-icon">🗂️</span>
+        <span class="report-text">REPORT TO WORK</span>
+        <span class="protocol-id">REF: LIVING_DIR</span>
+    </a>
+</div>
+
 
   <!-- NASA APOD -->
   <div class="card span2">
