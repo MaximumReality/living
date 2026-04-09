@@ -37,18 +37,21 @@
         /* The Iframe Container (The Screen) */
         .screen-area {
     position: absolute;
-    top: 22.2%; 
-    /* Nudge right: from 17.5% to 18.2% to clear that white border */
-    left: 18.2%;
-    /* Tighten width: from 63.5% to 62% to keep it inside the right border too */
-    width: 62%;
-    height: 18.5%;
+    /* Nudge up slightly to 21.8% to see if that helps the height */
+    top: 21.8%; 
+    /* Keep it at 18.5% to clear the left border */
+    left: 18.5%;
+    /* Widen to 63% - this is the "Clock breathing room" zone */
+    width: 63%;
+    /* Increase height to 20% to fight the "shorter" look */
+    height: 20%;
     
     background: #000;
     overflow: hidden;
     border-radius: 5px;
     box-shadow: inset 0 0 15px rgba(0,0,0,1);
 }
+
 
     
     background: #000;
