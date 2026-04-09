@@ -3,24 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>BUDDY.EXE [AZUL_UNIT]</title>
+<title>WILLOW.EXE</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
 
   :root {
-    --void: #02040a;    /* Darker, pure void */
-    --deep: #050a18;    /* Deep space base */
-    --panel: #0a1228;   /* Panel color */
-    --border: #102048;  /* Blue-tinted border */
-    --cyan: #00ffe5;    /* Keep the bright cyan accents */
-    --azul: #0066ff;    /* The New "Azul" - Core Blue */
-    --amber: #ffb300;   /* Keep amber for warning states */
-    --green: #00ff88;   /* Pure neon green */
-    --dim: #1a3060;     /* Dimmed blue */
-    --text: #a8d4e8;    /* Lighter blue-tinted text */
-    --muted: #4a6090;   /* Muted blue */
-    --glow-cyan: 0 0 10px #00ffe5, 0 0 25px #00ffe530;
-    --glow-azul: 0 0 10px #0066ff, 0 0 25px #0066ff30;
+    --void: #0a0a0f;
+    --deep: #0d0d1a;
+    --panel: #111122;
+    --border: #1a1a3a;
+    --cyan: #00ffe5;
+    --pink: #ff2d78;
+    --amber: #ffb300;
+    --green: #39ff14;
+    --dim: #2a2a44;
+    --text: #ccd6f6;
+    --muted: #667;
+    --glow-cyan: 0 0 8px #00ffe5, 0 0 20px #00ffe540;
+    --glow-pink: 0 0 8px #ff2d78, 0 0 20px #ff2d7840;
     --glow-amber: 0 0 8px #ffb300, 0 0 16px #ffb30040;
   }
 
@@ -45,8 +45,8 @@
       0deg,
       transparent 0px,
       transparent 3px,
-      rgba(0,0,0,0.15) 3px,
-      rgba(0,0,0,0.15) 4px
+      rgba(0,0,0,0.12) 3px,
+      rgba(0,0,0,0.12) 4px
     );
     pointer-events: none;
     z-index: 1000;
@@ -59,8 +59,8 @@
     border-radius: 28px;
     padding: 20px 18px 24px;
     box-shadow:
-      0 0 0 1px #000a,
-      0 0 70px #0066ff15, /* Blue glow for the device */
+      0 0 0 1px #0008,
+      0 0 60px #00ffe512,
       inset 0 1px 0 #ffffff0a;
     position: relative;
   }
@@ -108,14 +108,14 @@
   @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
   .screen {
-    background: #000208; /* Darker blue-black screen */
+    background: #06060f;
     border: 1px solid var(--border);
     border-radius: 12px;
     height: 200px;
     position: relative;
     overflow: hidden;
     margin-bottom: 14px;
-    box-shadow: inset 0 0 50px #00000090, 0 0 0 1px #00ffe508;
+    box-shadow: inset 0 0 40px #00000080, 0 0 0 1px #00ffe508;
   }
 
   .grid-floor {
@@ -198,8 +198,8 @@
   .stat-bar { height:5px; background:var(--dim); border-radius:3px; overflow:hidden; }
   .stat-fill { height:100%; border-radius:3px; transition:width 0.5s cubic-bezier(0.4,0,0.2,1); }
   .stat-fill.hunger    { background:linear-gradient(90deg,var(--amber),#ff6b35); box-shadow:var(--glow-amber); }
-  .stat-fill.happy-bar { background:linear-gradient(90deg,var(--cyan),#00a8ff);  box-shadow:var(--glow-cyan); } /* Swapped to cyan-blue */
-  .stat-fill.energy    { background:linear-gradient(90deg,var(--azul),#00a8ff);  box-shadow:var(--glow-azul); } /* Core Azul-Blue */
+  .stat-fill.happy-bar { background:linear-gradient(90deg,var(--pink),#ff7eb3);  box-shadow:var(--glow-pink); }
+  .stat-fill.energy    { background:linear-gradient(90deg,var(--cyan),#00c4ff);  box-shadow:var(--glow-cyan); }
   .stat-fill.health    { background:linear-gradient(90deg,var(--green),#7dff6b); }
   .stat-val { font-size:8px; color:var(--muted); margin-top:3px; text-align:right; }
 
@@ -214,7 +214,7 @@
     transition:all 0.15s; -webkit-tap-highlight-color:transparent; user-select:none;
   }
   .btn:active, .btn.active {
-    background:#0a1a3a; border-color:var(--cyan);
+    background:#1a1a2e; border-color:var(--cyan);
     box-shadow:var(--glow-cyan); transform:scale(0.94);
   }
   .btn-icon { font-size:16px; }
@@ -234,23 +234,23 @@
   }
   .buddy-name {
     font-family:'Orbitron',monospace; font-size:10px;
-    color:var(--azul); text-shadow:var(--glow-azul); letter-spacing:2px; /* Blue name */
+    color:var(--pink); text-shadow:var(--glow-pink); letter-spacing:2px;
   }
   .footer-right { display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
   .buddy-age { font-size:8px; color:var(--muted); letter-spacing:1px; }
   .reset-btn {
-    font-size:7px; letter-spacing:1px; color:#2a3a60;
+    font-size:7px; letter-spacing:1px; color:#443;
     background:none; border:none; cursor:pointer;
     font-family:'Share Tech Mono',monospace; padding:0;
   }
-  .reset-btn:hover { color:var(--red); } /* Red for the reset button hover */
+  .reset-btn:hover { color:var(--pink); }
 </style>
 </head>
 <body>
 
 <div class="device">
   <div class="header">
-    <div class="title">BUDDY.EXE</div>
+    <div class="title">WILLOW.EXE</div>
     <div class="header-right">
       <span class="save-indicator" id="saveIndicator">SAVED</span>
       <div class="status-dot"></div>
@@ -264,23 +264,30 @@
     <div class="cat-wrap" id="catWrap">
       <div class="cat" id="cat">
         <svg class="cat-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <ellipse cx="32" cy="47" rx="15" ry="11" fill="#e0f2fe" opacity="0.9"/> <circle cx="32" cy="30" r="15" fill="#000a1f"/> <polygon points="17,15 8,2 24,14" fill="#000a1f"/>
-  <polygon points="47,15 56,2 40,14" fill="#000a1f"/>
-  
-  <path d="M 26 32 Q 32 38 38 32 L 35 26 Q 32 28 29 26 Z" fill="#000208" opacity="0.8"/>
-  
-  <g id="eyeGroup">
-    <ellipse id="eyeL" cx="24" cy="28" rx="4.5" ry="4.5" fill="#00a8ff"/>
-    <ellipse id="eyeR" cx="40" cy="28" rx="4.5" ry="4.5" fill="#00a8ff"/>
-    <circle cx="24" cy="28" r="1.5" fill="#000208"/>
-    <circle cx="40" cy="28" r="1.5" fill="#000208"/>
-    <circle cx="25" cy="26" r="1" fill="white" opacity="0.6"/>
-  </g>
-  
-  <line x1="12" y1="32" x2="22" y2="34" stroke="#2a3a60" stroke-width="0.8"/>
-  <line x1="52" y1="32" x2="42" y2="34" stroke="#2a3a60" stroke-width="0.8"/>
-</svg>
-
+          <ellipse cx="32" cy="47" rx="15" ry="11" fill="#151528"/>
+          <circle cx="32" cy="30" r="15" fill="#151528"/>
+          <polygon points="19,18 13,5 24,14" fill="#151528"/>
+          <polygon points="45,18 51,5 40,14" fill="#151528"/>
+          <polygon points="20,17 15,8 23,14" fill="#2a0a1a" opacity="0.7"/>
+          <polygon points="44,17 49,8 41,14" fill="#2a0a1a" opacity="0.7"/>
+          <g id="eyeGroup">
+            <ellipse id="eyeL" cx="26" cy="30" rx="4.2" ry="4.2" fill="#00ffe5"/>
+            <ellipse id="eyeR" cx="38" cy="30" rx="4.2" ry="4.2" fill="#00ffe5"/>
+            <circle id="pupilL" cx="26" cy="30" r="2.6" fill="#06060f"/>
+            <circle id="pupilR" cx="38" cy="30" r="2.6" fill="#06060f"/>
+            <circle cx="27.5" cy="28.5" r="1.1" fill="white" opacity="0.85"/>
+            <circle cx="39.5" cy="28.5" r="1.1" fill="white" opacity="0.85"/>
+          </g>
+          <polygon id="nose" points="32,34 30,36.5 34,36.5" fill="#ff2d78"/>
+          <path id="mouth" d="M 28 37 Q 32 42 36 37" stroke="#ff2d78" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <line x1="16" y1="33" x2="25" y2="34.5" stroke="#2a2a44" stroke-width="1.2"/>
+          <line x1="16" y1="36.5" x2="25" y2="36.5" stroke="#2a2a44" stroke-width="1.2"/>
+          <line x1="48" y1="33" x2="39" y2="34.5" stroke="#2a2a44" stroke-width="1.2"/>
+          <line x1="48" y1="36.5" x2="39" y2="36.5" stroke="#2a2a44" stroke-width="1.2"/>
+          <path d="M 46 53 Q 58 44 55 36" stroke="#151528" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+          <circle cx="32" cy="47" r="4" fill="#00ffe510"/>
+          <circle cx="32" cy="47" r="2" fill="#00ffe5" opacity="0.35"/>
+        </svg>
         <div class="bubble" id="bubble">💫</div>
         <div class="zzz" id="zzz">z z z</div>
       </div>
@@ -331,7 +338,7 @@
   </div>
 
   <div class="footer">
-    <div class="buddy-name" id="buddyName">AZUL-UNIT</div>
+    <div class="buddy-name" id="buddyName">WILLOW-VOID_CAT</div>
     <div class="footer-right">
       <div class="buddy-age" id="buddyAge">AGE: 0d 0h</div>
       <button class="reset-btn" onclick="confirmReset()">[ RESET ]</button>
@@ -340,10 +347,10 @@
 </div>
 
 <script>
-const SAVE_KEY = 'buddyexe_v1_azul'; // New save key for Azul unit
+const SAVE_KEY = 'buddyexe_v1';
 const TICK_MS  = 3000;
 const SAVE_MS  = 10000;
-const NAMES = ['AZUL-UNIT','GLITCH-PAW','NULL.EXE','PHASE-CAT','DATA-PURR','MOCHI.SYS']; // Renamed first entry
+const NAMES = ['VOID-CAT','GLITCH-PAW','NULL.EXE','PHASE-CAT','DATA-PURR','MOCHI.SYS'];
 
 function freshState() {
   return {
@@ -400,51 +407,24 @@ let busy = false;
 // ── CANVAS GRID ──────────────────────────────────────────────
 function drawGrid() {
   const canvas = document.getElementById('gridCanvas');
-  const dpr = window.devicePixelRatio || 1; // Sharpen for iPhone
-  const parentWidth = canvas.parentElement.clientWidth;
-  const W = parentWidth - 2; 
+  const W = canvas.parentElement.clientWidth - 2; // account for border
   const H = 70;
-  
-  // Set the logical size and the physical (CSS) size
-  canvas.width  = W * dpr;
-  canvas.height = H * dpr;
-  canvas.style.width = W + 'px';
-  canvas.style.height = H + 'px';
-
+  canvas.width  = W;
+  canvas.height = H;
   const ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr); // Scale all context drawing operations
 
   const COLS = 14;
   const cellW = W / COLS;
-
-  // Horizontal lines — 5 rows, perspective scaled
-  // Drawing rows first puts them "under" the vertical lines
-  for (let r = 0; r <= 5; r++) {
-    const t = r / 5;
-    const y = H - t * H;
-    const halfW = (W / 2) * (0.15 + 0.85 * t);
-    const x0 = W / 2 - halfW;
-    const x1 = W / 2 + halfW;
-    const alpha = 0.07 + 0.22 * t;
-    ctx.beginPath();
-    ctx.moveTo(x0, y);
-    ctx.lineTo(x1, y);
-    // Draw horizontal lines using a rich azul glow
-    ctx.strokeStyle = `rgba(0,102,255,${alpha})`;
-    ctx.lineWidth = r === 5 ? 1.5 : 0.7;
-    ctx.stroke();
-  }
 
   // Perspective vertical lines converging to center top
   const vx = W / 2;
   for (let i = 0; i <= COLS; i++) {
     const bx = i * cellW;
-    const tx = vx + (bx - vx) * 0.1;
+    const tx = vx + (bx - vx) * 0.1; // top x (10% of distance to vp)
     const alpha = i === 0 || i === COLS ? 0.06 : 0.2;
     const grad = ctx.createLinearGradient(bx, H, tx, 0);
-    // Gradient from Azul-Blue to Transparent
-    grad.addColorStop(0, `rgba(0,102,255,${alpha})`);
-    grad.addColorStop(1, 'rgba(0,102,255,0)');
+    grad.addColorStop(0, `rgba(0,255,229,${alpha})`);
+    grad.addColorStop(1, 'rgba(0,255,229,0)');
     ctx.beginPath();
     ctx.moveTo(bx, H);
     ctx.lineTo(tx, 0);
@@ -453,10 +433,27 @@ function drawGrid() {
     ctx.stroke();
   }
 
-  // Bottom glow in pure Azul
+  // Horizontal lines — 5 rows, perspective scaled
+  for (let r = 0; r <= 5; r++) {
+    const t = r / 5;
+    const y = H - t * H;
+    // Width shrinks toward top
+    const halfW = (W / 2) * (0.15 + 0.85 * t);
+    const x0 = W / 2 - halfW;
+    const x1 = W / 2 + halfW;
+    const alpha = 0.07 + 0.22 * t;
+    ctx.beginPath();
+    ctx.moveTo(x0, y);
+    ctx.lineTo(x1, y);
+    ctx.strokeStyle = `rgba(0,255,229,${alpha})`;
+    ctx.lineWidth = r === 5 ? 1.5 : 0.7;
+    ctx.stroke();
+  }
+
+  // Bottom glow
   const glow = ctx.createLinearGradient(0, H - 4, 0, H);
-  glow.addColorStop(0, 'rgba(0,102,255,0)');
-  glow.addColorStop(1, 'rgba(0,102,255,0.18)');
+  glow.addColorStop(0, 'rgba(0,255,229,0)');
+  glow.addColorStop(1, 'rgba(0,255,229,0.18)');
   ctx.fillStyle = glow;
   ctx.fillRect(0, H - 4, W, 4);
 }
@@ -481,7 +478,6 @@ function updateBars() {
   });
 }
 
-// Fixed function: mouth colors are now all Cyan to match Azul style
 function setCatFace(mood) {
   const mouth  = document.getElementById('mouth');
   const eyeL   = document.getElementById('eyeL');
@@ -493,27 +489,22 @@ function setCatFace(mood) {
     eyeL.setAttribute('fill',fill); eyeR.setAttribute('fill',fill);
   };
   const pupils = r => { pupilL.setAttribute('r',r); pupilR.setAttribute('r',r); };
-  
-  // Set all dynamic colors (mouth/eyes) to match new cyan/azul theme
-  const coreCyan = "#00ffe5"; 
-  
   switch(mood) {
     case 'happy':
       mouth.setAttribute('d','M 27 37 Q 32 43 37 37');
-      eyes('4.8',coreCyan); pupils('2.6'); break;
+      eyes('4.8','#00ffe5'); pupils('2.6'); break;
     case 'sad':
       mouth.setAttribute('d','M 27 40 Q 32 36 37 40');
-      eyes('3',coreCyan); pupils('2.6'); break;
+      eyes('3','#00ffe5'); pupils('2.6'); break;
     case 'sleep':
       mouth.setAttribute('d','M 29 38 Q 32 40 35 38');
-      // Dark blue-grey for sleeping eyes
-      eyes('1','#102048'); pupils('0'); break;
+      eyes('1','#1a1a3a'); pupils('0'); break;
     case 'nom':
       mouth.setAttribute('d','M 28 35 Q 32 43 36 35 Q 32 46 28 35');
-      eyes('5',coreCyan); pupils('2.6'); break;
-    default: // neutral
+      eyes('5','#00ffe5'); pupils('2.6'); break;
+    default:
       mouth.setAttribute('d','M 28 38 Q 32 41 36 38');
-      eyes('4.2',coreCyan); pupils('2.6');
+      eyes('4.2','#00ffe5'); pupils('2.6');
   }
 }
 
@@ -555,13 +546,12 @@ function btnFlash(id) {
 
 function updateAge() {
   const h = Math.floor((Date.now() - state.birthTime) / 3600000);
-  // Renamed to 'CONTAINED' to fit the Bureau theme
-  document.getElementById('buddyAge').textContent = `CONTAINED: ${Math.floor(h/24)}d ${h%24}h`;
+  document.getElementById('buddyAge').textContent = `AGE: ${Math.floor(h/24)}d ${h%24}h`;
 }
 
 // ── ACTIONS ──────────────────────────────────────────────────
 function feed() {
-  if (busy || state.sleeping) { addLog('SYS: azul.unit is occupied...'); return; }
+  if (busy || state.sleeping) { addLog('SYS: WILLOW is occupied...'); return; }
   if (state.hunger >= 96) { addLog('CAT: *looks away* still full'); showBubble('😑'); return; }
   busy = true; btnFlash('btnFeed');
   document.getElementById('cat').className = 'cat eating'; setCatFace('nom');
@@ -577,7 +567,7 @@ function feed() {
 }
 
 function play() {
-  if (busy || state.sleeping) { addLog('SYS: azul.unit is occupied...'); return; }
+  if (busy || state.sleeping) { addLog('SYS: WILLOW is occupied...'); return; }
   if (state.energy < 15) { addLog('CAT: *too drained to play*'); showBubble('😴'); return; }
   busy = true; btnFlash('btnPlay');
   document.getElementById('cat').className = 'cat happy';
@@ -585,9 +575,8 @@ function play() {
   state.happy  = Math.min(100, state.happy  + 22);
   state.energy = Math.max(0,   state.energy - 16);
   state.hunger = Math.max(0,   state.hunger - 9);
-  showBubble('⚡'); // Swapped to bolt emoji for Blue style
-  showMsg('> AZUL_PLAYING.SYS');
-  const m = ['CAT: *glitches through the blue firewall*','CAT: *chases an azul-pixel*','CAT: *boots up azul_chaos.mode*','CAT: *fragments across 3 blue dimensions*'];
+  showBubble('✨'); showMsg('> PLAYING.EXE');
+  const m = ['CAT: *glitches through the wall*','CAT: *chases a void-pixel*','CAT: *boots up chaos.mode*','CAT: *fragments across 3 dimensions*'];
   addLog(m[Math.floor(Math.random()*m.length)]);
   setTimeout(() => {
     document.getElementById('cat').className = 'cat';
@@ -605,25 +594,25 @@ function sleepToggle() {
     state.sleeping = false;
     cat.className = 'cat'; zzz.classList.remove('show');
     setCatFace('happy'); showBubble('⚡'); showMsg('REBOOTING...');
-    addLog('CAT: *reboots azul.mode*');
+    addLog('CAT: *reboots from sleep mode*');
   } else {
     state.sleeping = true;
     cat.className = 'cat sleeping'; zzz.classList.add('show');
     setCatFace('sleep'); showMsg('SLEEP MODE ON');
-    addLog('CAT: *enters azul_sleep.exe*');
+    addLog('CAT: *enters sleep.exe*');
   }
   updateBars();
 }
 
 function heal() {
-  if (busy || state.sleeping) { addLog('SYS: azul.unit is occupied...'); return; }
-  if (state.health >= 96) { addLog('SYS: health optimal'); showBubble('💙'); return; } // Blue heart
+  if (busy || state.sleeping) { addLog('SYS: WILLOW is occupied...'); return; }
+  if (state.health >= 96) { addLog('SYS: health optimal'); showBubble('💚'); return; }
   busy = true; btnFlash('btnHeal');
   document.getElementById('cat').className = 'cat happy'; setCatFace('happy');
   state.health = Math.min(100, state.health + 22);
   state.happy  = Math.min(100, state.happy  + 5);
   showBubble('💊'); showMsg('PATCHING...');
-  addLog('SYS: running repairs on azul.unit');
+  addLog('SYS: running repair_protocol.sh');
   setTimeout(() => {
     document.getElementById('cat').className = 'cat';
     setCatFace(getMood()); busy = false; updateBars();
@@ -631,7 +620,7 @@ function heal() {
 }
 
 function confirmReset() {
-  if (confirm('Delete azul.unit profile?\nAll progress will be fragmented.')) {
+  if (confirm('Reset buddy.exe?\nAll progress will be deleted.')) {
     localStorage.removeItem(SAVE_KEY);
     location.reload();
   }
@@ -661,15 +650,16 @@ window.addEventListener('beforeunload', saveState);
 
 // ── AMBIENT ──────────────────────────────────────────────────
 const catMsgs = [
-  'CAT: *stares at blue screen corner*',
-  'CAT: *detects azul-shift fluctuation*',
-  'CAT: *knocks azul-pixel off the edge*',
-  'CAT: *phases through the azul_firewall*',
-  'CAT: *azul_tail.exe not responding*',
-  'CAT: *hacks into azul_nap dimension*',
-  'CAT: *finds the azul_void comfortable*',
-  'CAT: *recalibrates reality buffer to azul.sys*',
-  'CAT: *runs diagnostics on azul.link*',
+  'CAT: *stares at screen corner*',
+  'CAT: *detects quantum fluctuation*',
+  'CAT: *knocks pixel off the edge*',
+  'CAT: *phases through the firewall*',
+  'CAT: *tail.exe not responding*',
+  'CAT: *hacks into nap dimension*',
+  'CAT: *finds the void comfortable*',
+  'CAT: *recalibrates reality buffer*',
+  'CAT: *uploads hairball to cloud*',
+  'CAT: *runs diagnostics on you*',
 ];
 setInterval(() => {
   if (!busy && !state.sleeping && Math.random() > 0.45)
@@ -678,7 +668,7 @@ setInterval(() => {
 
 setInterval(() => {
   if (state.hunger < 20 && !state.sleeping) {
-    showBubble('😿'); addLog('CAT: *azul_hunger.signal critical*'); setCatFace('sad');
+    showBubble('😿'); addLog('CAT: *hunger.signal critical*'); setCatFace('sad');
   }
 }, 14000);
 
@@ -695,24 +685,23 @@ if (state.sleeping) {
   document.getElementById('zzz').classList.add('show');
 }
 
-// Initial perspective grid draw
 requestAnimationFrame(() => requestAnimationFrame(drawGrid));
 
-// Offline return message (adjusted text)
+// Offline return message
 if (prevLastSaved) {
   const goneMs = Date.now() - prevLastSaved;
   if (goneMs > 60000) {
     const mins = Math.round(goneMs / 60000);
     setTimeout(() => {
-      addLog(`SYS: azul.unit unmonitored for ${mins}m`);
-      showMsg('MISSED THE AZUL_LINK');
-      showBubble(state.hunger < 30 ? '😿' : '💙');
+      addLog(`SYS: WILLOW was alone for ${mins}m`);
+      showMsg('MISSED YOU');
+      showBubble(state.hunger < 30 ? '😿' : '👁️');
     }, 1200);
   } else {
-    setTimeout(() => addLog('CAT: *opens one blue eye at you*'), 1800);
+    setTimeout(() => addLog('CAT: *opens one eye at you*'), 1800);
   }
 } else {
-  setTimeout(() => addLog('CAT: *opens one blue eye at you*'), 1800);
+  setTimeout(() => addLog('CAT: *opens one eye at you*'), 1800);
 }
 </script>
 </body>
