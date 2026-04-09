@@ -43,7 +43,8 @@ body {
   color: var(--text);
 }
 
-.device {
+
+  .device {
   width: 320px;
   background: #1a0f2e;
   border: 1px solid var(--border);
@@ -52,12 +53,13 @@ body {
   position: relative;
 
   box-shadow:
-    0 20px 40px rgba(0,0,0,0.6),
+    0 30px 60px rgba(0,0,0,0.7),  /* ← upgraded shadow */
     0 0 60px #00ffe512,
     inset 0 1px 0 #ffffff0a;
 
-  transform: rotateX(6deg);
+  transform: rotateX(6deg); /* ← KEEP THIS */
 }
+  
   .header {
     display: flex;
     justify-content: space-between;
