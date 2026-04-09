@@ -17,9 +17,9 @@
 –pink: #ff2d78;
 –amber: #ffb300;
 –green: #39ff14;
-–dim: #334;
+–dim: #2a2a44;
 –text: #ccd6f6;
-–muted: #556;
+–muted: #667;
 –glow-cyan: 0 0 8px #00ffe5, 0 0 20px #00ffe540;
 –glow-pink: 0 0 8px #ff2d78, 0 0 20px #ff2d7840;
 –glow-amber: 0 0 8px #ffb300, 0 0 16px #ffb30040;
@@ -38,17 +38,16 @@ color: var(–text);
 overflow: hidden;
 }
 
-/* Scanlines overlay */
 body::before {
 content: ‘’;
 position: fixed;
 inset: 0;
 background: repeating-linear-gradient(
 0deg,
-transparent,
-transparent 2px,
-rgba(0,0,0,0.08) 2px,
-rgba(0,0,0,0.08) 4px
+transparent 0px,
+transparent 3px,
+rgba(0,0,0,0.12) 3px,
+rgba(0,0,0,0.12) 4px
 );
 pointer-events: none;
 z-index: 1000;
@@ -61,12 +60,11 @@ border: 1px solid var(–border);
 border-radius: 28px;
 padding: 20px 18px 24px;
 box-shadow:
-0 0 0 1px #0006,
-0 0 40px #00ffe510,
-inset 0 1px 0 #ffffff08;
+0 0 0 1px #0008,
+0 0 60px #00ffe512,
+inset 0 1px 0 #ffffff0a;
 position: relative;
 }
-
 .device::after {
 content: ‘’;
 position: absolute;
@@ -76,7 +74,6 @@ background: linear-gradient(135deg, #ffffff06 0%, transparent 50%);
 pointer-events: none;
 }
 
-/* Header */
 .header {
 display: flex;
 justify-content: space-between;
@@ -90,310 +87,164 @@ font-weight: 700;
 color: var(–cyan);
 text-shadow: var(–glow-cyan);
 letter-spacing: 3px;
+animation: glitch 6s infinite;
 }
+@keyframes glitch {
+0%,91%,100% { clip-path: none; transform: none; }
+92% { clip-path: inset(30% 0 40% 0); transform: translateX(-3px); }
+93% { clip-path: inset(60% 0 10% 0); transform: translateX(3px); }
+94% { clip-path: none; transform: none; }
+}
+.header-right { display: flex; align-items: center; gap: 8px; }
+.save-indicator {
+font-size: 7px; letter-spacing: 1px;
+color: var(–green); opacity: 0; transition: opacity 0.4s;
+}
+.save-indicator.show { opacity: 1; }
 .status-dot {
-width: 7px; height: 7px;
-border-radius: 50%;
-background: var(–green);
-box-shadow: 0 0 8px var(–green);
+width: 7px; height: 7px; border-radius: 50%;
+background: var(–green); box-shadow: 0 0 8px var(–green);
 animation: pulse-dot 2s ease-in-out infinite;
 }
-@keyframes pulse-dot {
-0%,100% { opacity: 1; }
-50% { opacity: 0.3; }
-}
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-/* Screen */
 .screen {
-background: #070712;
+background: #06060f;
 border: 1px solid var(–border);
 border-radius: 12px;
 height: 200px;
 position: relative;
 overflow: hidden;
 margin-bottom: 14px;
-box-shadow: inset 0 0 30px #00000060;
+box-shadow: inset 0 0 40px #00000080, 0 0 0 1px #00ffe508;
 }
 
-/* Grid floor */
-.screen::before {
-content: ‘’;
+.grid-floor {
 position: absolute;
-bottom: 0;
-left: 0; right: 0;
-height: 60px;
-background:
-linear-gradient(transparent 0%, #00ffe508 100%),
-repeating-linear-gradient(90deg, transparent, transparent 19px, #00ffe510 20px),
-repeating-linear-gradient(0deg, transparent, transparent 19px, #00ffe510 20px);
-background-size: 20px 20px, 20px 20px, 20px 20px;
-transform: perspective(60px) rotateX(30deg);
-transform-origin: bottom;
-opacity: 0.4;
+bottom: 0; left: 0;
+width: 100%; height: 70px;
+pointer-events: none;
+display: block;
 }
 
-/* Stars */
-.stars {
-position: absolute;
-inset: 0;
-}
+.stars { position: absolute; inset: 0; }
 .star {
-position: absolute;
-width: 2px; height: 2px;
-background: #fff;
-border-radius: 50%;
-opacity: 0;
-animation: twinkle var(–d, 3s) var(–delay, 0s) ease-in-out infinite;
+position: absolute; width: 2px; height: 2px;
+background: #fff; border-radius: 50%; opacity: 0;
+animation: twinkle var(–d,3s) var(–delay,0s) ease-in-out infinite;
 }
-@keyframes twinkle {
-0%,100% { opacity: 0; }
-50% { opacity: var(–o, 0.6); }
-}
+@keyframes twinkle { 0%,100%{opacity:0} 50%{opacity:var(–o,0.6)} }
 
-/* Cat sprite */
 .cat-wrap {
-position: absolute;
-bottom: 28px;
-left: 50%;
+position: absolute; bottom: 34px; left: 50%;
 transform: translateX(-50%);
-transition: bottom 0.15s;
 }
-.cat-wrap.jump {
-animation: jump-anim 0.5s ease-out;
-}
+.cat-wrap.jump { animation: jump-anim 0.5s ease-out; }
 @keyframes jump-anim {
-0% { bottom: 28px; }
-40% { bottom: 80px; }
-100% { bottom: 28px; }
+0%{bottom:34px} 40%{bottom:90px} 100%{bottom:34px}
 }
 
-.cat {
-width: 64px;
-height: 64px;
-position: relative;
-animation: idle-bob 2s ease-in-out infinite;
-}
-@keyframes idle-bob {
-0%,100% { transform: translateY(0); }
-50% { transform: translateY(-4px); }
-}
-.cat.happy {
-animation: happy-wiggle 0.4s ease-in-out 3;
-}
-@keyframes happy-wiggle {
-0%,100% { transform: rotate(0deg) translateY(0); }
-25% { transform: rotate(-8deg) translateY(-2px); }
-75% { transform: rotate(8deg) translateY(-2px); }
-}
-.cat.sad {
-animation: sad-droop 0.5s ease-in-out forwards;
-}
-@keyframes sad-droop {
-0% { transform: translateY(0); }
-100% { transform: translateY(4px); }
-}
-.cat.eating {
-animation: nom-nom 0.2s steps(1) 5;
-}
-@keyframes nom-nom {
-0%,100% { transform: scale(1); }
-50% { transform: scale(1.06) translateY(-2px); }
-}
-.cat.sleeping {
-opacity: 0.7;
-animation: sleep-breathe 3s ease-in-out infinite;
-}
-@keyframes sleep-breathe {
-0%,100% { transform: scaleY(1); }
-50% { transform: scaleY(0.95); }
-}
+.cat { width:64px; height:64px; position:relative; animation:idle-bob 2.2s ease-in-out infinite; }
+@keyframes idle-bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+.cat.happy  { animation:happy-wiggle 0.4s ease-in-out 3; }
+@keyframes happy-wiggle { 0%,100%{transform:rotate(0) translateY(0)} 25%{transform:rotate(-9deg) translateY(-2px)} 75%{transform:rotate(9deg) translateY(-2px)} }
+.cat.eating { animation:nom-nom 0.18s steps(1) 6; }
+@keyframes nom-nom { 0%,100%{transform:scale(1)} 50%{transform:scale(1.07) translateY(-3px)} }
+.cat.sleeping { opacity:0.65; animation:sleep-breathe 3.5s ease-in-out infinite; }
+@keyframes sleep-breathe { 0%,100%{transform:scaleY(1)} 50%{transform:scaleY(0.93)} }
 
-/* SVG cat face expression */
-.cat-svg { width: 64px; height: 64px; }
+.cat-svg { width:64px; height:64px; }
 
-/* Emotion bubble */
 .bubble {
-position: absolute;
-top: -28px;
-left: 50%;
-transform: translateX(-50%);
-font-size: 18px;
-opacity: 0;
-transition: opacity 0.3s;
-pointer-events: none;
+position:absolute; top:-30px; left:50%;
+transform:translateX(-50%); font-size:20px;
+opacity:0; transition:opacity 0.3s; pointer-events:none;
 }
-.bubble.show {
-opacity: 1;
-animation: bubble-pop 0.3s ease-out;
-}
+.bubble.show { opacity:1; animation:bubble-pop 0.3s ease-out; }
 @keyframes bubble-pop {
-0% { transform: translateX(-50%) scale(0); }
-70% { transform: translateX(-50%) scale(1.2); }
-100% { transform: translateX(-50%) scale(1); }
+0%{transform:translateX(-50%) scale(0)}
+70%{transform:translateX(-50%) scale(1.2)}
+100%{transform:translateX(-50%) scale(1)}
 }
 
-/* Sleep Z’s */
 .zzz {
-position: absolute;
-top: 4px;
-right: -10px;
-font-family: ‘Orbitron’, monospace;
-font-size: 10px;
-color: var(–cyan);
-opacity: 0;
-pointer-events: none;
+position:absolute; top:2px; right:-14px;
+font-family:‘Orbitron’,monospace; font-size:9px;
+color:var(–cyan); opacity:0; pointer-events:none;
 }
-.zzz.show {
-animation: float-z 2s ease-in-out infinite;
-}
+.zzz.show { animation:float-z 2.2s ease-in-out infinite; }
 @keyframes float-z {
-0% { opacity: 0; transform: translateY(0) scale(0.7); }
-30% { opacity: 1; }
-100% { opacity: 0; transform: translateY(-20px) scale(1.1); }
+0%{opacity:0;transform:translateY(0) scale(0.7)}
+35%{opacity:1}
+100%{opacity:0;transform:translateY(-22px) scale(1.1)}
 }
 
-/* Screen message */
 .screen-msg {
-position: absolute;
-top: 10px;
-left: 0; right: 0;
-text-align: center;
-font-size: 9px;
-color: var(–cyan);
-opacity: 0;
-letter-spacing: 2px;
-transition: opacity 0.4s;
-text-shadow: var(–glow-cyan);
+position:absolute; top:10px; left:0; right:0;
+text-align:center; font-size:9px; color:var(–cyan);
+opacity:0; letter-spacing:2px; transition:opacity 0.4s;
+text-shadow:var(–glow-cyan); z-index:2;
 }
-.screen-msg.show { opacity: 1; }
+.screen-msg.show { opacity:1; }
 
-/* Stats panel */
 .stats {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 8px;
-margin-bottom: 14px;
+display:grid; grid-template-columns:1fr 1fr;
+gap:8px; margin-bottom:14px;
 }
 .stat {
-background: var(–panel);
-border: 1px solid var(–border);
-border-radius: 8px;
-padding: 7px 10px;
+background:var(–panel); border:1px solid var(–border);
+border-radius:8px; padding:7px 10px;
 }
-.stat-label {
-font-size: 8px;
-letter-spacing: 2px;
-color: var(–muted);
-margin-bottom: 4px;
-text-transform: uppercase;
-}
-.stat-bar {
-height: 5px;
-background: var(–dim);
-border-radius: 3px;
-overflow: hidden;
-}
-.stat-fill {
-height: 100%;
-border-radius: 3px;
-transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
-}
-.stat-fill.hunger { background: linear-gradient(90deg, var(–amber), #ff6b35); box-shadow: var(–glow-amber); }
-.stat-fill.happy-bar { background: linear-gradient(90deg, var(–pink), #ff7eb3); box-shadow: var(–glow-pink); }
-.stat-fill.energy { background: linear-gradient(90deg, var(–cyan), #00c4ff); box-shadow: var(–glow-cyan); }
-.stat-fill.health { background: linear-gradient(90deg, var(–green), #7dff6b); }
-.stat-val {
-font-size: 8px;
-color: var(–muted);
-margin-top: 3px;
-text-align: right;
-}
+.stat-label { font-size:8px; letter-spacing:2px; color:var(–muted); margin-bottom:4px; text-transform:uppercase; }
+.stat-bar { height:5px; background:var(–dim); border-radius:3px; overflow:hidden; }
+.stat-fill { height:100%; border-radius:3px; transition:width 0.5s cubic-bezier(0.4,0,0.2,1); }
+.stat-fill.hunger    { background:linear-gradient(90deg,var(–amber),#ff6b35); box-shadow:var(–glow-amber); }
+.stat-fill.happy-bar { background:linear-gradient(90deg,var(–pink),#ff7eb3);  box-shadow:var(–glow-pink); }
+.stat-fill.energy    { background:linear-gradient(90deg,var(–cyan),#00c4ff);  box-shadow:var(–glow-cyan); }
+.stat-fill.health    { background:linear-gradient(90deg,var(–green),#7dff6b); }
+.stat-val { font-size:8px; color:var(–muted); margin-top:3px; text-align:right; }
 
-/* Action buttons */
 .actions {
-display: grid;
-grid-template-columns: 1fr 1fr 1fr 1fr;
-gap: 8px;
-margin-bottom: 14px;
+display:grid; grid-template-columns:1fr 1fr 1fr 1fr;
+gap:8px; margin-bottom:14px;
 }
 .btn {
-background: var(–panel);
-border: 1px solid var(–border);
-border-radius: 10px;
-padding: 9px 4px 7px;
-cursor: pointer;
-display: flex;
-flex-direction: column;
-align-items: center;
-gap: 3px;
-transition: all 0.15s;
--webkit-tap-highlight-color: transparent;
-user-select: none;
+background:var(–panel); border:1px solid var(–border);
+border-radius:10px; padding:9px 4px 7px; cursor:pointer;
+display:flex; flex-direction:column; align-items:center; gap:3px;
+transition:all 0.15s; -webkit-tap-highlight-color:transparent; user-select:none;
 }
 .btn:active, .btn.active {
-background: #1a1a2e;
-border-color: var(–cyan);
-box-shadow: var(–glow-cyan);
-transform: scale(0.95);
+background:#1a1a2e; border-color:var(–cyan);
+box-shadow:var(–glow-cyan); transform:scale(0.94);
 }
-.btn-icon { font-size: 16px; }
-.btn-label {
-font-size: 7px;
-letter-spacing: 1px;
-color: var(–muted);
-text-transform: uppercase;
-}
-.btn:hover .btn-label { color: var(–cyan); }
+.btn-icon { font-size:16px; }
+.btn-label { font-size:7px; letter-spacing:1px; color:var(–muted); text-transform:uppercase; }
+.btn:hover .btn-label { color:var(–cyan); }
 
-/* Log */
 .log {
-background: var(–panel);
-border: 1px solid var(–border);
-border-radius: 8px;
-padding: 8px 10px;
-height: 44px;
-overflow: hidden;
-position: relative;
+background:var(–panel); border:1px solid var(–border);
+border-radius:8px; padding:8px 10px; height:44px; overflow:hidden;
 }
-.log-line {
-font-size: 9px;
-color: var(–muted);
-letter-spacing: 1px;
-line-height: 1.6;
-transition: opacity 0.3s;
-}
-.log-line.new { color: var(–cyan); text-shadow: var(–glow-cyan); }
+.log-line { font-size:9px; color:var(–muted); letter-spacing:1px; line-height:1.7; }
+.log-line.new { color:var(–cyan); text-shadow:var(–glow-cyan); }
 
-/* Age / name */
 .footer {
-display: flex;
-justify-content: space-between;
-margin-top: 10px;
-padding-top: 10px;
-border-top: 1px solid var(–border);
+display:flex; justify-content:space-between; align-items:center;
+margin-top:10px; padding-top:10px; border-top:1px solid var(–border);
 }
 .buddy-name {
-font-family: ‘Orbitron’, monospace;
-font-size: 10px;
-color: var(–pink);
-text-shadow: var(–glow-pink);
-letter-spacing: 2px;
+font-family:‘Orbitron’,monospace; font-size:10px;
+color:var(–pink); text-shadow:var(–glow-pink); letter-spacing:2px;
 }
-.buddy-age {
-font-size: 9px;
-color: var(–muted);
-letter-spacing: 1px;
+.footer-right { display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
+.buddy-age { font-size:8px; color:var(–muted); letter-spacing:1px; }
+.reset-btn {
+font-size:7px; letter-spacing:1px; color:#443;
+background:none; border:none; cursor:pointer;
+font-family:‘Share Tech Mono’,monospace; padding:0;
 }
-
-/* Glitch text effect */
-@keyframes glitch {
-0%,100% { clip-path: none; transform: none; }
-92% { clip-path: none; transform: none; }
-93% { clip-path: inset(30% 0 40% 0); transform: translateX(-3px); }
-94% { clip-path: inset(60% 0 10% 0); transform: translateX(3px); }
-95% { clip-path: none; transform: none; }
-}
-.title { animation: glitch 5s infinite; }
+.reset-btn:hover { color:var(–pink); }
 </style>
 
 </head>
@@ -402,51 +253,42 @@ letter-spacing: 1px;
 <div class="device">
   <div class="header">
     <div class="title">BUDDY.EXE</div>
-    <div class="status-dot"></div>
+    <div class="header-right">
+      <span class="save-indicator" id="saveIndicator">SAVED</span>
+      <div class="status-dot"></div>
+    </div>
   </div>
 
-  <!-- Screen -->
-
   <div class="screen" id="screen">
+    <canvas class="grid-floor" id="gridCanvas"></canvas>
     <div class="stars" id="stars"></div>
     <div class="screen-msg" id="screenMsg"></div>
     <div class="cat-wrap" id="catWrap">
       <div class="cat" id="cat">
-        <svg class="cat-svg" id="catSvg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Body -->
-          <ellipse cx="32" cy="46" rx="16" ry="12" fill="#1a1a2e"/>
-          <!-- Head -->
-          <circle cx="32" cy="30" r="15" fill="#1a1a2e"/>
-          <!-- Ears -->
-          <polygon points="19,18 14,6 24,14" fill="#1a1a2e"/>
-          <polygon points="45,18 50,6 40,14" fill="#1a1a2e"/>
-          <!-- Inner ears -->
-          <polygon points="20,17 16,9 23,14" fill="#ff2d7830"/>
-          <polygon points="44,17 48,9 41,14" fill="#ff2d7830"/>
-          <!-- Eyes -->
+        <svg class="cat-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="32" cy="47" rx="15" ry="11" fill="#151528"/>
+          <circle cx="32" cy="30" r="15" fill="#151528"/>
+          <polygon points="19,18 13,5 24,14" fill="#151528"/>
+          <polygon points="45,18 51,5 40,14" fill="#151528"/>
+          <polygon points="20,17 15,8 23,14" fill="#2a0a1a" opacity="0.7"/>
+          <polygon points="44,17 49,8 41,14" fill="#2a0a1a" opacity="0.7"/>
           <g id="eyeGroup">
-            <ellipse id="eyeL" cx="26" cy="30" rx="4" ry="4" fill="#00ffe5"/>
-            <ellipse id="eyeR" cx="38" cy="30" rx="4" ry="4" fill="#00ffe5"/>
-            <circle id="pupilL" cx="26" cy="30" r="2.5" fill="#070712"/>
-            <circle id="pupilR" cx="38" cy="30" r="2.5" fill="#070712"/>
-            <!-- Eye shine -->
-            <circle cx="27.5" cy="28.5" r="1" fill="white" opacity="0.8"/>
-            <circle cx="39.5" cy="28.5" r="1" fill="white" opacity="0.8"/>
+            <ellipse id="eyeL" cx="26" cy="30" rx="4.2" ry="4.2" fill="#00ffe5"/>
+            <ellipse id="eyeR" cx="38" cy="30" rx="4.2" ry="4.2" fill="#00ffe5"/>
+            <circle id="pupilL" cx="26" cy="30" r="2.6" fill="#06060f"/>
+            <circle id="pupilR" cx="38" cy="30" r="2.6" fill="#06060f"/>
+            <circle cx="27.5" cy="28.5" r="1.1" fill="white" opacity="0.85"/>
+            <circle cx="39.5" cy="28.5" r="1.1" fill="white" opacity="0.85"/>
           </g>
-          <!-- Nose -->
-          <polygon id="nose" points="32,34 30,36 34,36" fill="#ff2d78"/>
-          <!-- Mouth - happy default -->
-          <path id="mouth" d="M 28 37 Q 32 41 36 37" stroke="#ff2d78" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-          <!-- Whiskers -->
-          <line x1="17" y1="33" x2="26" y2="34" stroke="#334" stroke-width="1" opacity="0.6"/>
-          <line x1="17" y1="36" x2="26" y2="36" stroke="#334" stroke-width="1" opacity="0.6"/>
-          <line x1="47" y1="33" x2="38" y2="34" stroke="#334" stroke-width="1" opacity="0.6"/>
-          <line x1="47" y1="36" x2="38" y2="36" stroke="#334" stroke-width="1" opacity="0.6"/>
-          <!-- Tail -->
-          <path d="M 46 52 Q 56 44 54 38" stroke="#1a1a2e" stroke-width="4" fill="none" stroke-linecap="round"/>
-          <!-- Glow dot on chest -->
-          <circle cx="32" cy="46" r="3" fill="#00ffe520"/>
-          <circle cx="32" cy="46" r="1.5" fill="#00ffe5" opacity="0.5"/>
+          <polygon id="nose" points="32,34 30,36.5 34,36.5" fill="#ff2d78"/>
+          <path id="mouth" d="M 28 37 Q 32 42 36 37" stroke="#ff2d78" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <line x1="16" y1="33" x2="25" y2="34.5" stroke="#2a2a44" stroke-width="1.2"/>
+          <line x1="16" y1="36.5" x2="25" y2="36.5" stroke="#2a2a44" stroke-width="1.2"/>
+          <line x1="48" y1="33" x2="39" y2="34.5" stroke="#2a2a44" stroke-width="1.2"/>
+          <line x1="48" y1="36.5" x2="39" y2="36.5" stroke="#2a2a44" stroke-width="1.2"/>
+          <path d="M 46 53 Q 58 44 55 36" stroke="#151528" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+          <circle cx="32" cy="47" r="4" fill="#00ffe510"/>
+          <circle cx="32" cy="47" r="2" fill="#00ffe5" opacity="0.35"/>
         </svg>
         <div class="bubble" id="bubble">💫</div>
         <div class="zzz" id="zzz">z z z</div>
@@ -454,153 +296,239 @@ letter-spacing: 1px;
     </div>
   </div>
 
-  <!-- Stats -->
-
   <div class="stats">
     <div class="stat">
       <div class="stat-label">HUNGER</div>
-      <div class="stat-bar"><div class="stat-fill hunger" id="hungerBar" style="width:70%"></div></div>
+      <div class="stat-bar"><div class="stat-fill hunger" id="hungerBar"></div></div>
       <div class="stat-val" id="hungerVal">70</div>
     </div>
     <div class="stat">
       <div class="stat-label">HAPPY</div>
-      <div class="stat-bar"><div class="stat-fill happy-bar" id="happyBar" style="width:80%"></div></div>
+      <div class="stat-bar"><div class="stat-fill happy-bar" id="happyBar"></div></div>
       <div class="stat-val" id="happyVal">80</div>
     </div>
     <div class="stat">
       <div class="stat-label">ENERGY</div>
-      <div class="stat-bar"><div class="stat-fill energy" id="energyBar" style="width:65%"></div></div>
+      <div class="stat-bar"><div class="stat-fill energy" id="energyBar"></div></div>
       <div class="stat-val" id="energyVal">65</div>
     </div>
     <div class="stat">
       <div class="stat-label">HEALTH</div>
-      <div class="stat-bar"><div class="stat-fill health" id="healthBar" style="width:90%"></div></div>
+      <div class="stat-bar"><div class="stat-fill health" id="healthBar"></div></div>
       <div class="stat-val" id="healthVal">90</div>
     </div>
   </div>
 
-  <!-- Actions -->
-
   <div class="actions">
-    <button class="btn" id="btnFeed" onclick="feed()">
-      <span class="btn-icon">🍜</span>
-      <span class="btn-label">FEED</span>
+    <button class="btn" id="btnFeed"  onclick="feed()">
+      <span class="btn-icon">🍜</span><span class="btn-label">FEED</span>
     </button>
-    <button class="btn" id="btnPlay" onclick="play()">
-      <span class="btn-icon">⚡</span>
-      <span class="btn-label">PLAY</span>
+    <button class="btn" id="btnPlay"  onclick="play()">
+      <span class="btn-icon">⚡</span><span class="btn-label">PLAY</span>
     </button>
-    <button class="btn" id="btnSleep" onclick="sleep()">
-      <span class="btn-icon">🌙</span>
-      <span class="btn-label">SLEEP</span>
+    <button class="btn" id="btnSleep" onclick="sleepToggle()">
+      <span class="btn-icon">🌙</span><span class="btn-label">SLEEP</span>
     </button>
-    <button class="btn" id="btnHeal" onclick="heal()">
-      <span class="btn-icon">💊</span>
-      <span class="btn-label">HEAL</span>
+    <button class="btn" id="btnHeal"  onclick="heal()">
+      <span class="btn-icon">💊</span><span class="btn-label">HEAL</span>
     </button>
   </div>
 
-  <!-- Log -->
-
-  <div class="log" id="log">
+  <div class="log">
     <div class="log-line" id="logLine1">SYSTEM: buddy.exe initialized...</div>
     <div class="log-line" id="logLine2">CAT: *stares into the void*</div>
   </div>
 
   <div class="footer">
     <div class="buddy-name" id="buddyName">VOID-CAT</div>
-    <div class="buddy-age" id="buddyAge">AGE: 0d 0h</div>
+    <div class="footer-right">
+      <div class="buddy-age" id="buddyAge">AGE: 0d 0h</div>
+      <button class="reset-btn" onclick="confirmReset()">[ RESET ]</button>
+    </div>
   </div>
 </div>
 
 <script>
-const state = {
-  hunger: 70,
-  happy: 80,
-  energy: 65,
-  health: 90,
-  sleeping: false,
-  busy: false,
-  birthTime: Date.now(),
-  name: 'VOID-CAT'
-};
+const SAVE_KEY = 'buddyexe_v1';
+const TICK_MS  = 3000;
+const SAVE_MS  = 10000;
+const NAMES = ['VOID-CAT','GLITCH-PAW','NULL.EXE','PHASE-CAT','DATA-PURR','MOCHI.SYS'];
 
-const catNames = ['VOID-CAT','GLITCH-PAW','NULL.EXE','PHASE-CAT','DATA-PURR'];
-state.name = catNames[Math.floor(Math.random() * catNames.length)];
-document.getElementById('buddyName').textContent = state.name;
+function freshState() {
+  return {
+    hunger: 70, happy: 80, energy: 65, health: 90,
+    sleeping: false,
+    birthTime: Date.now(),
+    lastSaved: Date.now(),
+    name: NAMES[Math.floor(Math.random() * NAMES.length)]
+  };
+}
 
-// Spawn stars
+// ── LOAD + OFFLINE DECAY ─────────────────────────────────────
+function loadState() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return freshState();
+    const s = JSON.parse(raw);
+    const now = Date.now();
+    const ticks = Math.min(Math.floor((now - (s.lastSaved || now)) / TICK_MS), 600);
+    if (ticks > 0) {
+      if (!s.sleeping) {
+        s.hunger = Math.max(0, s.hunger - ticks * 1.2);
+        s.happy  = Math.max(0, s.happy  - ticks * 0.8);
+        s.energy = Math.max(0, s.energy - ticks * 0.5);
+        if (s.hunger < 20 || s.energy < 10)
+          s.health = Math.max(0, s.health - ticks * 0.4);
+      } else {
+        s.energy = Math.min(100, s.energy + ticks * 2);
+        s.health = Math.min(100, s.health + ticks * 0.3);
+      }
+    }
+    s.lastSaved = now;
+    s.busy = false;
+    return s;
+  } catch(e) { return freshState(); }
+}
+
+function saveState() {
+  try {
+    state.lastSaved = Date.now();
+    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    const el = document.getElementById('saveIndicator');
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 1200);
+  } catch(e) {}
+}
+
+// ── STATE ────────────────────────────────────────────────────
+const prevSaved = localStorage.getItem(SAVE_KEY);
+const prevLastSaved = prevSaved ? JSON.parse(prevSaved).lastSaved : null;
+const state = loadState();
+let busy = false;
+
+// ── CANVAS GRID ──────────────────────────────────────────────
+function drawGrid() {
+  const canvas = document.getElementById('gridCanvas');
+  const W = canvas.parentElement.clientWidth - 2; // account for border
+  const H = 70;
+  canvas.width  = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  const COLS = 14;
+  const cellW = W / COLS;
+
+  // Perspective vertical lines converging to center top
+  const vx = W / 2;
+  for (let i = 0; i <= COLS; i++) {
+    const bx = i * cellW;
+    const tx = vx + (bx - vx) * 0.1; // top x (10% of distance to vp)
+    const alpha = i === 0 || i === COLS ? 0.06 : 0.2;
+    const grad = ctx.createLinearGradient(bx, H, tx, 0);
+    grad.addColorStop(0, `rgba(0,255,229,${alpha})`);
+    grad.addColorStop(1, 'rgba(0,255,229,0)');
+    ctx.beginPath();
+    ctx.moveTo(bx, H);
+    ctx.lineTo(tx, 0);
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 0.7;
+    ctx.stroke();
+  }
+
+  // Horizontal lines — 5 rows, perspective scaled
+  for (let r = 0; r <= 5; r++) {
+    const t = r / 5;
+    const y = H - t * H;
+    // Width shrinks toward top
+    const halfW = (W / 2) * (0.15 + 0.85 * t);
+    const x0 = W / 2 - halfW;
+    const x1 = W / 2 + halfW;
+    const alpha = 0.07 + 0.22 * t;
+    ctx.beginPath();
+    ctx.moveTo(x0, y);
+    ctx.lineTo(x1, y);
+    ctx.strokeStyle = `rgba(0,255,229,${alpha})`;
+    ctx.lineWidth = r === 5 ? 1.5 : 0.7;
+    ctx.stroke();
+  }
+
+  // Bottom glow
+  const glow = ctx.createLinearGradient(0, H - 4, 0, H);
+  glow.addColorStop(0, 'rgba(0,255,229,0)');
+  glow.addColorStop(1, 'rgba(0,255,229,0.18)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, H - 4, W, 4);
+}
+
+// ── STARS ────────────────────────────────────────────────────
 const starsEl = document.getElementById('stars');
-for (let i = 0; i < 18; i++) {
+for (let i = 0; i < 20; i++) {
   const s = document.createElement('div');
   s.className = 'star';
-  s.style.cssText = `
-    left:${Math.random()*95}%;
-    top:${Math.random()*70}%;
-    --d:${2+Math.random()*4}s;
-    --delay:${Math.random()*3}s;
-    --o:${0.3+Math.random()*0.7};
-  `;
+  s.style.cssText = `left:${Math.random()*96}%;top:${8+Math.random()*52}%;--d:${2+Math.random()*4}s;--delay:${Math.random()*4}s;--o:${0.25+Math.random()*0.65};`;
   starsEl.appendChild(s);
 }
 
+// ── UI HELPERS ───────────────────────────────────────────────
 function updateBars() {
-  const bars = ['hunger','happy','energy','health'];
-  bars.forEach(k => {
+  const map = {hunger:'hungerBar', happy:'happyBar', energy:'energyBar', health:'healthBar'};
+  Object.entries(map).forEach(([k, barId]) => {
     const v = Math.max(0, Math.min(100, state[k]));
-    document.getElementById(k+'Bar').style.width = v+'%';
+    document.getElementById(barId).style.width = v + '%';
     document.getElementById(k+'Val').textContent = Math.round(v);
-    // Low warning color
-    const el = document.getElementById(k+'Bar');
-    el.style.opacity = v < 20 ? '0.5' : '1';
+    document.getElementById(barId).style.filter = v < 20 ? 'brightness(0.55) saturate(0.5)' : '';
   });
 }
 
 function setCatFace(mood) {
-  const mouth = document.getElementById('mouth');
-  const eyeL = document.getElementById('eyeL');
-  const eyeR = document.getElementById('eyeR');
+  const mouth  = document.getElementById('mouth');
+  const eyeL   = document.getElementById('eyeL');
+  const eyeR   = document.getElementById('eyeR');
   const pupilL = document.getElementById('pupilL');
   const pupilR = document.getElementById('pupilR');
-
-  if (mood === 'happy') {
-    mouth.setAttribute('d','M 27 37 Q 32 42 37 37');
-    eyeL.setAttribute('ry','4'); eyeR.setAttribute('ry','4');
-    pupilL.setAttribute('r','2.5'); pupilR.setAttribute('r','2.5');
-    eyeL.setAttribute('fill','#00ffe5'); eyeR.setAttribute('fill','#00ffe5');
-  } else if (mood === 'sad') {
-    mouth.setAttribute('d','M 27 40 Q 32 36 37 40');
-    eyeL.setAttribute('ry','3'); eyeR.setAttribute('ry','3');
-    eyeL.setAttribute('fill','#00ffe5'); eyeR.setAttribute('fill','#00ffe5');
-  } else if (mood === 'sleep') {
-    mouth.setAttribute('d','M 29 38 Q 32 40 35 38');
-    eyeL.setAttribute('ry','1'); eyeR.setAttribute('ry','1');
-    eyeL.setAttribute('fill','#334'); eyeR.setAttribute('fill','#334');
-    pupilL.setAttribute('r','0'); pupilR.setAttribute('r','0');
-  } else if (mood === 'nom') {
-    mouth.setAttribute('d','M 28 36 Q 32 41 36 36 Q 32 44 28 36');
-    eyeL.setAttribute('ry','5'); eyeR.setAttribute('ry','5');
-    eyeL.setAttribute('fill','#00ffe5'); eyeR.setAttribute('fill','#00ffe5');
-  } else { // neutral
-    mouth.setAttribute('d','M 28 38 Q 32 40 36 38');
-    eyeL.setAttribute('ry','4'); eyeR.setAttribute('ry','4');
-    pupilL.setAttribute('r','2.5'); pupilR.setAttribute('r','2.5');
-    eyeL.setAttribute('fill','#00ffe5'); eyeR.setAttribute('fill','#00ffe5');
+  const eyes = (ry, fill) => {
+    eyeL.setAttribute('ry',ry); eyeR.setAttribute('ry',ry);
+    eyeL.setAttribute('fill',fill); eyeR.setAttribute('fill',fill);
+  };
+  const pupils = r => { pupilL.setAttribute('r',r); pupilR.setAttribute('r',r); };
+  switch(mood) {
+    case 'happy':
+      mouth.setAttribute('d','M 27 37 Q 32 43 37 37');
+      eyes('4.8','#00ffe5'); pupils('2.6'); break;
+    case 'sad':
+      mouth.setAttribute('d','M 27 40 Q 32 36 37 40');
+      eyes('3','#00ffe5'); pupils('2.6'); break;
+    case 'sleep':
+      mouth.setAttribute('d','M 29 38 Q 32 40 35 38');
+      eyes('1','#1a1a3a'); pupils('0'); break;
+    case 'nom':
+      mouth.setAttribute('d','M 28 35 Q 32 43 36 35 Q 32 46 28 35');
+      eyes('5','#00ffe5'); pupils('2.6'); break;
+    default:
+      mouth.setAttribute('d','M 28 38 Q 32 41 36 38');
+      eyes('4.2','#00ffe5'); pupils('2.6');
   }
+}
+
+function getMood() {
+  if (state.sleeping) return 'sleep';
+  if (state.happy > 60 && state.hunger > 40) return 'happy';
+  if (state.happy < 30 || state.hunger < 20) return 'sad';
+  return 'neutral';
 }
 
 function showBubble(emoji) {
   const b = document.getElementById('bubble');
   b.textContent = emoji;
   b.classList.add('show');
-  setTimeout(() => b.classList.remove('show'), 1500);
+  setTimeout(() => b.classList.remove('show'), 1600);
 }
 
 function showMsg(msg) {
   const el = document.getElementById('screenMsg');
   el.textContent = msg;
   el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2000);
+  setTimeout(() => el.classList.remove('show'), 2200);
 }
 
 function addLog(msg, isNew = true) {
@@ -613,169 +541,170 @@ function addLog(msg, isNew = true) {
 }
 
 function btnFlash(id) {
-  const btn = document.getElementById(id);
-  btn.classList.add('active');
-  setTimeout(() => btn.classList.remove('active'), 200);
+  const b = document.getElementById(id);
+  b.classList.add('active');
+  setTimeout(() => b.classList.remove('active'), 220);
 }
 
+function updateAge() {
+  const h = Math.floor((Date.now() - state.birthTime) / 3600000);
+  document.getElementById('buddyAge').textContent = `AGE: ${Math.floor(h/24)}d ${h%24}h`;
+}
+
+// ── ACTIONS ──────────────────────────────────────────────────
 function feed() {
-  if (state.busy || state.sleeping) { addLog('SYS: buddy is busy...'); return; }
-  if (state.hunger >= 95) { addLog('CAT: *looks away* not hungry'); showBubble('😑'); return; }
-  state.busy = true;
-  btnFlash('btnFeed');
-  const cat = document.getElementById('cat');
-  cat.className = 'cat eating';
-  setCatFace('nom');
-  state.hunger = Math.min(100, state.hunger + 25);
+  if (busy || state.sleeping) { addLog('SYS: buddy is occupied...'); return; }
+  if (state.hunger >= 96) { addLog('CAT: *looks away* still full'); showBubble('😑'); return; }
+  busy = true; btnFlash('btnFeed');
+  document.getElementById('cat').className = 'cat eating'; setCatFace('nom');
+  state.hunger = Math.min(100, state.hunger + 26);
   state.energy = Math.min(100, state.energy + 5);
   state.health = Math.min(100, state.health + 3);
-  showBubble('😋');
-  showMsg('NOM NOM NOM');
+  showBubble('😋'); showMsg('NOM NOM NOM');
   addLog('CAT: *devours the data-noodles*');
   setTimeout(() => {
-    cat.className = 'cat';
-    setCatFace(getMood());
-    state.busy = false;
-    updateBars();
-  }, 1200);
+    document.getElementById('cat').className = 'cat';
+    setCatFace(getMood()); busy = false; updateBars();
+  }, 1100);
 }
 
 function play() {
-  if (state.busy || state.sleeping) { addLog('SYS: buddy is busy...'); return; }
-  if (state.energy < 15) { addLog('CAT: *too tired to play*'); showBubble('😴'); return; }
-  state.busy = true;
-  btnFlash('btnPlay');
-  const cat = document.getElementById('cat');
-  const wrap = document.getElementById('catWrap');
-  cat.className = 'cat happy';
-  wrap.classList.add('jump');
-  setCatFace('happy');
-  state.happy = Math.min(100, state.happy + 20);
-  state.energy = Math.max(0, state.energy - 15);
-  state.hunger = Math.max(0, state.hunger - 8);
-  showBubble('✨');
-  showMsg('> PLAYING.EXE');
-  const msgs = ['CAT: *glitches through the wall*','CAT: *chases a void-pixel*','CAT: *boots up chaos.mode*'];
-  addLog(msgs[Math.floor(Math.random()*msgs.length)]);
+  if (busy || state.sleeping) { addLog('SYS: buddy is occupied...'); return; }
+  if (state.energy < 15) { addLog('CAT: *too drained to play*'); showBubble('😴'); return; }
+  busy = true; btnFlash('btnPlay');
+  document.getElementById('cat').className = 'cat happy';
+  document.getElementById('catWrap').classList.add('jump'); setCatFace('happy');
+  state.happy  = Math.min(100, state.happy  + 22);
+  state.energy = Math.max(0,   state.energy - 16);
+  state.hunger = Math.max(0,   state.hunger - 9);
+  showBubble('✨'); showMsg('> PLAYING.EXE');
+  const m = ['CAT: *glitches through the wall*','CAT: *chases a void-pixel*','CAT: *boots up chaos.mode*','CAT: *fragments across 3 dimensions*'];
+  addLog(m[Math.floor(Math.random()*m.length)]);
   setTimeout(() => {
-    cat.className = 'cat';
-    wrap.classList.remove('jump');
-    setCatFace(getMood());
-    state.busy = false;
-    updateBars();
-  }, 1000);
+    document.getElementById('cat').className = 'cat';
+    document.getElementById('catWrap').classList.remove('jump');
+    setCatFace(getMood()); busy = false; updateBars();
+  }, 950);
 }
 
-function sleep() {
-  if (state.busy) { addLog('SYS: busy...'); return; }
+function sleepToggle() {
+  if (busy) { addLog('SYS: busy...'); return; }
   btnFlash('btnSleep');
+  const cat = document.getElementById('cat');
+  const zzz = document.getElementById('zzz');
   if (state.sleeping) {
-    // Wake up
     state.sleeping = false;
-    const cat = document.getElementById('cat');
-    const zzz = document.getElementById('zzz');
-    cat.className = 'cat';
-    zzz.classList.remove('show');
-    setCatFace('happy');
-    showBubble('⚡');
-    showMsg('REBOOTING...');
+    cat.className = 'cat'; zzz.classList.remove('show');
+    setCatFace('happy'); showBubble('⚡'); showMsg('REBOOTING...');
     addLog('CAT: *reboots from sleep mode*');
-    updateBars();
   } else {
-    // Sleep
     state.sleeping = true;
-    const cat = document.getElementById('cat');
-    const zzz = document.getElementById('zzz');
-    cat.className = 'cat sleeping';
-    zzz.classList.add('show');
-    setCatFace('sleep');
-    showMsg('SLEEP MODE ON');
+    cat.className = 'cat sleeping'; zzz.classList.add('show');
+    setCatFace('sleep'); showMsg('SLEEP MODE ON');
     addLog('CAT: *enters sleep.exe*');
   }
+  updateBars();
 }
 
 function heal() {
-  if (state.busy || state.sleeping) { addLog('SYS: buddy is busy...'); return; }
-  if (state.health >= 95) { addLog('SYS: health optimal'); showBubble('💚'); return; }
-  state.busy = true;
-  btnFlash('btnHeal');
-  const cat = document.getElementById('cat');
-  cat.className = 'cat happy';
-  setCatFace('happy');
-  state.health = Math.min(100, state.health + 20);
-  state.happy = Math.min(100, state.happy + 5);
-  showBubble('💊');
-  showMsg('PATCHING...');
+  if (busy || state.sleeping) { addLog('SYS: buddy is occupied...'); return; }
+  if (state.health >= 96) { addLog('SYS: health optimal'); showBubble('💚'); return; }
+  busy = true; btnFlash('btnHeal');
+  document.getElementById('cat').className = 'cat happy'; setCatFace('happy');
+  state.health = Math.min(100, state.health + 22);
+  state.happy  = Math.min(100, state.happy  + 5);
+  showBubble('💊'); showMsg('PATCHING...');
   addLog('SYS: running repair_protocol.sh');
   setTimeout(() => {
-    cat.className = 'cat';
-    setCatFace(getMood());
-    state.busy = false;
-    updateBars();
+    document.getElementById('cat').className = 'cat';
+    setCatFace(getMood()); busy = false; updateBars();
   }, 900);
 }
 
-function getMood() {
-  if (state.sleeping) return 'sleep';
-  if (state.happy > 60 && state.hunger > 40) return 'happy';
-  if (state.happy < 30 || state.hunger < 20) return 'sad';
-  return 'neutral';
+function confirmReset() {
+  if (confirm('Reset buddy.exe?\nAll progress will be deleted.')) {
+    localStorage.removeItem(SAVE_KEY);
+    location.reload();
+  }
 }
 
-// Passive decay
+// ── DECAY LOOP ───────────────────────────────────────────────
 setInterval(() => {
-  if (!state.sleeping && !state.busy) {
+  if (!state.sleeping && !busy) {
     state.hunger = Math.max(0, state.hunger - 1.2);
-    state.happy = Math.max(0, state.happy - 0.8);
+    state.happy  = Math.max(0, state.happy  - 0.8);
     state.energy = Math.max(0, state.energy - 0.5);
-    if (state.hunger < 20 || state.energy < 10) {
+    if (state.hunger < 20 || state.energy < 10)
       state.health = Math.max(0, state.health - 0.4);
-    }
   } else if (state.sleeping) {
-    state.energy = Math.min(100, state.energy + 2);
+    state.energy = Math.min(100, state.energy + 2.2);
     state.health = Math.min(100, state.health + 0.3);
   }
   setCatFace(getMood());
   updateBars();
-}, 3000);
+}, TICK_MS);
 
-// Ambient cat messages
+// ── AUTOSAVE ─────────────────────────────────────────────────
+setInterval(saveState, SAVE_MS);
+document.addEventListener('visibilitychange', () => { if (document.hidden) saveState(); });
+window.addEventListener('pagehide', saveState);
+window.addEventListener('beforeunload', saveState);
+
+// ── AMBIENT ──────────────────────────────────────────────────
 const catMsgs = [
   'CAT: *stares at screen corner*',
   'CAT: *detects quantum fluctuation*',
-  'CAT: *knocks pixel off edge*',
-  'CAT: *phases through wall*',
+  'CAT: *knocks pixel off the edge*',
+  'CAT: *phases through the firewall*',
   'CAT: *tail.exe not responding*',
   'CAT: *hacks into nap dimension*',
-  'CAT: *finds void comfortable*',
+  'CAT: *finds the void comfortable*',
+  'CAT: *recalibrates reality buffer*',
+  'CAT: *uploads hairball to cloud*',
+  'CAT: *runs diagnostics on you*',
 ];
 setInterval(() => {
-  if (!state.busy && Math.random() > 0.5) {
+  if (!busy && !state.sleeping && Math.random() > 0.45)
     addLog(catMsgs[Math.floor(Math.random()*catMsgs.length)], false);
-  }
 }, 8000);
 
-// Sad event
 setInterval(() => {
   if (state.hunger < 20 && !state.sleeping) {
-    showBubble('😿');
-    addLog('CAT: *hungry.signal critical*');
-    setCatFace('sad');
+    showBubble('😿'); addLog('CAT: *hunger.signal critical*'); setCatFace('sad');
   }
-}, 12000);
+}, 14000);
 
-// Age counter
-setInterval(() => {
-  const ms = Date.now() - state.birthTime;
-  const h = Math.floor(ms/3600000);
-  const d = Math.floor(h/24);
-  document.getElementById('buddyAge').textContent = `AGE: ${d}d ${h%24}h`;
-}, 60000);
+setInterval(updateAge, 60000);
 
-// Init
+// ── INIT ─────────────────────────────────────────────────────
+document.getElementById('buddyName').textContent = state.name;
 updateBars();
-setCatFace('happy');
-setTimeout(() => addLog('CAT: *opens one eye at you*'), 2000);
+updateAge();
+setCatFace(getMood());
+
+if (state.sleeping) {
+  document.getElementById('cat').className = 'cat sleeping';
+  document.getElementById('zzz').classList.add('show');
+}
+
+requestAnimationFrame(() => requestAnimationFrame(drawGrid));
+
+// Offline return message
+if (prevLastSaved) {
+  const goneMs = Date.now() - prevLastSaved;
+  if (goneMs > 60000) {
+    const mins = Math.round(goneMs / 60000);
+    setTimeout(() => {
+      addLog(`SYS: buddy was alone for ${mins}m`);
+      showMsg('MISSED YOU');
+      showBubble(state.hunger < 30 ? '😿' : '👁️');
+    }, 1200);
+  } else {
+    setTimeout(() => addLog('CAT: *opens one eye at you*'), 1800);
+  }
+} else {
+  setTimeout(() => addLog('CAT: *opens one eye at you*'), 1800);
+}
 </script>
 
 </body>
