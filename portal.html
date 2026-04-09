@@ -37,13 +37,19 @@
         /* The Iframe Container (The Screen) */
         .screen-area {
     position: absolute;
-    /* Keeps it recessed vertically */
     top: 22.2%; 
-    /* Shift left to compensate for the wider screen (was 20.5%) */
-    left: 17.5%;
-    /* Widen it back out to let the clock breathe (was 53.5%) */
-    width: 63.5%;
+    /* Nudge right: from 17.5% to 18.2% to clear that white border */
+    left: 18.2%;
+    /* Tighten width: from 63.5% to 62% to keep it inside the right border too */
+    width: 62%;
     height: 18.5%;
+    
+    background: #000;
+    overflow: hidden;
+    border-radius: 5px;
+    box-shadow: inset 0 0 15px rgba(0,0,0,1);
+}
+
     
     background: #000;
     overflow: hidden;
