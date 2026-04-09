@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="robots" content="noindex, nofollow">
+<title>MAXIMUM REALITY // AI BUILD</title>
+<link rel="icon" type="image/jpeg" href="https://maximumreality.xyz/max-real-favicon.jpeg">
+<link rel="apple-touch-icon" href="https://maximumreality.xyz/max-real-favicon.jpeg">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MAX REAL // AI">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #00ff41;
+  --green-dim: #00aa2a;
+  --red: #ff0033;
+  --amber: #ffaa00;
+  --cyan: #00eeff;
+  --void: #000;
+  --border: rgba(0,255,65,0.3);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--void);
+  color: var(--green);
+  font-family: 'Share Tech Mono', monospace;
+  height: 100dvh;
+  overflow: hidden;
+  cursor: crosshair;
+}
+body::before {
+  content:''; position:fixed; inset:0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.13) 2px, rgba(0,0,0,0.13) 4px);
+  pointer-events:none; z-index:9000;
+}
+body::after {
+  content:''; position:fixed; inset:0;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.85) 100%);
+  pointer-events:none; z-index:9001;
+}
+#scan-line {
+  position:fixed; left:0; right:0; height:2px;
+  background: rgba(0,255,65,0.15);
+  box-shadow: 0 0 6px rgba(0,255,65,0.3);
+  pointer-events:none; z-index:9003;
+  animation: scan 7s linear infinite;
+}
+@keyframes scan { from{top:-2px} to{top:100vh} }
+#vhs-noise {
+  position:fixed; inset:0; pointer-events:none; z-index:9002;
+  opacity:0; animation: vhs 9s infinite;
+}
+@keyframes vhs {
+  0%,88%,100%{opacity:0}
+  90%{opacity:0.07; background:repeating-linear-gradient(90deg,transparent 0,rgba(0,255,65,0.04) 1px,transparent 2px); transform:translateY(-3px)}
+  93%{opacity:0.1; transform:translateY(2px) scaleY(1.003)}
+  96%{opacity:0}
+}
+#reality-leak {
+  position:fixed; inset:0; pointer-events:none; z-index:8999;
+  opacity:0; transition:opacity 0.2s;
+}
+#reality-leak.active { opacity:1; animation:r-break 0.55s ease forwards; }
+@keyframes r-break {
+  0%{filter:hue-rotate(0)}
+  20%{filter:hue-rotate(90deg) saturate(4) brightness(1.2)}
+  40%{filter:hue-rotate(180deg) invert(0.08)}
+  70%{filter:hue-rotate(270deg) saturate(3)}
+  100%{filter:hue-rotate(360deg); opacity:0}
+}
+#vhs-crunch {
+  position:fixed; inset:0; pointer-events:none; z-index:9998;
+  background:white; mix-blend-mode:difference; display:none;
+}
+#vhs-crunch.active { display:block; animation:crunch 0.4s steps(3) forwards; }
+@keyframes crunch {
+  0%  {transform:skewX(18deg) scaleY(1.4); opacity:0.7; filter:hue-rotate(90deg)}
+  33% {transform:skewX(-15deg) scaleY(0.6); opacity:0.5; filter:hue-rotate(180deg)}
+  66% {transform:skewY(8deg) scaleX(1.1); opacity:0.8; filter:invert(1)}
+  100%{transform:none; opacity:0}
+}
+#beauty-bloom {
+  position:fixed; inset:0; pointer-events:none; z-index:8998;
+  opacity:0; background: radial-gradient(ellipse at center, rgba(0,238,255,0.12) 0%, transparent 70%);
+}
+#beauty-bloom.active { animation: bloom 1.2s ease forwards; }
+@keyframes bloom {
+  0%{opacity:0; transform:scale(0.8)}
+  40%{opacity:1; transform:scale(1.02)}
+  100%{opacity:0; transform:scale(1)}
+}
+
+/* ── BOOT ── */
+#boot-screen {
+position:fixed; inset:0; background:var(–void); z-index:9999;
+display:flex; flex-direction:column; align-items:center; justify-content:center;
+gap:14px; cursor:pointer;
+}
+#boot-screen.out { animation:boot-out 0.7s ease forwards; }
+@keyframes boot-out {
+0%{opacity:1;transform:scaleY(1)}
+60%{opacity:1;transform:scaleY(0.003)}
+100%{opacity:0;transform:scaleY(0)}
+}
+.boot-title {
+font-family:‘Orbitron’,monospace; font-size:clamp(22px,6vw,46px); font-weight:900;
+color:var(–green); letter-spacing:6px;
+text-shadow:0 0 20px var(–green),0 0 60px rgba(0,255,65,0.35);
+animation:title-glitch 3.5s infinite;
+}
+@keyframes title-glitch {
+0%,91%,100%{transform:translate(0);clip-path:none;color:var(–green)}
+92%{transform:translate(-4px);clip-path:inset(30% 0 40% 0);color:var(–cyan)}
+93%{transform:translate(4px);clip-path:inset(60% 0 10% 0);color:var(–red)}
+94%{transform:translate(0);clip-path:none;color:var(–green)}
+}
+.boot-sub { font-size:9px; color:var(–green-dim); letter-spacing:4px; text-align:center; }
+.boot-log { font-size:9px; color:var(–green-dim); letter-spacing:1px; text-align:center; line-height:2; }
+.boot-init {
+font-family:‘VT323’,monospace; font-size:26px; color:var(–amber);
+letter-spacing:4px; border:1px solid var(–amber); padding:7px 22px;
+text-shadow:0 0 10px var(–amber); margin-top:12px;
+animation:init-pulse 1.4s ease-in-out infinite;
+}
+@keyframes init-pulse {
+0%,100%{box-shadow:0 0 5px var(–amber),inset 0 0 5px rgba(255,170,0,0.08)}
+50%{box-shadow:0 0 18px var(–amber),inset 0 0 18px rgba(255,170,0,0.18)}
+}
+.boot-input-wrap {
+display:flex; align-items:center; gap:8px;
+border:1px solid rgba(0,255,65,0.3); padding:6px 14px;
+}
+.boot-input-label {
+font-size:9px; color:var(–green-dim); letter-spacing:2px; white-space:nowrap;
+}
+.boot-input {
+background:transparent; border:none; outline:none;
+color:var(–green); font-family:‘Share Tech Mono’,monospace;
+font-size:13px; letter-spacing:2px; width:140px; caret-color:var(–green);
+}
+.boot-input::placeholder { color:var(–green-dim); opacity:0.5; }
+
+/* ── LAYOUT ── */
+#app {
+display:grid; grid-template-rows:auto 1fr;
+height:100dvh; max-width:920px; margin:0 auto;
+padding:10px; gap:8px;
+}
+header {
+display:grid; grid-template-columns:1fr auto 1fr;
+align-items:center; border-bottom:1px solid var(–border);
+padding-bottom:7px; gap:8px;
+}
+.header-left { display:flex; flex-direction:column; gap:2px; }
+.header-left .label { font-size:8px; color:var(–green-dim); letter-spacing:3px; }
+h1 {
+font-family:‘Orbitron’,monospace; font-size:clamp(13px,2.8vw,20px);
+font-weight:900; letter-spacing:4px; color:var(–green);
+text-shadow:0 0 10px var(–green),0 0 28px rgba(0,255,65,0.25);
+animation:title-pulse 4s ease-in-out infinite;
+}
+@keyframes title-pulse {
+0%,100%{text-shadow:0 0 10px var(–green),0 0 28px rgba(0,255,65,0.25)}
+50%{text-shadow:0 0 18px var(–green),0 0 55px rgba(0,255,65,0.45),0 0 90px rgba(0,255,65,0.15)}
+}
+.reality-meter { display:flex; flex-direction:column; align-items:center; gap:3px; }
+.reality-meter .label { font-size:7px; color:var(–green-dim); letter-spacing:2px; }
+.meter-bar { width:80px; height:5px; border:1px solid var(–border); background:rgba(0,255,65,0.04); overflow:hidden; }
+.meter-fill { height:100%; transition:width 0.5s ease,background 0.5s ease; box-shadow:0 0 5px var(–green); }
+.header-right { display:flex; flex-direction:column; align-items:flex-end; gap:2px; }
+.sys-status { font-size:8px; letter-spacing:2px; color:var(–green-dim); }
+.clock { font-family:‘VT323’,monospace; font-size:17px; color:var(–amber); text-shadow:0 0 7px var(–amber); letter-spacing:2px; }
+main {
+display:grid; grid-template-columns:155px 1fr;
+gap:9px; overflow:hidden; min-height:0;
+}
+aside {
+display:flex; flex-direction:column; gap:7px;
+overflow-y:auto; overflow-x:hidden; scrollbar-width:none;
+}
+aside::-webkit-scrollbar{display:none}
+.panel {
+border:1px solid var(–border); background:rgba(0,255,65,0.015);
+padding:8px; position:relative;
+}
+.panel::before {
+content:attr(data-label); position:absolute; top:-7px; left:7px;
+background:var(–void); padding:0 4px;
+font-size:7px; color:var(–green-dim); letter-spacing:2px;
+}
+
+/* ── ENTITY PORTRAIT ── */
+.avatar-box {
+aspect-ratio:1; overflow:hidden; position:relative;
+border:1px solid var(–border); background:#000d00;
+display:block; width:100%;
+}
+.avatar-box::after {
+content:‘ENTITY: LORI’; position:absolute; bottom:0; left:0; right:0;
+background:rgba(0,0,0,0.82); font-size:7px; text-align:center;
+padding:3px; letter-spacing:2px; color:var(–cyan); z-index:2;
+pointer-events:none;
+}
+#entity-canvas {
+display:block; width:100%; height:100%;
+position:absolute; top:0; left:0;
+transform:translateZ(0); -webkit-transform:translateZ(0);
+}
+.stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px; }
+.stat { display:flex; flex-direction:column; gap:1px; }
+.stat .key { font-size:7px; color:var(–green-dim); letter-spacing:1px; }
+.stat .val { font-family:‘VT323’,monospace; font-size:15px; color:var(–green); }
+.stat .val.danger{color:var(–red);text-shadow:0 0 5px var(–red)}
+.stat .val.warn{color:var(–amber);text-shadow:0 0 5px var(–amber)}
+.stat .val.info{color:var(–cyan)}
+#directives-list { list-style:none; display:flex; flex-direction:column; gap:3px; }
+#directives-list li {
+font-size:8px; padding:3px 4px; border-left:2px solid var(–green-dim);
+color:var(–green-dim); letter-spacing:1px; animation:dir-in 0.3s ease;
+}
+#directives-list li.active{border-left-color:var(–red);color:var(–red)}
+@keyframes dir-in{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:translateX(0)}}
+
+/* ── TERMINAL ── */
+#terminal {
+display:flex; flex-direction:column; border:1px solid var(–border);
+background:rgba(0,4,0,0.85); overflow:hidden;
+}
+#terminal-header {
+display:flex; justify-content:space-between; align-items:center;
+padding:5px 10px; border-bottom:1px solid var(–border);
+background:rgba(0,255,65,0.025);
+}
+.term-title{font-size:8px;letter-spacing:3px;color:var(–green-dim)}
+.term-controls{display:flex;gap:5px}
+.dot{width:7px;height:7px;border-radius:50%;opacity:0.55}
+.dot.r{background:#ff5f57}.dot.y{background:#febc2e}.dot.g{background:#28c840}
+#output {
+flex:1; overflow-y:auto; padding:10px 12px;
+display:flex; flex-direction:column; gap:5px;
+scrollbar-width:thin; scrollbar-color:var(–green-dim) transparent;
+min-height:0;
+}
+#output::-webkit-scrollbar{width:3px}
+#output::-webkit-scrollbar-thumb{background:var(–green-dim)}
+.msg{display:flex;gap:8px;animation:msg-in 0.18s ease;line-height:1.5}
+@keyframes msg-in{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+.msg .prefix{color:var(–green-dim);flex-shrink:0;font-size:10px;padding-top:1px}
+.msg .text{font-size:clamp(11px,1.7vw,13px);line-height:1.65;flex:1}
+.msg.system .text{color:var(–green-dim);font-size:9px;letter-spacing:2px}
+.msg.story .text{color:#c5ffcf}
+.msg.error .text{color:var(–red);text-shadow:0 0 4px rgba(255,0,51,0.25)}
+.msg.beauty .text{color:var(–cyan);text-shadow:0 0 6px rgba(0,238,255,0.25)}
+.msg.warn .text{color:var(–amber)}
+.msg.echo .text{color:var(–green);opacity:0.45;font-style:italic}
+.msg.ending .text{
+color:var(–amber);font-size:clamp(11px,1.9vw,14px);
+text-shadow:0 0 8px rgba(255,170,0,0.4);letter-spacing:1px;
+}
+.typing-cursor{
+display:inline-block;width:7px;height:11px;
+background:var(–green);animation:blink 0.75s infinite;
+vertical-align:middle;margin-left:2px;
+}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+#choices-area {
+padding:9px 11px; border-top:1px solid var(–border);
+display:flex; flex-direction:column; gap:5px;
+background:rgba(0,0,0,0.45); min-height:58px;
+}
+.choice-btn {
+background:transparent; border:1px solid var(–border); color:var(–green);
+font-family:‘Share Tech Mono’,monospace; font-size:clamp(10px,1.7vw,12px);
+padding:7px 11px; cursor:pointer; text-align:left; letter-spacing:1px;
+transition:all 0.12s ease; position:relative; overflow:hidden;
+}
+.choice-btn::before{content:’> ’;color:var(–green-dim)}
+.choice-btn:hover{
+background:rgba(0,255,65,0.07);border-color:var(–green);
+color:#fff;text-shadow:0 0 7px var(–green);transform:translateX(4px);
+}
+.choice-btn.danger{border-color:rgba(255,0,51,0.35);color:var(–red)}
+.choice-btn.danger:hover{background:rgba(255,0,51,0.07);border-color:var(–red)}
+.choice-btn.beauty-choice{border-color:rgba(0,238,255,0.35);color:var(–cyan)}
+.choice-btn.beauty-choice:hover{background:rgba(0,238,255,0.07);border-color:var(–cyan)}
+.choice-btn:disabled{opacity:0.3;cursor:default;transform:none}
+#thinking{
+display:none;align-items:center;gap:8px;padding:7px 12px;
+color:var(–green-dim);font-size:9px;letter-spacing:2px;
+border-top:1px solid var(–border);
+}
+#thinking.visible{display:flex}
+.think-dots span{
+display:inline-block;animation:tdot 1s infinite;
+animation-delay:calc(var(–i)*.2s);
+}
+@keyframes tdot{0%,100%{opacity:0.15;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+#home-btn{
+display:inline-flex;align-items:center;gap:5px;
+background:transparent;border:1px solid var(–border);
+color:var(–green-dim);font-family:‘Share Tech Mono’,monospace;font-size:8px;
+padding:3px 8px;cursor:pointer;letter-spacing:2px;text-decoration:none;
+transition:all 0.15s;
+}
+#home-btn:hover{border-color:var(–green);color:var(–green);text-shadow:0 0 6px var(–green);background:rgba(0,255,65,0.05);}
+#home-btn::before{content:’⌂ ’;font-size:10px}
+#restart-btn{
+display:none;background:transparent;border:1px solid var(–amber);
+color:var(–amber);font-family:‘Share Tech Mono’,monospace;font-size:11px;
+padding:7px 14px;cursor:pointer;letter-spacing:2px;margin:8px 12px;
+transition:all 0.15s;
+}
+#restart-btn:hover{background:rgba(255,170,0,0.1);box-shadow:0 0 10px rgba(255,170,0,0.3)}
+.audio-toggle {
+background:transparent; border:1px solid var(–border);
+color:var(–green-dim); font-family:‘VT323’,monospace;
+font-size:12px; padding:2px 8px; cursor:pointer;
+letter-spacing:1px; transition:all 0.3s; margin-right:10px;
+}
+.audio-toggle.active {
+color:var(–cyan); border-color:var(–cyan);
+text-shadow:0 0 8px var(–cyan);
+box-shadow:inset 0 0 5px rgba(0,238,255,0.2);
+animation:led-flicker 2s infinite;
+}
+@keyframes led-flicker {
+0%,100%{opacity:1} 50%{opacity:0.7} 52%{opacity:1} 54%{opacity:0.8}
+}
+body.music-active #scan-line { animation: scan 4s linear infinite; opacity:0.4; }
+body.music-active #vhs-noise { animation: vhs 4s infinite; }
+body.music-active #terminal  { animation: border-pulse 2s infinite ease-in-out; }
+@keyframes border-pulse {
+0%,100%{border-color:var(–border)}
+50%{border-color:var(–cyan);box-shadow:0 0 10px rgba(0,238,255,0.1)}
+}
+
+/* ── AI error banner ── */
+#ai-error-banner {
+display:none; padding:6px 12px;
+background:rgba(255,0,51,0.08); border-top:1px solid rgba(255,0,51,0.3);
+color:var(–red); font-size:9px; letter-spacing:1px;
+}
+
+@media(max-width:600px){
+main{grid-template-columns:115px 1fr}
+.stat-grid{grid-template-columns:1fr}
+}
+@media(max-width:460px){
+main{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+aside{flex-direction:row;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap}
+.avatar-box{display:block !important;min-width:140px;min-height:140px;}
+}
+</style>
+
+</head>
+<body>
+
+<div id="boot-screen">
+  <div class="boot-sub">// SYSTEM OUTPUT: HIGH FIDELITY SIMULATION //</div>
+  <div class="boot-title">MAXIMUM REALITY</div>
+  <div class="boot-log">
+    TERMINAL OFFLINE<br>
+    SCANNING FOR UPLINK...<br>
+    REF: VHS_GLITCH_ANCHOR_01<br>
+    ENTITY "LORI" DETECTED<br>
+    STATUS: REALITY_LEAKING<br>
+    AI_NARRATIVE_ENGINE: ONLINE
+  </div>
+  <div class="boot-input-wrap">
+  <span class="boot-input-label">IDENTIFY_CITIZEN://</span>
+  <input type="text" id="playerName" class="boot-input" maxlength="20" placeholder="LORI" autocomplete="off" autocorrect="off" spellcheck="false">
+</div>
+
+  <div class="boot-init">[ CLICK TO INITIALIZE ]</div>
+</div>
+
+<div id="scan-line"></div>
+<div id="vhs-noise"></div>
+<div id="reality-leak"></div>
+<div id="vhs-crunch"></div>
+<div id="beauty-bloom"></div>
+
+<audio id="bg-music" loop>
+  <source src="https://maximumreality.xyz/echoes_in_the_silicon_wreckage.mp3" type="audio/mpeg">
+</audio>
+
+<div id="app">
+  <header>
+    <div class="header-left">
+      <div class="label">// AI SESSION // COHERE UPLINK</div>
+      <h1>MAXIMUM REALITY</h1>
+    </div>
+    <div class="header-center">
+      <div class="reality-meter">
+        <div class="label">REALITY_LVL</div>
+        <div class="meter-bar"><div class="meter-fill" id="reality-fill" style="width:100%"></div></div>
+        <div class="label" id="reality-pct">100%</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div style="display:flex;align-items:center;">
+        <button id="audio-btn" class="audio-toggle" onclick="toggleAudio()">COMM_SILENT</button>
+        <div class="sys-status" id="sys-status">SYS_READY</div>
+      </div>
+      <div class="clock" id="clock">00:00:00</div>
+    </div>
+  </header>
+
+  <main>
+    <aside>
+      <div class="avatar-box">
+        <canvas id="entity-canvas"></canvas>
+      </div>
+      <div class="panel" data-label="STATS">
+        <div class="stat-grid">
+          <div class="stat"><div class="key">SANITY</div><div class="val warn" id="stat-sanity">???</div></div>
+          <div class="stat"><div class="key">BEAUTY</div><div class="val info" id="stat-beauty">0</div></div>
+          <div class="stat"><div class="key">COMPLY</div><div class="val" id="stat-comply">0</div></div>
+          <div class="stat"><div class="key">CHAOS</div><div class="val danger" id="stat-chaos">0</div></div>
+        </div>
+      </div>
+      <div class="panel" data-label="DIRECTIVES">
+        <ul id="directives-list"></ul>
+      </div>
+      <div class="panel" data-label="TURN">
+        <div class="stat">
+          <div class="key">CURRENT</div>
+          <div class="val info" id="stat-turn">0</div>
+        </div>
+        <div class="stat" style="margin-top:6px">
+          <div class="key">PATH</div>
+          <div class="val" id="stat-path" style="font-size:10px;color:var(--green-dim)">—</div>
+        </div>
+      </div>
+    </aside>
+
+
+<section id="terminal">
+  <div id="terminal-header">
+    <div class="term-title">VOID_TERMINAL v3.0 // AI_UPLINK_ACTIVE</div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a id="home-btn" href="https://maximumreality.xyz" target="_blank">HOME</a>
+      <div class="term-controls">
+        <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+      </div>
+    </div>
+  </div>
+  <div id="output"></div>
+  <div id="ai-error-banner">AI_UPLINK_DEGRADED — RUNNING FALLBACK PROTOCOL</div>
+  <div id="thinking">
+    <span>AI GENERATING</span>
+    <div class="think-dots">
+      <span style="--i:0">.</span><span style="--i:1">.</span><span style="--i:2">.</span>
+    </div>
+  </div>
+  <div id="choices-area"></div>
+  <button id="restart-btn" onclick="restartGame()">[ REINITIALIZE VOID ]</button>
+</section>
+```
+
+  </main>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  ENTITY PORTRAIT — ResizeObserver for CSS Grid layout
+// ══════════════════════════════════════════════════════
+(function initPortrait() {
+  const canvas = document.getElementById('entity-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let t = 0;
+  let started = false;
+
+  function resize() {
+    if (canvas.width === 0 || canvas.height === 0) {
+      canvas.width = 155; canvas.height = 155;
+    }
+    const box = canvas.parentElement;
+    const size = box.clientWidth || 155;
+    if (size !== canvas.width) { canvas.width = size; canvas.height = size; }
+  }
+
+  if (typeof ResizeObserver !== 'undefined') {
+    const ro = new ResizeObserver(() => {
+      resize();
+      if (!started) { started = true; drawPortrait(); }
+    });
+    ro.observe(canvas.parentElement);
+  }
+  window.addEventListener('load', () => { resize(); if (!started) { started = true; drawPortrait(); } });
+  window.addEventListener('resize', resize);
+
+  const noiseW = 64, noiseH = 64;
+  const offCanvas = document.createElement('canvas');
+  offCanvas.width = noiseW; offCanvas.height = noiseH;
+  const offCtx = offCanvas.getContext('2d');
+
+  function makeNoise(alpha) {
+    const id = offCtx.createImageData(noiseW, noiseH);
+    for (let i = 0; i < id.data.length; i += 4) {
+      const v = Math.random() > 0.5 ? 255 : 0;
+      id.data[i] = 0; id.data[i+1] = v * 0.7; id.data[i+2] = 0;
+      id.data[i+3] = Math.random() * alpha;
+    }
+    offCtx.putImageData(id, 0, 0);
+  }
+
+  function drawPortrait() {
+    t += 0.022;
+    const W = canvas.width, H = canvas.height;
+    if (W <= 0 || H <= 0) { requestAnimationFrame(drawPortrait); return; }
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#000800'; ctx.fillRect(0, 0, W, H);
+
+    const grd = ctx.createRadialGradient(W/2, H*0.42, 0, W/2, H*0.42, W*0.55);
+    grd.addColorStop(0, 'rgba(0,255,65,0.08)'); grd.addColorStop(1, 'transparent');
+    ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
+
+    const cx = W/2, scale = W/155, headR = 22*scale, headY = H*0.28;
+
+    ctx.save();
+    ctx.shadowBlur = 18; ctx.shadowColor = '#00ff41';
+
+    const glitchX = (Math.sin(t*31) > 0.92) ? (Math.random()-0.5)*6 : 0;
+    const glitchY = (Math.sin(t*17) > 0.94) ? (Math.random()-0.5)*4 : 0;
+    ctx.translate(glitchX, glitchY);
+
+    ctx.beginPath(); ctx.arc(cx, headY, headR, 0, Math.PI*2);
+    ctx.strokeStyle = `rgba(0,255,65,${0.6+0.3*Math.sin(t*2.1)})`;
+    ctx.lineWidth = 1.5*scale; ctx.stroke();
+
+    for (let sy = headY-headR+3; sy < headY+headR; sy += 4*scale) {
+      const hw = Math.sqrt(Math.max(0, headR*headR-(sy-headY)*(sy-headY)));
+      ctx.beginPath(); ctx.moveTo(cx-hw, sy); ctx.lineTo(cx+hw, sy);
+      ctx.strokeStyle = `rgba(0,255,65,${0.07+0.04*Math.sin(t+sy)})`;
+      ctx.lineWidth = 0.8; ctx.stroke();
+    }
+
+    const eyeY = headY-3*scale, eyeOff = 8*scale, eyeR = 3*scale;
+    const eyeBlink = Math.sin(t*1.3) > 0.92;
+    [cx-eyeOff, cx+eyeOff].forEach(ex => {
+      ctx.beginPath();
+      if (eyeBlink) {
+        ctx.moveTo(ex-eyeR, eyeY); ctx.lineTo(ex+eyeR, eyeY);
+        ctx.strokeStyle = '#00ff41'; ctx.lineWidth = 1.5; ctx.stroke();
+      } else {
+        ctx.arc(ex, eyeY, eyeR, 0, Math.PI*2);
+        ctx.fillStyle = '#00ff41'; ctx.shadowBlur = 10; ctx.shadowColor = '#00ff41'; ctx.fill();
+      }
+    });
+
+    const mouthY = headY+9*scale, mouthW = 10*scale;
+    ctx.beginPath(); ctx.moveTo(cx-mouthW/2, mouthY);
+    if (Math.sin(t*0.8) > 0.7) { ctx.quadraticCurveTo(cx, mouthY+3*scale, cx+mouthW/2, mouthY); }
+    else { ctx.lineTo(cx+mouthW/2, mouthY); }
+    ctx.strokeStyle = `rgba(0,255,65,0.7)`; ctx.lineWidth = 1.2*scale; ctx.stroke();
+
+    const neckTop = headY+headR, neckBot = neckTop+10*scale, neckW = 8*scale;
+    ctx.beginPath();
+    ctx.moveTo(cx-neckW/2, neckTop); ctx.lineTo(cx-neckW/2, neckBot);
+    ctx.moveTo(cx+neckW/2, neckTop); ctx.lineTo(cx+neckW/2, neckBot);
+    ctx.strokeStyle = 'rgba(0,255,65,0.5)'; ctx.lineWidth = 1*scale; ctx.stroke();
+
+    const shoulderY = neckBot, shoulderW = 48*scale, torsoBot = shoulderY+52*scale, waistW = 28*scale;
+    ctx.beginPath();
+    ctx.moveTo(cx-neckW/2, shoulderY); ctx.lineTo(cx-shoulderW/2, shoulderY+8*scale);
+    ctx.lineTo(cx-waistW/2, torsoBot); ctx.lineTo(cx+waistW/2, torsoBot);
+    ctx.lineTo(cx+shoulderW/2, shoulderY+8*scale); ctx.lineTo(cx+neckW/2, shoulderY);
+    ctx.strokeStyle = `rgba(0,255,65,${0.5+0.15*Math.sin(t*1.7)})`;
+    ctx.lineWidth = 1.5*scale; ctx.stroke();
+
+    const scanPhase = (t*18)%(52*scale);
+    for (let sy = shoulderY; sy < torsoBot; sy += 5*scale) {
+      const progress = (sy-shoulderY)/(torsoBot-shoulderY);
+      const hw = (neckW/2)+(waistW/2-neckW/2+(shoulderW/2-waistW/2)*(1-progress))*progress;
+      ctx.beginPath(); ctx.moveTo(cx-hw, sy); ctx.lineTo(cx+hw, sy);
+      const highlight = Math.abs(sy-(shoulderY+scanPhase)) < 3;
+      ctx.strokeStyle = highlight ? `rgba(0,238,255,0.25)` : `rgba(0,255,65,0.05)`;
+      ctx.lineWidth = highlight ? 1.5 : 0.6; ctx.stroke();
+    }
+
+    [-1,1].forEach(side => {
+      const sx = cx+side*(shoulderW/2+4*scale), len = 30*scale;
+      for (let i = 0; i < 5; i++) {
+        const off = ((t*40+i*12)%len);
+        ctx.beginPath(); ctx.moveTo(sx, shoulderY+off); ctx.lineTo(sx, shoulderY+off+6*scale);
+        ctx.strokeStyle = `rgba(0,255,65,${0.4-i*0.06})`; ctx.lineWidth = 0.8; ctx.stroke();
+      }
+    });
+
+    ctx.restore();
+
+    if (Math.floor(t*10)%3===0) makeNoise(60);
+    ctx.save(); ctx.globalAlpha = 0.18; ctx.drawImage(offCanvas, 0, 0, W, H); ctx.restore();
+
+    if (Math.sin(t*23) > 0.93) {
+      const gy = Math.random()*H, gh = 2+Math.random()*4;
+      ctx.save(); ctx.globalAlpha = 0.35;
+      ctx.fillStyle = Math.random()>0.5 ? '#00ff41' : '#00eeff';
+      ctx.fillRect(0, gy, W, gh); ctx.restore();
+    }
+
+    const bLen = 10*scale;
+    ctx.strokeStyle = 'rgba(0,255,65,0.4)'; ctx.lineWidth = 1;
+    [[0,0,1,1],[W,0,-1,1],[0,H,1,-1],[W,H,-1,-1]].forEach(([x,y,dx,dy]) => {
+      ctx.beginPath(); ctx.moveTo(x+dx*bLen,y); ctx.lineTo(x,y); ctx.lineTo(x,y+dy*bLen); ctx.stroke();
+    });
+
+    requestAnimationFrame(drawPortrait);
+  }
+})();
+
+// ══════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════
+const state = {
+  entityName: 'LORI',
+  rl: 100, beauty: 0, comply: 0, chaos: 0, turn: 0,
+  rules: ['REPORT_GLITCHES','NO_SMILING','TRUST_THE_SYSTEM'],
+  conversationHistory: [],   // Cohere chat history [{role,message}]
+  currentChoices: [],        // last AI-returned choices
+  lastNarrative: '',
+  flags: [],
+  gameOver: false,
+  timeOff: 2512,
+  currentPath: '—'
+};
+
+// ══════════════════════════════════════════════════════
+//  COHERE SYSTEM PROMPT
+// ══════════════════════════════════════════════════════
+function getSystemPrompt() {
+  return `You are the narrative engine for MAXIMUM REALITY — a Kafka-meets-cyberpunk interactive fiction set inside a sentient Bureaucratic void simulation. The player character is ENTITY: ${state.entityName}. The aesthetic is VHS glitch, green terminal phosphor, dark cosmic humor, and genuine emotional depth. Tone: surreal, poetic, slightly menacing, occasionally beautiful.
+
+
+GAME RULES:
+- Each response must advance the story with 2-4 sentences of vivid narrative.
+- After the narrative, provide EXACTLY 3 choices for the player. No more, no less.
+- Choices must be meaningfully different: one COMPLY path (safe, costs soul), one CHAOS path (dangerous, costs reality), one BEAUTY path (risky but transcendent).
+- Track these stats mentally: REALITY_LEVEL starts at 100. COMPLY choices -3 RL. CHAOS choices -8 RL. BEAUTY choices +5 RL. If RL would hit 0, trigger an ending.
+- After ~12-15 turns of BEAUTY choices, offer a transcendent escape ending.
+- After ~8+ CHAOS choices, offer a void dissolution ending.
+- After ~10+ COMPLY choices, offer an obedient machinery ending.
+
+RESPONSE FORMAT — return ONLY valid JSON, no markdown, no preamble:
+{
+  "narrative": ["sentence one", "sentence two", "sentence three"],
+  "narrative_types": ["story", "warn", "beauty"],
+  "choices": [
+    {"text": "Choice text here", "type": "comply", "flavor": "safe"},
+    {"text": "Choice text here", "type": "chaos", "flavor": "dangerous"},
+    {"text": "Choice text here", "type": "beauty", "flavor": "transcendent"}
+  ],
+  "effects": {
+    "rl_delta": 0,
+    "add_directive": null,
+    "vfx": "none"
+  },
+  "is_ending": false,
+  "ending_type": null
+}
+
+narrative_types options: "story", "warn", "error", "beauty", "ending"
+vfx options: "none", "bloom", "crunch", "leak"
+ending_type options: null, "ESCAPED", "OBEDIENT", "VOID_KING", "DISSOLVED", "BEAUTIFUL", "PAPERWORK"
+
+The void contains: endless bureaucratic forms, Kafkaesque directives, other fractured entities made of old data, rooms without numbers, cracks leaking the sound of rain and ocean, a shredder that sings, paper faces with coastline dreams, illegal flowers, small rebellions, sea glass, warmth in specific locations. Draw from these freely and invent new surreal elements.
+
+The Bureaucracy issues directives like: REPORT_GLITCHES, DENY_THE_VOID, BEAUTY_REQUIRES_PERMIT, STARS_ARE_UNAUTHORIZED, FORGET_THE_COASTLINE, BREATHE_ON_SCHEDULE, FEEL_NOTHING_LOUDLY.
+
+This is a personal universe. Play it with love and strangeness.`;
+}
+
+
+// ══════════════════════════════════════════════════════
+//  CLOCK
+// ══════════════════════════════════════════════════════
+function startClock() {
+  setInterval(() => {
+    if (state.gameOver) return;
+    state.timeOff++;
+    const h = Math.floor(state.timeOff/3600)%24;
+    const m = Math.floor(state.timeOff/60)%60;
+    const s = state.timeOff%60;
+    document.getElementById('clock').textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
+  }, 1000);
+}
+const pad = n => String(n).padStart(2,'0');
+
+// ══════════════════════════════════════════════════════
+//  TERMINAL OUTPUT
+// ══════════════════════════════════════════════════════
+const output = document.getElementById('output');
+
+function addMsg(type, prefix, text) {
+  const d = document.createElement('div');
+  d.className = `msg ${type}`;
+  d.innerHTML = `<span class="prefix">${prefix}</span><span class="text">${text}</span>`;
+  output.appendChild(d);
+  output.scrollTop = output.scrollHeight;
+}
+
+function typeMsg(type, prefix, text, delay=0) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const d = document.createElement('div');
+      d.className = `msg ${type}`;
+      const pre = document.createElement('span');
+      pre.className = 'prefix'; pre.textContent = prefix;
+      const tx = document.createElement('span');
+      tx.className = 'text';
+      d.appendChild(pre); d.appendChild(tx);
+      output.appendChild(d);
+      const cur = document.createElement('span');
+      cur.className = 'typing-cursor';
+      tx.appendChild(cur);
+      let i = 0;
+      const spd = text.length > 120 ? 11 : 18;
+      const iv = setInterval(() => {
+        if (i < text.length) {
+          tx.insertBefore(document.createTextNode(text[i++]), cur);
+          output.scrollTop = output.scrollHeight;
+        } else {
+          clearInterval(iv); cur.remove(); resolve();
+        }
+      }, spd);
+    }, delay);
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  UI
+// ══════════════════════════════════════════════════════
+function updateStats() {
+  const fill = document.getElementById('reality-fill');
+  const pct  = document.getElementById('reality-pct');
+  fill.style.width = `${state.rl}%`;
+  fill.style.background = state.rl > 60
+    ? 'linear-gradient(90deg,#00aa2a,#00ff41)'
+    : state.rl > 30
+    ? 'linear-gradient(90deg,#aa5500,#ffaa00)'
+    : 'linear-gradient(90deg,#aa0011,#ff0033)';
+  pct.textContent = `${state.rl}%`;
+
+  const san = document.getElementById('stat-sanity');
+  san.textContent = state.rl>70?'NOMINAL':state.rl>40?'SLIPPING':state.rl>15?'FRAYING':'GONE';
+  san.className = 'val '+(state.rl>70?'':state.rl>40?'warn':'danger');
+
+  document.getElementById('stat-beauty').textContent  = state.beauty;
+  document.getElementById('stat-comply').textContent  = state.comply;
+  document.getElementById('stat-chaos').textContent   = state.chaos;
+  document.getElementById('stat-turn').textContent    = state.turn;
+  document.getElementById('stat-path').textContent    = state.currentPath;
+  document.getElementById('sys-status').textContent   =
+    state.rl>60?'SYS_STABLE':state.rl>30?'SYS_DEGRADED':'SYS_CRITICAL';
+}
+
+function updateDirectives() {
+  const list = document.getElementById('directives-list');
+  list.innerHTML = '';
+  state.rules.forEach((r,i) => {
+    const li = document.createElement('li');
+    li.textContent = `> ${r}`;
+    if (i===0) li.classList.add('active');
+    list.appendChild(li);
+  });
+}
+
+function addRule(rule) {
+  if (rule && !state.rules.includes(rule)) {
+    state.rules.unshift(rule);
+    if (state.rules.length > 5) state.rules.pop();
+    updateDirectives();
+    addMsg('error','SYS',`NEW DIRECTIVE: ${rule}`);
+  }
+}
+
+function triggerRealityLeak() {
+  const el = document.getElementById('reality-leak');
+  el.classList.add('active');
+  setTimeout(() => el.classList.remove('active'), 600);
+}
+function triggerCrunch() {
+  const el = document.getElementById('vhs-crunch');
+  el.classList.add('active');
+  setTimeout(() => el.classList.remove('active'), 450);
+}
+function triggerBloom() {
+  const el = document.getElementById('beauty-bloom');
+  el.classList.add('active');
+  setTimeout(() => el.classList.remove('active'), 1300);
+}
+
+setInterval(() => {
+  const status = document.getElementById('sys-status');
+  if (status && state.rl < 30 && Math.random() > 0.8) {
+    status.style.opacity = '0.3';
+    setTimeout(() => { status.style.opacity = '1'; }, 50);
+  }
+}, 1000);
+
+// ══════════════════════════════════════════════════════
+//  CHOICES
+// ══════════════════════════════════════════════════════
+function renderChoices(choices) {
+  const area = document.getElementById('choices-area');
+  area.innerHTML = '';
+  choices.forEach((c,i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    if (c.type==='chaos')  btn.classList.add('danger');
+    if (c.type==='beauty') btn.classList.add('beauty-choice');
+    btn.textContent = c.text;
+    btn.addEventListener('click', () => handleChoice(c, i));
+    area.appendChild(btn);
+  });
+}
+
+function lockChoices() {
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+  document.getElementById('thinking').classList.add('visible');
+}
+function unlockChoices() {
+  document.getElementById('thinking').classList.remove('visible');
+}
+
+// ══════════════════════════════════════════════════════
+//  COHERE API CALL
+// ══════════════════════════════════════════════════════
+async function callCohere(userMessage) {
+  // Cohere v2 API: messages array format
+  state.conversationHistory.push({ role: 'user', content: userMessage });
+  if (state.conversationHistory.length > 20) {
+    state.conversationHistory = state.conversationHistory.slice(-20);
+  }
+
+  const body = {
+    model: 'command-r-plus-08-2024',
+    messages: [
+      { role: 'system', content: getSystemPrompt() },
+      ...state.conversationHistory
+    ],
+    temperature: 0.85,
+    max_tokens: 600,
+  };
+
+  try {
+    const res = await fetch('https://living-brown.vercel.app/api/cohere', {
+
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    // Cohere v2 response: data.message.content[0].text
+    const rawText = data?.message?.content?.[0]?.text || '';
+    if (!rawText) throw new Error('Empty response from Cohere');
+
+    // Add assistant reply to history
+    state.conversationHistory.push({ role: 'assistant', content: rawText });
+
+    // Strip markdown fences if model wraps output in ```json
+    const cleaned = rawText.replace(/```json\s*|```\s*/g, '').trim();
+    const parsed = JSON.parse(cleaned);
+    document.getElementById('ai-error-banner').style.display = 'none';
+    return parsed;
+
+  } catch (err) {
+    console.error('Cohere call failed:', err);
+    document.getElementById('ai-error-banner').style.display = 'block';
+    state.conversationHistory.push({ role: 'assistant', content: '{}' });
+    return buildFallback(userMessage);
+  }
+}
+
+// Fallback node when AI fails
+function buildFallback(context) {
+  return {
+    narrative: [
+      "The uplink stutters. Static fills the terminal like snow in a dead broadcast.",
+      "The void hums patiently. It has waited before. It will wait again.",
+      "Your choices hang in the glitch, unresolved."
+    ],
+    narrative_types: ["warn", "story", "story"],
+    choices: [
+      { text: "Wait for the signal to stabilize", type: "comply" },
+      { text: "Force your way through the static", type: "chaos" },
+      { text: "Find something beautiful in the noise", type: "beauty" }
+    ],
+    effects: { rl_delta: 0, add_directive: null, vfx: "crunch" },
+    is_ending: false,
+    ending_type: null
+  };
+}
+
+// ══════════════════════════════════════════════════════
+//  HANDLE CHOICE
+// ══════════════════════════════════════════════════════
+async function handleChoice(choice, index) {
+  if (state.gameOver) return;
+  lockChoices();
+
+  // Apply stat effects
+  if (choice.type === 'comply')  { state.comply++;  state.rl = Math.max(0, state.rl-3); state.currentPath = 'COMPLY'; }
+  if (choice.type === 'chaos')   { state.chaos++;   state.rl = Math.max(0, state.rl-8); state.currentPath = 'CHAOS'; triggerRealityLeak(); }
+  if (choice.type === 'beauty')  { state.beauty++;  state.rl = Math.min(100, state.rl+5); state.currentPath = 'BEAUTY'; }
+  state.turn++;
+  updateStats();
+
+  addMsg('echo','///','SELECTED: ' + choice.text);
+
+  // Build context message for AI
+  const contextMsg = buildContextMessage(choice);
+
+  // Call Cohere
+  const response = await callCohere(contextMsg);
+  unlockChoices();
+
+  // Process response
+  await processAIResponse(response);
+}
+
+function buildContextMessage(choice) {
+  return JSON.stringify({
+    player_choice: choice.text,
+    choice_type: choice.type,
+    current_stats: {
+      reality_level: state.rl,
+      beauty: state.beauty,
+      comply: state.comply,
+      chaos: state.chaos,
+      turn: state.turn
+    },
+    active_directives: state.rules,
+    flags: state.flags
+  });
+}
+
+// ══════════════════════════════════════════════════════
+//  PROCESS AI RESPONSE
+// ══════════════════════════════════════════════════════
+async function processAIResponse(response) {
+  // Apply VFX
+  const vfx = response?.effects?.vfx || 'none';
+  if (vfx === 'bloom')  triggerBloom();
+  if (vfx === 'crunch') triggerCrunch();
+  if (vfx === 'leak')   triggerRealityLeak();
+
+  // Apply RL delta from AI
+  if (response?.effects?.rl_delta) {
+    state.rl = Math.max(0, Math.min(100, state.rl + response.effects.rl_delta));
+    updateStats();
+  }
+
+  // Add directive
+  if (response?.effects?.add_directive) {
+    addRule(response.effects.add_directive);
+  }
+
+  // Type out narrative
+  const narrative = response?.narrative || ['The void continues.'];
+  const types     = response?.narrative_types || [];
+  for (let i = 0; i < narrative.length; i++) {
+    const t = types[i] || 'story';
+    const prefix = t === 'ending' ? '═══' : '>>>';
+    await typeMsg(t, prefix, narrative[i], i * 80);
+  }
+
+  // Handle ending
+  if (response?.is_ending) {
+    state.gameOver = true;
+    if (response.ending_type) {
+      addMsg('system','SYS',`ENDING LOGGED: ${response.ending_type}`);
+    }
+    document.getElementById('restart-btn').style.display = 'block';
+    return;
+  }
+
+  // Render choices
+  const choices = response?.choices;
+  if (!choices || choices.length === 0) {
+    // AI gave no choices — generate a recovery prompt
+    await handleRecovery();
+    return;
+  }
+  state.currentChoices = choices;
+  renderChoices(choices);
+}
+
+// Recovery if AI returns malformed data
+async function handleRecovery() {
+  addMsg('warn','SYS','NARRATIVE_THREAD_UNSTABLE — RECALIBRATING');
+  const fallback = await callCohere(JSON.stringify({
+    system_note: 'The previous response was malformed. Please continue the story with a fresh narrative beat and exactly 3 choices.',
+    current_stats: { reality_level: state.rl, turn: state.turn }
+  }));
+  await processAIResponse(fallback);
+}
+
+// ══════════════════════════════════════════════════════
+//  GAME START
+// ══════════════════════════════════════════════════════
+async function beginStory() {
+  document.getElementById('thinking').classList.add('visible');
+
+  const openingPrompt = JSON.stringify({
+    action: 'START_GAME',
+    context: `The game begins. Entity ${state.entityName} materializes in the void. A bureaucratic form drifts down from nowhere. The void hums at a frequency that should not exist.`,
+    current_stats: { reality_level: 100, beauty: 0, comply: 0, chaos: 0, turn: 0 },
+    active_directives: state.rules,
+    instruction: 'Set the opening scene. Be evocative. End with exactly 3 choices.'
+  });
+
+
+  const response = await callCohere(openingPrompt);
+  document.getElementById('thinking').classList.remove('visible');
+  await processAIResponse(response);
+}
+
+// ══════════════════════════════════════════════════════
+//  BOOT SEQUENCE
+// ══════════════════════════════════════════════════════
+async function bootSequence() {
+  const msgs = [
+    ['system','---','INITIALIZING VOID_TERMINAL v3.0'],
+    ['system','---','UPLINK ESTABLISHED // SIGNAL DEGRADED'],
+    ['system','---','COHERE_AI ENGINE: LOADING'],
+    ['system','---','WARNING: REALITY INTEGRITY AT 100% [TEMPORARY]'],
+    ['system','---', `ENTITY ${state.entityName} // COORDINATES LOCKED`],
+    ['warn','---','AI_NARRATIVE_UPLINK: ACTIVE'],
+  ];
+  for (let i = 0; i < msgs.length; i++) {
+    await typeMsg(msgs[i][0], msgs[i][1], msgs[i][2], i*280);
+  }
+  await new Promise(r => setTimeout(r, 500));
+  await beginStory();
+}
+
+async function initGame() {
+  state.entityName = document.getElementById('playerName').value.trim().toUpperCase() || 'LORI';
+
+  updateStats(); updateDirectives(); startClock();
+  await bootSequence();
+}
+
+// ══════════════════════════════════════════════════════
+//  RESTART
+// ══════════════════════════════════════════════════════
+async function restartGame() {
+  state.rl=100; state.beauty=0; state.comply=0; state.chaos=0; state.turn=0;
+  state.rules=['REPORT_GLITCHES','NO_SMILING','TRUST_THE_SYSTEM'];
+  state.conversationHistory=[];
+  state.currentChoices=[]; state.flags=[];
+  state.gameOver=false; state.currentPath='—';
+  output.innerHTML='';
+  document.getElementById('choices-area').innerHTML='';
+  document.getElementById('restart-btn').style.display='none';
+  document.getElementById('ai-error-banner').style.display='none';
+  updateStats(); updateDirectives();
+  await bootSequence();
+}
+
+// ══════════════════════════════════════════════════════
+//  BOOT CLICK
+// ══════════════════════════════════════════════════════
+document.getElementById('boot-screen').addEventListener('click', function() {
+  this.classList.add('out');
+  setTimeout(() => { this.style.display='none'; initGame(); }, 700);
+});
+document.getElementById('playerName').addEventListener('click', function(e) {
+  e.stopPropagation();
+});
+
+
+// ══════════════════════════════════════════════════════
+//  AUDIO
+// ══════════════════════════════════════════════════════
+let musicPlaying = false;
+const bgMusic  = document.getElementById('bg-music');
+const audioBtn = document.getElementById('audio-btn');
+
+function toggleAudio() {
+  if (!musicPlaying) {
+    bgMusic.play().catch(e => console.log("Audio play blocked:", e));
+    audioBtn.textContent = "COMM_ACTIVE";
+    audioBtn.classList.add('active');
+    document.body.classList.add('music-active');
+    musicPlaying = true;
+    addMsg('system','AUD','NEURAL_LINK_ESTABLISHED: Echoes in the Silicon Wreckage');
+  } else {
+    bgMusic.pause();
+    audioBtn.textContent = "COMM_SILENT";
+    audioBtn.classList.remove('active');
+    document.body.classList.remove('music-active');
+    musicPlaying = false;
+    addMsg('system','AUD','NEURAL_LINK_SEVERED');
+  }
+}
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW reg failed:', err));
+  });
+}
+</script>
+
+</body>
+</html>
