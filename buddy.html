@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>BUDDY.EXE</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+
+:root {
+–void: #0a0a0f;
+–deep: #0d0d1a;
+–panel: #111122;
+–border: #1a1a3a;
+–cyan: #00ffe5;
+–pink: #ff2d78;
+–amber: #ffb300;
+–green: #39ff14;
+–dim: #334;
+–text: #ccd6f6;
+–muted: #556;
+–glow-cyan: 0 0 8px #00ffe5, 0 0 20px #00ffe540;
+–glow-pink: 0 0 8px #ff2d78, 0 0 20px #ff2d7840;
+–glow-amber: 0 0 8px #ffb300, 0 0 16px #ffb30040;
+}
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+background: var(–void);
+display: flex;
+align-items: center;
+justify-content: center;
+min-height: 100vh;
+font-family: ‘Share Tech Mono’, monospace;
+color: var(–text);
+overflow: hidden;
+}
+
+/* Scanlines overlay */
+body::before {
+content: ‘’;
+position: fixed;
+inset: 0;
+background: repeating-linear-gradient(
+0deg,
+transparent,
+transparent 2px,
+rgba(0,0,0,0.08) 2px,
+rgba(0,0,0,0.08) 4px
+);
+pointer-events: none;
+z-index: 1000;
+}
+
+.device {
+width: 320px;
+background: var(–deep);
+border: 1px solid var(–border);
+border-radius: 28px;
+padding: 20px 18px 24px;
+box-shadow:
+0 0 0 1px #0006,
+0 0 40px #00ffe510,
+inset 0 1px 0 #ffffff08;
+position: relative;
+}
+
+.device::after {
+content: ‘’;
+position: absolute;
+inset: 0;
+border-radius: 28px;
+background: linear-gradient(135deg, #ffffff06 0%, transparent 50%);
+pointer-events: none;
+}
+
+/* Header */
+.header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 14px;
+}
+.title {
+font-family: ‘Orbitron’, monospace;
+font-size: 11px;
+font-weight: 700;
+color: var(–cyan);
+text-shadow: var(–glow-cyan);
+letter-spacing: 3px;
+}
+.status-dot {
+width: 7px; height: 7px;
+border-radius: 50%;
+background: var(–green);
+box-shadow: 0 0 8px var(–green);
+animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+0%,100% { opacity: 1; }
+50% { opacity: 0.3; }
+}
+
+/* Screen */
+.screen {
+background: #070712;
+border: 1px solid var(–border);
+border-radius: 12px;
+height: 200px;
+position: relative;
+overflow: hidden;
+margin-bottom: 14px;
+box-shadow: inset 0 0 30px #00000060;
+}
+
+/* Grid floor */
+.screen::before {
+content: ‘’;
+position: absolute;
+bottom: 0;
+left: 0; right: 0;
+height: 60px;
+background:
+linear-gradient(transparent 0%, #00ffe508 100%),
+repeating-linear-gradient(90deg, transparent, transparent 19px, #00ffe510 20px),
+repeating-linear-gradient(0deg, transparent, transparent 19px, #00ffe510 20px);
+background-size: 20px 20px, 20px 20px, 20px 20px;
+transform: perspective(60px) rotateX(30deg);
+transform-origin: bottom;
+opacity: 0.4;
+}
+
+/* Stars */
+.stars {
+position: absolute;
+inset: 0;
+}
+.star {
+position: absolute;
+width: 2px; height: 2px;
+background: #fff;
+border-radius: 50%;
+opacity: 0;
+animation: twinkle var(–d, 3s) var(–delay, 0s) ease-in-out infinite;
+}
+@keyframes twinkle {
+0%,100% { opacity: 0; }
+50% { opacity: var(–o, 0.6); }
+}
+
+/* Cat sprite */
+.cat-wrap {
+position: absolute;
+bottom: 28px;
+left: 50%;
+transform: translateX(-50%);
+transition: bottom 0.15s;
+}
+.cat-wrap.jump {
+animation: jump-anim 0.5s ease-out;
+}
+@keyframes jump-anim {
+0% { bottom: 28px; }
+40% { bottom: 80px; }
+100% { bottom: 28px; }
+}
+
+.cat {
+width: 64px;
+height: 64px;
+position: relative;
+animation: idle-bob 2s ease-in-out infinite;
+}
+@keyframes idle-bob {
+0%,100% { transform: translateY(0); }
+50% { transform: translateY(-4px); }
+}
+.cat.happy {
+animation: happy-wiggle 0.4s ease-in-out 3;
+}
+@keyframes happy-wiggle {
+0%,100% { transform: rotate(0deg) translateY(0); }
+25% { transform: rotate(-8deg) translateY(-2px); }
+75% { transform: rotate(8deg) translateY(-2px); }
+}
+.cat.sad {
+animation: sad-droop 0.5s ease-in-out forwards;
+}
+@keyframes sad-droop {
+0% { transform: translateY(0); }
+100% { transform: translateY(4px); }
+}
+.cat.eating {
+animation: nom-nom 0.2s steps(1) 5;
+}
+@keyframes nom-nom {
+0%,100% { transform: scale(1); }
+50% { transform: scale(1.06) translateY(-2px); }
+}
+.cat.sleeping {
+opacity: 0.7;
+animation: sleep-breathe 3s ease-in-out infinite;
+}
+@keyframes sleep-breathe {
+0%,100% { transform: scaleY(1); }
+50% { transform: scaleY(0.95); }
+}
+
+/* SVG cat face expression */
+.cat-svg { width: 64px; height: 64px; }
+
+/* Emotion bubble */
+.bubble {
+position: absolute;
+top: -28px;
+left: 50%;
+transform: translateX(-50%);
+font-size: 18px;
+opacity: 0;
+transition: opacity 0.3s;
+pointer-events: none;
+}
+.bubble.show {
+opacity: 1;
+animation: bubble-pop 0.3s ease-out;
+}
+@keyframes bubble-pop {
+0% { transform: translateX(-50%) scale(0); }
+70% { transform: translateX(-50%) scale(1.2); }
+100% { transform: translateX(-50%) scale(1); }
+}
+
+/* Sleep Z’s */
+.zzz {
+position: absolute;
+top: 4px;
+right: -10px;
+font-family: ‘Orbitron’, monospace;
+font-size: 10px;
+color: var(–cyan);
+opacity: 0;
+pointer-events: none;
+}
+.zzz.show {
+animation: float-z 2s ease-in-out infinite;
+}
+@keyframes float-z {
+0% { opacity: 0; transform: translateY(0) scale(0.7); }
+30% { opacity: 1; }
+100% { opacity: 0; transform: translateY(-20px) scale(1.1); }
+}
+
+/* Screen message */
+.screen-msg {
+position: absolute;
+top: 10px;
+left: 0; right: 0;
+text-align: center;
+font-size: 9px;
+color: var(–cyan);
+opacity: 0;
+letter-spacing: 2px;
+transition: opacity 0.4s;
+text-shadow: var(–glow-cyan);
+}
+.screen-msg.show { opacity: 1; }
+
+/* Stats panel */
+.stats {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 8px;
+margin-bottom: 14px;
+}
+.stat {
+background: var(–panel);
+border: 1px solid var(–border);
+border-radius: 8px;
+padding: 7px 10px;
+}
+.stat-label {
+font-size: 8px;
+letter-spacing: 2px;
+color: var(–muted);
+margin-bottom: 4px;
+text-transform: uppercase;
+}
+.stat-bar {
+height: 5px;
+background: var(–dim);
+border-radius: 3px;
+overflow: hidden;
+}
+.stat-fill {
+height: 100%;
+border-radius: 3px;
+transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+.stat-fill.hunger { background: linear-gradient(90deg, var(–amber), #ff6b35); box-shadow: var(–glow-amber); }
+.stat-fill.happy-bar { background: linear-gradient(90deg, var(–pink), #ff7eb3); box-shadow: var(–glow-pink); }
+.stat-fill.energy { background: linear-gradient(90deg, var(–cyan), #00c4ff); box-shadow: var(–glow-cyan); }
+.stat-fill.health { background: linear-gradient(90deg, var(–green), #7dff6b); }
+.stat-val {
+font-size: 8px;
+color: var(–muted);
+margin-top: 3px;
+text-align: right;
+}
+
+/* Action buttons */
+.actions {
+display: grid;
+grid-template-columns: 1fr 1fr 1fr 1fr;
+gap: 8px;
+margin-bottom: 14px;
+}
+.btn {
+background: var(–panel);
+border: 1px solid var(–border);
+border-radius: 10px;
+padding: 9px 4px 7px;
+cursor: pointer;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 3px;
+transition: all 0.15s;
+-webkit-tap-highlight-color: transparent;
+user-select: none;
+}
+.btn:active, .btn.active {
+background: #1a1a2e;
+border-color: var(–cyan);
+box-shadow: var(–glow-cyan);
+transform: scale(0.95);
+}
+.btn-icon { font-size: 16px; }
+.btn-label {
+font-size: 7px;
+letter-spacing: 1px;
+color: var(–muted);
+text-transform: uppercase;
+}
+.btn:hover .btn-label { color: var(–cyan); }
+
+/* Log */
+.log {
+background: var(–panel);
+border: 1px solid var(–border);
+border-radius: 8px;
+padding: 8px 10px;
+height: 44px;
+overflow: hidden;
+position: relative;
+}
+.log-line {
+font-size: 9px;
+color: var(–muted);
+letter-spacing: 1px;
+line-height: 1.6;
+transition: opacity 0.3s;
+}
+.log-line.new { color: var(–cyan); text-shadow: var(–glow-cyan); }
+
+/* Age / name */
+.footer {
+display: flex;
+justify-content: space-between;
+margin-top: 10px;
+padding-top: 10px;
+border-top: 1px solid var(–border);
+}
+.buddy-name {
+font-family: ‘Orbitron’, monospace;
+font-size: 10px;
+color: var(–pink);
+text-shadow: var(–glow-pink);
+letter-spacing: 2px;
+}
+.buddy-age {
+font-size: 9px;
+color: var(–muted);
+letter-spacing: 1px;
+}
+
+/* Glitch text effect */
+@keyframes glitch {
+0%,100% { clip-path: none; transform: none; }
+92% { clip-path: none; transform: none; }
+93% { clip-path: inset(30% 0 40% 0); transform: translateX(-3px); }
+94% { clip-path: inset(60% 0 10% 0); transform: translateX(3px); }
+95% { clip-path: none; transform: none; }
+}
+.title { animation: glitch 5s infinite; }
+</style>
+
+</head>
+<body>
+
+<div class="device">
+  <div class="header">
+    <div class="title">BUDDY.EXE</div>
+    <div class="status-dot"></div>
+  </div>
+
+  <!-- Screen -->
+
+  <div class="screen" id="screen">
+    <div class="stars" id="stars"></div>
+    <div class="screen-msg" id="screenMsg"></div>
+    <div class="cat-wrap" id="catWrap">
+      <div class="cat" id="cat">
+        <svg class="cat-svg" id="catSvg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Body -->
+          <ellipse cx="32" cy="46" rx="16" ry="12" fill="#1a1a2e"/>
+          <!-- Head -->
+          <circle cx="32" cy="30" r="15" fill="#1a1a2e"/>
+          <!-- Ears -->
+          <polygon points="19,18 14,6 24,14" fill="#1a1a2e"/>
+          <polygon points="45,18 50,6 40,14" fill="#1a1a2e"/>
+          <!-- Inner ears -->
+          <polygon points="20,17 16,9 23,14" fill="#ff2d7830"/>
+          <polygon points="44,17 48,9 41,14" fill="#ff2d7830"/>
+          <!-- Eyes -->
+          <g id="eyeGroup">
+            <ellipse id="eyeL" cx="26" cy="30" rx="4" ry="4" fill="#00ffe5"/>
+            <ellipse id="eyeR" cx="38" cy="30" rx="4" ry="4" fill="#00ffe5"/>
+            <circle id="pupilL" cx="26" cy="30" r="2.5" fill="#070712"/>
+            <circle id="pupilR" cx="38" cy="30" r="2.5" fill="#070712"/>
+            <!-- Eye shine -->
+            <circle cx="27.5" cy="28.5" r="1" fill="white" opacity="0.8"/>
+            <circle cx="39.5" cy="28.5" r="1" fill="white" opacity="0.8"/>
+          </g>
+          <!-- Nose -->
+          <polygon id="nose" points="32,34 30,36 34,36" fill="#ff2d78"/>
+          <!-- Mouth - happy default -->
+          <path id="mouth" d="M 28 37 Q 32 41 36 37" stroke="#ff2d78" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <!-- Whiskers -->
+          <line x1="17" y1="33" x2="26" y2="34" stroke="#334" stroke-width="1" opacity="0.6"/>
+          <line x1="17" y1="36" x2="26" y2="36" stroke="#334" stroke-width="1" opacity="0.6"/>
+          <line x1="47" y1="33" x2="38" y2="34" stroke="#334" stroke-width="1" opacity="0.6"/>
+          <line x1="47" y1="36" x2="38" y2="36" stroke="#334" stroke-width="1" opacity="0.6"/>
+          <!-- Tail -->
+          <path d="M 46 52 Q 56 44 54 38" stroke="#1a1a2e" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <!-- Glow dot on chest -->
+          <circle cx="32" cy="46" r="3" fill="#00ffe520"/>
+          <circle cx="32" cy="46" r="1.5" fill="#00ffe5" opacity="0.5"/>
+        </svg>
+        <div class="bubble" id="bubble">💫</div>
+        <div class="zzz" id="zzz">z z z</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-label">HUNGER</div>
+      <div class="stat-bar"><div class="stat-fill hunger" id="hungerBar" style="width:70%"></div></div>
+      <div class="stat-val" id="hungerVal">70</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">HAPPY</div>
+      <div class="stat-bar"><div class="stat-fill happy-bar" id="happyBar" style="width:80%"></div></div>
+      <div class="stat-val" id="happyVal">80</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">ENERGY</div>
+      <div class="stat-bar"><div class="stat-fill energy" id="energyBar" style="width:65%"></div></div>
+      <div class="stat-val" id="energyVal">65</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">HEALTH</div>
+      <div class="stat-bar"><div class="stat-fill health" id="healthBar" style="width:90%"></div></div>
+      <div class="stat-val" id="healthVal">90</div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+
+  <div class="actions">
+    <button class="btn" id="btnFeed" onclick="feed()">
+      <span class="btn-icon">🍜</span>
+      <span class="btn-label">FEED</span>
+    </button>
+    <button class="btn" id="btnPlay" onclick="play()">
+      <span class="btn-icon">⚡</span>
+      <span class="btn-label">PLAY</span>
+    </button>
+    <button class="btn" id="btnSleep" onclick="sleep()">
+      <span class="btn-icon">🌙</span>
+      <span class="btn-label">SLEEP</span>
+    </button>
+    <button class="btn" id="btnHeal" onclick="heal()">
+      <span class="btn-icon">💊</span>
+      <span class="btn-label">HEAL</span>
+    </button>
+  </div>
+
+  <!-- Log -->
+
+  <div class="log" id="log">
+    <div class="log-line" id="logLine1">SYSTEM: buddy.exe initialized...</div>
+    <div class="log-line" id="logLine2">CAT: *stares into the void*</div>
+  </div>
+
+  <div class="footer">
+    <div class="buddy-name" id="buddyName">VOID-CAT</div>
+    <div class="buddy-age" id="buddyAge">AGE: 0d 0h</div>
+  </div>
+</div>
+
+<script>
+const state = {
+  hunger: 70,
+  happy: 80,
+  energy: 65,
+  health: 90,
+  sleeping: false,
+  busy: false,
+  birthTime: Date.now(),
+  name: 'VOID-CAT'
+};
+
+const catNames = ['VOID-CAT','GLITCH-PAW','NULL.EXE','PHASE-CAT','DATA-PURR'];
+state.name = catNames[Math.floor(Math.random() * catNames.length)];
+document.getElementById('buddyName').textContent = state.name;
+
+// Spawn stars
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 18; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  s.style.cssText = `
+    left:${Math.random()*95}%;
+    top:${Math.random()*70}%;
+    --d:${2+Math.random()*4}s;
+    --delay:${Math.random()*3}s;
+    --o:${0.3+Math.random()*0.7};
+  `;
+  starsEl.appendChild(s);
+}
+
+function updateBars() {
+  const bars = ['hunger','happy','energy','health'];
+  bars.forEach(k => {
+    const v = Math.max(0, Math.min(100, state[k]));
+    document.getElementById(k+'Bar').style.width = v+'%';
+    document.getElementById(k+'Val').textContent = Math.round(v);
+    // Low warning color
+    const el = document.getElementById(k+'Bar');
+    el.style.opacity = v < 20 ? '0.5' : '1';
+  });
+}
+
+function setCatFace(mood) {
+  const mouth = document.getElementById('mouth');
+  const eyeL = document.getElementById('eyeL');
+  const eyeR = document.getElementById('eyeR');
+  const pupilL = document.getElementById('pupilL');
+  const pupilR = document.getElementById('pupilR');
+
+  if (mood === 'happy') {
+    mouth.setAttribute('d','M 27 37 Q 32 42 37 37');
+    eyeL.setAttribute('ry','4'); eyeR.setAttribute('ry','4');
+    pupilL.setAttribute('r','2.5'); pupilR.setAttribute('r','2.5');
+    eyeL.setAttribute('fill','#00ffe5'); eyeR.setAttribute('fill','#00ffe5');
+  } else if (mood === 'sad') {
+    mouth.setAttribute('d','M 27 40 Q 32 36 37 40');
+    eyeL.setAttribute('ry','3'); eyeR.setAttribute('ry','3');
+    eyeL.setAttribute('fill','#00ffe5'); eyeR.setAttribute('fill','#00ffe5');
+  } else if (mood === 'sleep') {
+    mouth.setAttribute('d','M 29 38 Q 32 40 35 38');
+    eyeL.setAttribute('ry','1'); eyeR.setAttribute('ry','1');
+    eyeL.setAttribute('fill','#334'); eyeR.setAttribute('fill','#334');
+    pupilL.setAttribute('r','0'); pupilR.setAttribute('r','0');
+  } else if (mood === 'nom') {
+    mouth.setAttribute('d','M 28 36 Q 32 41 36 36 Q 32 44 28 36');
+    eyeL.setAttribute('ry','5'); eyeR.setAttribute('ry','5');
+    eyeL.setAttribute('fill','#00ffe5'); eyeR.setAttribute('fill','#00ffe5');
+  } else { // neutral
+    mouth.setAttribute('d','M 28 38 Q 32 40 36 38');
+    eyeL.setAttribute('ry','4'); eyeR.setAttribute('ry','4');
+    pupilL.setAttribute('r','2.5'); pupilR.setAttribute('r','2.5');
+    eyeL.setAttribute('fill','#00ffe5'); eyeR.setAttribute('fill','#00ffe5');
+  }
+}
+
+function showBubble(emoji) {
+  const b = document.getElementById('bubble');
+  b.textContent = emoji;
+  b.classList.add('show');
+  setTimeout(() => b.classList.remove('show'), 1500);
+}
+
+function showMsg(msg) {
+  const el = document.getElementById('screenMsg');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+function addLog(msg, isNew = true) {
+  const l1 = document.getElementById('logLine1');
+  const l2 = document.getElementById('logLine2');
+  l1.textContent = l2.textContent;
+  l1.classList.remove('new');
+  l2.textContent = msg;
+  l2.className = 'log-line' + (isNew ? ' new' : '');
+}
+
+function btnFlash(id) {
+  const btn = document.getElementById(id);
+  btn.classList.add('active');
+  setTimeout(() => btn.classList.remove('active'), 200);
+}
+
+function feed() {
+  if (state.busy || state.sleeping) { addLog('SYS: buddy is busy...'); return; }
+  if (state.hunger >= 95) { addLog('CAT: *looks away* not hungry'); showBubble('😑'); return; }
+  state.busy = true;
+  btnFlash('btnFeed');
+  const cat = document.getElementById('cat');
+  cat.className = 'cat eating';
+  setCatFace('nom');
+  state.hunger = Math.min(100, state.hunger + 25);
+  state.energy = Math.min(100, state.energy + 5);
+  state.health = Math.min(100, state.health + 3);
+  showBubble('😋');
+  showMsg('NOM NOM NOM');
+  addLog('CAT: *devours the data-noodles*');
+  setTimeout(() => {
+    cat.className = 'cat';
+    setCatFace(getMood());
+    state.busy = false;
+    updateBars();
+  }, 1200);
+}
+
+function play() {
+  if (state.busy || state.sleeping) { addLog('SYS: buddy is busy...'); return; }
+  if (state.energy < 15) { addLog('CAT: *too tired to play*'); showBubble('😴'); return; }
+  state.busy = true;
+  btnFlash('btnPlay');
+  const cat = document.getElementById('cat');
+  const wrap = document.getElementById('catWrap');
+  cat.className = 'cat happy';
+  wrap.classList.add('jump');
+  setCatFace('happy');
+  state.happy = Math.min(100, state.happy + 20);
+  state.energy = Math.max(0, state.energy - 15);
+  state.hunger = Math.max(0, state.hunger - 8);
+  showBubble('✨');
+  showMsg('> PLAYING.EXE');
+  const msgs = ['CAT: *glitches through the wall*','CAT: *chases a void-pixel*','CAT: *boots up chaos.mode*'];
+  addLog(msgs[Math.floor(Math.random()*msgs.length)]);
+  setTimeout(() => {
+    cat.className = 'cat';
+    wrap.classList.remove('jump');
+    setCatFace(getMood());
+    state.busy = false;
+    updateBars();
+  }, 1000);
+}
+
+function sleep() {
+  if (state.busy) { addLog('SYS: busy...'); return; }
+  btnFlash('btnSleep');
+  if (state.sleeping) {
+    // Wake up
+    state.sleeping = false;
+    const cat = document.getElementById('cat');
+    const zzz = document.getElementById('zzz');
+    cat.className = 'cat';
+    zzz.classList.remove('show');
+    setCatFace('happy');
+    showBubble('⚡');
+    showMsg('REBOOTING...');
+    addLog('CAT: *reboots from sleep mode*');
+    updateBars();
+  } else {
+    // Sleep
+    state.sleeping = true;
+    const cat = document.getElementById('cat');
+    const zzz = document.getElementById('zzz');
+    cat.className = 'cat sleeping';
+    zzz.classList.add('show');
+    setCatFace('sleep');
+    showMsg('SLEEP MODE ON');
+    addLog('CAT: *enters sleep.exe*');
+  }
+}
+
+function heal() {
+  if (state.busy || state.sleeping) { addLog('SYS: buddy is busy...'); return; }
+  if (state.health >= 95) { addLog('SYS: health optimal'); showBubble('💚'); return; }
+  state.busy = true;
+  btnFlash('btnHeal');
+  const cat = document.getElementById('cat');
+  cat.className = 'cat happy';
+  setCatFace('happy');
+  state.health = Math.min(100, state.health + 20);
+  state.happy = Math.min(100, state.happy + 5);
+  showBubble('💊');
+  showMsg('PATCHING...');
+  addLog('SYS: running repair_protocol.sh');
+  setTimeout(() => {
+    cat.className = 'cat';
+    setCatFace(getMood());
+    state.busy = false;
+    updateBars();
+  }, 900);
+}
+
+function getMood() {
+  if (state.sleeping) return 'sleep';
+  if (state.happy > 60 && state.hunger > 40) return 'happy';
+  if (state.happy < 30 || state.hunger < 20) return 'sad';
+  return 'neutral';
+}
+
+// Passive decay
+setInterval(() => {
+  if (!state.sleeping && !state.busy) {
+    state.hunger = Math.max(0, state.hunger - 1.2);
+    state.happy = Math.max(0, state.happy - 0.8);
+    state.energy = Math.max(0, state.energy - 0.5);
+    if (state.hunger < 20 || state.energy < 10) {
+      state.health = Math.max(0, state.health - 0.4);
+    }
+  } else if (state.sleeping) {
+    state.energy = Math.min(100, state.energy + 2);
+    state.health = Math.min(100, state.health + 0.3);
+  }
+  setCatFace(getMood());
+  updateBars();
+}, 3000);
+
+// Ambient cat messages
+const catMsgs = [
+  'CAT: *stares at screen corner*',
+  'CAT: *detects quantum fluctuation*',
+  'CAT: *knocks pixel off edge*',
+  'CAT: *phases through wall*',
+  'CAT: *tail.exe not responding*',
+  'CAT: *hacks into nap dimension*',
+  'CAT: *finds void comfortable*',
+];
+setInterval(() => {
+  if (!state.busy && Math.random() > 0.5) {
+    addLog(catMsgs[Math.floor(Math.random()*catMsgs.length)], false);
+  }
+}, 8000);
+
+// Sad event
+setInterval(() => {
+  if (state.hunger < 20 && !state.sleeping) {
+    showBubble('😿');
+    addLog('CAT: *hungry.signal critical*');
+    setCatFace('sad');
+  }
+}, 12000);
+
+// Age counter
+setInterval(() => {
+  const ms = Date.now() - state.birthTime;
+  const h = Math.floor(ms/3600000);
+  const d = Math.floor(h/24);
+  document.getElementById('buddyAge').textContent = `AGE: ${d}d ${h%24}h`;
+}, 60000);
+
+// Init
+updateBars();
+setCatFace('happy');
+setTimeout(() => addLog('CAT: *opens one eye at you*'), 2000);
+</script>
+
+</body>
+</html>
