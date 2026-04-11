@@ -35,6 +35,29 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Sh
 .hud-label{font-size:8px;color:#006633;letter-spacing:3px}
 .hud-value{font-family:'VT323',monospace;font-size:22px;color:var(--green);text-shadow:0 0 8px var(--green-dim);line-height:1}
 .hud-right{text-align:right}
+
+  /* Inside HUD Return Button */
+#hud-return {
+  position: fixed;
+  bottom: 18px;
+  left: 18px;
+  z-index: 10; /* Above the tap-zone */
+  font-size: 9px;
+  color: var(--green-dim);
+  letter-spacing: 2px;
+  cursor: pointer;
+  pointer-events: all; /* CRITICAL: Allows clicking through the HUD */
+  text-decoration: none;
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  padding: 4px 8px;
+  background: rgba(0, 8, 3, 0.6);
+}
+#hud-return:active {
+  color: var(--green);
+  border-color: var(--green);
+  background: var(--green-faint);
+}
+
 #compass-wrap{position:fixed;z-index:6;left:50%;transform:translateX(-50%);pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:3px}
 #compass-label{font-size:8px;color:#006633;letter-spacing:3px;text-align:center}
 #hud-bottom{position:fixed;bottom:0;left:0;right:0;z-index:6;padding:10px 18px 32px;pointer-events:none}
@@ -93,13 +116,17 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Sh
   <div class="boot-sub">MAXIMUM REALITY // BUREAU FIELD DIVISION</div>
 </div>
 
+  
+
 <div id="app">
   <video id="video-bg" autoplay playsinline muted></video>
   <canvas id="terminal-canvas"></canvas>
   <canvas id="ring-canvas"></canvas>
   <div id="scanlines"></div>
   <canvas id="video-canvas" style="display:none"></canvas>
-
+ <div id="hud-return" onclick="window.location.href='Portal.html'">◀ EXIT LENS</div>
+  
+  <div id="tap-zone" onclick="onTap(event)"></div>
   <div id="hud-top">
     <div class="hud-block">
       <div class="hud-label">HEADING</div>
@@ -209,6 +236,7 @@ async function initLens(){
     checkSystemStatus();
     addLog('BUREAU LENS ACTIVE','var(--green)');
     addLog('TAP SCREEN TO SCAN OBJECTS','#006633');
+    addLog('EXIT PROTOCOL: LOADED', '#004422');
   }catch(e){
     btn.textContent='ERROR -- RETRY';btn.disabled=false;
     console.error(e);
