@@ -181,11 +181,25 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   </div>
   <div id="hud-bottom">
     <button id="vision-toggle" onclick="toggleVision()" 
-        style="pointer-events:all; background:transparent; border:1px solid var(--green); 
-               color:var(--green); font-size:9px; padding:4px 10px; margin-bottom:10px; 
-               letter-spacing:2px; font-family:'Orbitron', sans-serif;">
-  MODE: OPTICAL
-</button>
+            style="pointer-events:all; background:transparent; border:1px solid var(--green); 
+                   color:var(--green); font-size:9px; padding:6px 12px; margin-bottom:10px; 
+                   letter-spacing:2px; font-family:'Orbitron', sans-serif; cursor:pointer;">
+      MODE: OPTICAL
+    </button>
+
+    <div id="status-bar">
+      <span id="stat-left">BUREAU LENS ACTIVE</span>
+      <span id="stat-right"></span>
+    </div>
+
+    <div id="scan-log"></div>
+
+    <div id="portal-return" onclick="window.location.href='https://maximumreality.github.io/living/Portal.html'" 
+         style="pointer-events:all; cursor:pointer; color:var(--green-dim); font-size:9px; margin-top:14px; letter-spacing:2px;">
+      ◀ RETURN TO BUREAU PORTAL
+    </div>
+</div>
+
 
     <div id="status-bar"><span id="stat-left">BUREAU LENS ACTIVE</span><span id="stat-right"></span></div>
     <div id="scan-log"></div>
