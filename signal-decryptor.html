@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>BUREAU OF REALITY // SIGNAL DECRYPTOR</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Orbitron:wght@400;700;900&display=swap');
+
+  :root {
+    --green: #00ff88;
+    --green-dim: #00ff8855;
+    --green-faint: #00ff8818;
+    --red: #ff2244;
+    --cyan: #00ffff;
+    --orange: #ff8800;
+    --purple: #cc00ff;
+    --bg: #000a04;
+    --terminal: #001208;
+    --scan: rgba(0,255,136,0.03);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--green);
+    user-select: none;
+  }
+
+  /* ── BOOT SCREEN ─────────────────────────────────────────── */
+  #boot {
+    position: fixed; inset: 0; z-index: 9999;
+    background: #000;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 24px;
+    padding: 40px;
+  }
+
+  .boot-logo {
+    font-family: 'VT323', monospace;
+    font-size: clamp(28px, 8vw, 48px);
+    color: var(--green);
+    text-align: center;
+    line-height: 1.2;
+    text-shadow: 0 0 20px var(--green), 0 0 40px var(--green-dim);
+    letter-spacing: 4px;
+  }
+
+  .boot-sub {
+    font-size: 11px;
+    color: #006633;
+    letter-spacing: 3px;
+    text-align: center;
+  }
+
+  .boot-divider {
+    width: 80%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+  }
+
+  .boot-warnings {
+    font-size: 10px;
+    color: #004422;
+    text-align: left;
+    width: 100%;
+    line-height: 1.8;
+  }
+
+  .boot-warnings span { color: var(--green); }
+
+  #boot-btn {
+    margin-top: 10px;
+    padding: 16px 32px;
+    background: transparent;
+    border: 1px solid var(--green);
+    color: var(--green);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s;
+    box-shadow: 0 0 20px var(--green-dim), inset 0 0 20px var(--green-faint);
+  }
+
+  #boot-btn:active {
+    background: var(--green);
+    color: #000;
+    box-shadow: 0 0 40px var(--green);
+  }
+
+  #boot-btn::before {
+    content: '';
+    position: absolute; top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: linear-gradient(45deg, transparent 40%, rgba(0,255,136,0.1) 50%, transparent 60%);
+    animation: bootShine 3s infinite;
+  }
+
+  @keyframes bootShine {
+    0% { transform: translateX(-100%) translateY(-100%); }
+    100% { transform: translateX(100%) translateY(100%); }
+  }
+
+  /* ── MAIN APP ─────────────────────────────────────────────── */
+  #app {
+    display: none;
+    position: fixed; inset: 0;
+    flex-direction: column;
+  }
+
+  /* ── VIDEO BACKGROUND ─────────────────────────────────────── */
+  #video-bg {
+    position: fixed; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    filter: saturate(0.7) brightness(0.5);
+  }
+
+  /* ── GLITCH OVERLAY (scanlines + blend) ───────────────────── */
+  #glitch-overlay {
+    position: fixed; inset: 0; z-index: 1;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.15) 2px,
+      rgba(0,0,0,0.15) 4px
+    );
+    mix-blend-mode: multiply;
+    pointer-events: none;
+  }
+
+  #color-overlay {
+    position: fixed; inset: 0; z-index: 2;
+    background: rgba(0,20,10,0.45);
+    mix-blend-mode: multiply;
+    pointer-events: none;
+  }
+
+  /* ── TERMINAL RAIN (outside viewfinder) ───────────────────── */
+  #terminal-canvas {
+    position: fixed; inset: 0; z-index: 3;
+    pointer-events: none;
+  }
+
+  /* ── VIEWFINDER MASK ──────────────────────────────────────── */
+  #viewfinder-wrap {
+    position: fixed; inset: 0; z-index: 4;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+
+  /* The mask: a radial gradient that punches a "raw" circle in center */
+  #vf-mask {
+    position: fixed; inset: 0;
+    background: radial-gradient(
+      circle var(--vf-r) at 50% var(--vf-cy),
+      transparent 0%,
+      transparent calc(var(--vf-r) - 2px),
+      rgba(0,255,136,0.5) calc(var(--vf-r) - 2px),
+      rgba(0,255,136,0.5) calc(var(--vf-r) + 1px),
+      rgba(0,12,5,0.92) calc(var(--vf-r) + 1px)
+    );
+    z-index: 4;
+    pointer-events: none;
+    transition: --vf-r 0.3s;
+  }
+
+  /* ── VIEWFINDER RING UI ───────────────────────────────────── */
+  .vf-ring {
+    position: fixed;
+    border-radius: 50%;
+    z-index: 5;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    left: 50%;
+  }
+
+  #vf-ring-outer {
+    border: 1px solid rgba(0,255,136,0.3);
+    animation: ringPulse 4s ease-in-out infinite;
+  }
+
+  #vf-ring-inner {
+    border: 1px solid rgba(0,255,136,0.15);
+    animation: ringPulse 4s ease-in-out infinite reverse;
+  }
+
+  #vf-crosshair {
+    position: fixed;
+    z-index: 5;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    left: 50%;
+  }
+
+  #vf-crosshair::before, #vf-crosshair::after {
+    content: '';
+    position: absolute;
+    background: rgba(0,255,136,0.5);
+  }
+
+  #vf-crosshair::before {
+    width: 1px; height: 20px;
+    left: 50%; top: 50%;
+    transform: translate(-50%,-50%);
+  }
+
+  #vf-crosshair::after {
+    width: 20px; height: 1px;
+    left: 50%; top: 50%;
+    transform: translate(-50%,-50%);
+  }
+
+  @keyframes ringPulse {
+    0%, 100% { opacity: 0.4; transform: translate(-50%,-50%) scale(1); }
+    50% { opacity: 0.9; transform: translate(-50%,-50%) scale(1.03); }
+  }
+
+  @keyframes ringAlert {
+    0%, 100% { opacity: 1; border-color: var(--red); box-shadow: 0 0 30px var(--red); }
+    50% { opacity: 0.5; }
+  }
+
+  @keyframes ringLocked {
+    0%, 100% { border-color: var(--cyan); box-shadow: 0 0 40px var(--cyan); opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  /* ── CORNER BRACKETS ──────────────────────────────────────── */
+  .corner {
+    position: fixed; z-index: 5;
+    width: 20px; height: 20px;
+    pointer-events: none;
+  }
+
+  .corner::before, .corner::after {
+    content: '';
+    position: absolute;
+    background: var(--green);
+    opacity: 0.6;
+  }
+
+  .corner::before { width: 100%; height: 1px; top: 0; left: 0; }
+  .corner::after  { width: 1px; height: 100%; top: 0; left: 0; }
+
+  #c-tl { top: 16px; left: 16px; }
+  #c-tr { top: 16px; right: 16px; transform: scaleX(-1); }
+  #c-bl { bottom: 16px; left: 16px; transform: scaleY(-1); }
+  #c-br { bottom: 16px; right: 16px; transform: scale(-1); }
+
+  /* ── HUD TOP ──────────────────────────────────────────────── */
+  #hud-top {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 6;
+    padding: 20px 20px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    pointer-events: none;
+  }
+
+  .hud-block { display: flex; flex-direction: column; gap: 4px; }
+
+  .hud-label {
+    font-size: 8px;
+    color: #006633;
+    letter-spacing: 3px;
+  }
+
+  .hud-value {
+    font-family: 'VT323', monospace;
+    font-size: 22px;
+    color: var(--green);
+    text-shadow: 0 0 10px var(--green-dim);
+    line-height: 1;
+  }
+
+  .hud-right { text-align: right; }
+
+  /* ── COMPASS ARC ──────────────────────────────────────────── */
+  #compass-wrap {
+    position: fixed; z-index: 6;
+    left: 50%; transform: translateX(-50%);
+    pointer-events: none;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 4px;
+  }
+
+  #compass-svg { display: block; }
+
+  #compass-label {
+    font-size: 9px;
+    color: #006633;
+    letter-spacing: 3px;
+    text-align: center;
+  }
+
+  /* ── HUD BOTTOM ───────────────────────────────────────────── */
+  #hud-bottom {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    z-index: 6;
+    padding: 12px 20px 36px;
+    pointer-events: none;
+  }
+
+  #status-bar {
+    font-size: 10px;
+    color: #006633;
+    letter-spacing: 2px;
+    display: flex; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  /* ── SCAN LOG ─────────────────────────────────────────────── */
+  #scan-log {
+    height: 56px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 2px;
+  }
+
+  .log-entry {
+    font-size: 9px;
+    letter-spacing: 1px;
+    line-height: 1.4;
+    opacity: 0;
+    transform: translateY(4px);
+    animation: logIn 0.3s forwards;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @keyframes logIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── TAP ZONE ─────────────────────────────────────────────── */
+  #tap-zone {
+    position: fixed; inset: 0; z-index: 7;
+    cursor: crosshair;
+  }
+
+  /* ── SIGNAL LOCK PANEL ────────────────────────────────────── */
+  #lock-panel {
+    position: fixed;
+    left: 50%; transform: translateX(-50%);
+    z-index: 8;
+    width: calc(100% - 40px);
+    max-width: 380px;
+    background: rgba(0,8,3,0.95);
+    border: 1px solid var(--green);
+    padding: 20px;
+    display: none;
+    box-shadow: 0 0 40px var(--green-dim), inset 0 0 40px rgba(0,255,136,0.03);
+  }
+
+  #lock-panel.active { display: block; }
+
+  #lock-header {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--green);
+    margin-bottom: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  #lock-level {
+    font-size: 9px;
+    color: var(--orange);
+    letter-spacing: 2px;
+  }
+
+  #lock-msg {
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    color: var(--green);
+    line-height: 1.4;
+    min-height: 60px;
+    text-shadow: 0 0 8px var(--green-dim);
+  }
+
+  #lock-dismiss {
+    margin-top: 16px;
+    font-size: 9px;
+    color: #006633;
+    letter-spacing: 3px;
+    text-align: center;
+    cursor: pointer;
+    pointer-events: all;
+    animation: blinkDim 1.5s step-end infinite;
+  }
+
+  @keyframes blinkDim {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 0.2; }
+  }
+
+  /* ── AZUL SPRITE ──────────────────────────────────────────── */
+  #azul-sprite {
+    position: fixed;
+    z-index: 7;
+    pointer-events: none;
+    display: none;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 0 8px var(--cyan)) drop-shadow(0 0 20px var(--cyan));
+    animation: spriteFloat 2s ease-in-out infinite, spriteIn 0.6s ease-out forwards;
+  }
+
+  @keyframes spriteFloat {
+    0%, 100% { transform: translateY(0) translateX(-50%); }
+    50% { transform: translateY(-12px) translateX(-50%); }
+  }
+
+  @keyframes spriteIn {
+    0% { opacity: 0; transform: scale(0.3) translateX(-50%); filter: drop-shadow(0 0 40px var(--cyan)) brightness(3); }
+    100% { opacity: 1; }
+  }
+
+  /* ── GLITCH FLICKER ───────────────────────────────────────── */
+  #glitch-frame {
+    position: fixed; inset: 0; z-index: 9;
+    pointer-events: none;
+    display: none;
+    background: rgba(0,255,136,0.04);
+    animation: glitchFlicker 0.15s step-end 4;
+  }
+
+  @keyframes glitchFlicker {
+    0%   { opacity: 1; clip-path: inset(10% 0 85% 0); background: rgba(0,255,136,0.08); }
+    25%  { opacity: 0; }
+    50%  { opacity: 1; clip-path: inset(60% 0 5% 0); background: rgba(255,0,50,0.06); }
+    75%  { opacity: 0; }
+    100% { opacity: 1; clip-path: inset(40% 0 40% 0); }
+  }
+
+  /* ── COMPASS SEEK INDICATOR ───────────────────────────────── */
+  #seek-ring {
+    position: fixed; border-radius: 50%;
+    z-index: 5;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    border: 2px dashed var(--orange);
+    opacity: 0;
+    display: none;
+    animation: seekPulse 0.8s ease-in-out infinite;
+  }
+
+  @keyframes seekPulse {
+    0%, 100% { opacity: 0.8; transform: translate(-50%,-50%) scale(1); }
+    50% { opacity: 0.3; transform: translate(-50%,-50%) scale(1.06); }
+  }
+
+  /* ── ANOMALY BURST ────────────────────────────────────────── */
+  .burst {
+    position: fixed; border-radius: 50%;
+    pointer-events: none; z-index: 6;
+    transform: translate(-50%, -50%);
+    animation: burstOut 0.6s ease-out forwards;
+  }
+
+  @keyframes burstOut {
+    0%   { width: 0; height: 0; opacity: 0.8; }
+    100% { width: 120px; height: 120px; opacity: 0; }
+  }
+
+  /* ── BATTERY/NETWORK ALERT ────────────────────────────────── */
+  #sys-alert {
+    position: fixed; top: 80px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 8;
+    font-size: 9px;
+    color: var(--orange);
+    letter-spacing: 2px;
+    background: rgba(0,0,0,0.8);
+    border: 1px solid var(--orange);
+    padding: 6px 14px;
+    display: none;
+    white-space: nowrap;
+    animation: sysFade 4s forwards;
+  }
+
+  @keyframes sysFade {
+    0%, 70% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* ── SEQUENCE TRACKER ─────────────────────────────────────── */
+  #seq-track {
+    position: fixed; z-index: 6;
+    right: 20px;
+    display: flex; flex-direction: column; gap: 6px;
+    pointer-events: none;
+  }
+
+  .seq-pip {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    border: 1px solid #006633;
+    transition: all 0.3s;
+  }
+
+  .seq-pip.done { background: var(--green); border-color: var(--green); box-shadow: 0 0 8px var(--green); }
+  .seq-pip.active { background: var(--orange); border-color: var(--orange); box-shadow: 0 0 8px var(--orange); animation: seekPulse 0.6s infinite; }
+
+  /* ── GHOST SIGNAL ─────────────────────────────────────────── */
+  #ghost-signal {
+    position: fixed; z-index: 8;
+    left: 50%; transform: translateX(-50%);
+    font-family: 'VT323', monospace;
+    font-size: 20px;
+    color: var(--purple);
+    letter-spacing: 2px;
+    text-shadow: 0 0 20px var(--purple);
+    pointer-events: none;
+    display: none;
+    animation: ghostFade 3s forwards;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  @keyframes ghostFade {
+    0%   { opacity: 0; }
+    10%  { opacity: 1; }
+    70%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ BOOT SCREEN ══════════════════════════════════════════ -->
+<div id="boot">
+  <div class="boot-logo">
+    BUREAU OF REALITY<br>
+    ░░ SIGNAL DECRYPTOR ░░<br>
+    <span style="font-size:0.5em;color:#006633">FIELD UNIT v3.7 // CLASSIFIED</span>
+  </div>
+  <div class="boot-divider"></div>
+  <div class="boot-warnings">
+    <span>SYS:</span> Loading perception filters...<br>
+    <span>SYS:</span> Calibrating reality index...<br>
+    <span>WARN:</span> Simulation anomalies detected in local sector<br>
+    <span>WARN:</span> Do not share Bureau materials with uncleared citizens<br>
+    <span>AUTH:</span> Field Agent clearance required<br>
+    <span>NOTE:</span> This device will require camera + motion access
+  </div>
+  <div class="boot-divider"></div>
+  <button id="boot-btn" onclick="initLens()">⬡ INITIALIZE BUREAU LENS ⬡</button>
+  <div class="boot-sub">MAXIMUM REALITY // BUREAU OF REALITY FIELD DIVISION</div>
+</div>
+
+<!-- ══ MAIN APP ══════════════════════════════════════════════ -->
+<div id="app">
+  <video id="video-bg" autoplay playsinline muted></video>
+  <canvas id="video-canvas" style="display:none"></canvas>
+  <div id="glitch-overlay"></div>
+  <div id="color-overlay"></div>
+  <canvas id="terminal-canvas"></canvas>
+  <div id="vf-mask"></div>
+
+  <!-- Viewfinder rings -->
+  <div class="vf-ring" id="vf-ring-outer"></div>
+  <div class="vf-ring" id="vf-ring-inner"></div>
+  <div id="vf-crosshair"></div>
+  <div id="seek-ring"></div>
+
+  <!-- Corners -->
+  <div class="corner" id="c-tl"></div>
+  <div class="corner" id="c-tr"></div>
+  <div class="corner" id="c-bl"></div>
+  <div class="corner" id="c-br"></div>
+
+  <!-- HUD Top -->
+  <div id="hud-top">
+    <div class="hud-block">
+      <div class="hud-label">HEADING</div>
+      <div class="hud-value" id="hud-heading">---°</div>
+      <div class="hud-label" id="hud-dir">SCANNING</div>
+    </div>
+    <div class="hud-block" style="align-items:center">
+      <div class="hud-label">ANOMALY LVL</div>
+      <div class="hud-value" id="hud-level" style="text-align:center">01</div>
+    </div>
+    <div class="hud-block hud-right">
+      <div class="hud-label">SIGNAL</div>
+      <div class="hud-value" id="hud-signal">0%</div>
+      <div class="hud-label" id="hud-mode">STANDBY</div>
+    </div>
+  </div>
+
+  <!-- Compass arc -->
+  <div id="compass-wrap">
+    <svg id="compass-svg" width="200" height="40" viewBox="0 0 200 40">
+      <defs>
+        <linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:transparent"/>
+          <stop offset="30%" style="stop-color:#00ff88;stop-opacity:0.5"/>
+          <stop offset="50%" style="stop-color:#00ff88"/>
+          <stop offset="70%" style="stop-color:#00ff88;stop-opacity:0.5"/>
+          <stop offset="100%" style="stop-color:transparent"/>
+        </linearGradient>
+      </defs>
+      <text id="compass-text" x="100" y="16" fill="#00ff88" font-family="Share Tech Mono" font-size="11"
+        text-anchor="middle" letter-spacing="4" opacity="0.7">N    NE    E    SE    S</text>
+      <line x1="100" y1="20" x2="100" y2="32" stroke="#00ff88" stroke-width="2" opacity="0.8"/>
+      <line x1="80" y1="24" x2="120" y2="24" stroke="url(#arcGrad)" stroke-width="1"/>
+    </svg>
+    <div id="compass-label">ORIENTATION SENSOR</div>
+  </div>
+
+  <!-- Sequence pips -->
+  <div id="seq-track"></div>
+
+  <!-- Azul sprite (drawn on canvas) -->
+  <canvas id="azul-sprite"></canvas>
+
+  <!-- Glitch frame -->
+  <div id="glitch-frame"></div>
+
+  <!-- Ghost signal text -->
+  <div id="ghost-signal"></div>
+
+  <!-- System alert -->
+  <div id="sys-alert"></div>
+
+  <!-- Lock panel -->
+  <div id="lock-panel">
+    <div id="lock-header">
+      <span>▶ SIGNAL LOCKED</span>
+      <span id="lock-level">THREAT: LVL 01</span>
+    </div>
+    <div id="lock-msg"></div>
+    <div id="lock-dismiss" onclick="dismissLock()">[ TAP TO ACKNOWLEDGE ]</div>
+  </div>
+
+  <!-- HUD Bottom -->
+  <div id="hud-bottom">
+    <div id="status-bar">
+      <span id="stat-left">BUREAU LENS ACTIVE</span>
+      <span id="stat-right" id="stat-time"></span>
+    </div>
+    <div id="scan-log"></div>
+  </div>
+
+  <!-- Tap zone -->
+  <div id="tap-zone" onclick="onTap(event)"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+const state = {
+  heading: 0,
+  targetHeading: null,
+  signalStrength: 0,
+  anomalyLevel: 1,
+  locked: false,
+  colorSeq: [],           // Colors found in sequence
+  seqGoal: ['RED','BLUE','GREEN'], // Find all three for Level 4
+  seqDone: 0,
+  compassGranted: false,
+  lastColor: null,
+  scanCount: 0,
+  ghostTimer: null
+};
+
+// ═══════════════════════════════════════════════════════════
+//  LORE MESSAGES
+// ═══════════════════════════════════════════════════════════
+const lore = {
+  RED: [
+    "DANGER: RED-SHIFT ANOMALY DETECTED. The object you see is a Level {L} simulation error. Do not touch. Proceed to the nearest shredder.",
+    "ALERT: CRIMSON BREACH. Bureau analysts confirm this object should not exist in Sector 7G. Report immediately.",
+    "WARNING: RED SIGNATURE. This is a remnant from Timeline 3. It bleeds entropy into your local reality matrix."
+  ],
+  BLUE: [
+    "AZUL QUANTUM SIGNATURE FOUND. Entity trace detected. Azul was here. The hairless one watches from the void.",
+    "CYAN RESONANCE: Bureau frequency match 99.7%. This object vibrates at the same frequency as the quantum field. Do not look directly.",
+    "BLUE-PHASE LOCK. You have found a Bureau-issued reality anchor. It prevents local simulation collapse. Step away slowly."
+  ],
+  GREEN: [
+    "SIGNAL ECHO: Green-spectrum Bureau transmission encoded in this surface. The Maximum Reality bleeds through.",
+    "ORGANIC BANDWIDTH DETECTED. This object is routing consciousness data. The Bureau says thank you for your compliance.",
+    "VOID-BLOOM RESIDUE. Green phosphorescence indicates recent entity passage. Azul or Mochkil. Possibly both."
+  ],
+  YELLOW: [
+    "CAUTION: AMBER PROTOCOL. This object is under Bureau surveillance. You are being watched watching it.",
+    "SIGNAL NOISE: Yellow-band interference. Someone in a parallel timeline is looking at the same object right now.",
+  ],
+  NEUTRAL: [
+    "BACKGROUND RADIATION: No anomaly detected. Or the anomaly is hiding. It knows you're looking.",
+    "SCAN COMPLETE: Object appears nominal. Bureau records show 3,847 identical objects in this zip code. Suspicious.",
+    "LOW SIGNAL: Reality index within acceptable parameters. For now."
+  ],
+  compass: [
+    "DIRECTIVE: Turn to {H}° to intercept a Bureau transmission embedded in the local magnetic field.",
+    "SIGNAL SOURCE TRIANGULATED at bearing {H}°. Physical orientation required to decode. Turn, citizen.",
+    "VOID-BEACON active at heading {H}°. Face the signal to decrypt entity message."
+  ],
+  compassLock: [
+    "TRANSMISSION DECRYPTED. You faced the void and it blinked first. Azul acknowledges your compliance.",
+    "HEADING CONFIRMED. Bureau Field Agent {H}° clearance granted. The simulation logged this moment.",
+    "SIGNAL INTERCEPTED at {H}°. The message: There is no message. There is only the Bureau. There is only Maximum Reality."
+  ],
+  ghost: [
+    "ANOMALY AT {H}° — RESOLVING…",
+    "PHANTOM SIGNAL // TRACE LOST",
+    "ENTITY DETECTED // SIGNAL DEGRADED",
+    "VOID BREACH AT {H}° — CLOSING…",
+    "CLASSIFIED // REDACTED // PROCEED"
+  ]
+};
+
+function getLore(key, lvl, heading) {
+  const arr = lore[key] || lore.NEUTRAL;
+  let msg = arr[Math.floor(Math.random() * arr.length)];
+  msg = msg.replace('{L}', lvl).replace('{H}', Math.round(heading || state.heading));
+  return msg;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  BOOT / INIT
+// ═══════════════════════════════════════════════════════════
+async function initLens() {
+  const btn = document.getElementById('boot-btn');
+  btn.textContent = '⬡ INITIALIZING... ⬡';
+  btn.disabled = true;
+
+  try {
+    // Camera
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
+    document.getElementById('video-bg').srcObject = stream;
+
+    // Compass (iOS requires permission)
+    await requestOrientation();
+
+    // System checks
+    checkSystemStatus();
+
+    // Show app
+    document.getElementById('boot').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+
+    // Init
+    setupViewfinder();
+    startTerminalRain();
+    startCompassTick();
+    startGhostSignals();
+    startStatusTick();
+    buildSeqPips();
+    setTarget();
+    addLog('▶ BUREAU LENS ACTIVE', 'var(--green)');
+    addLog('▶ TAP SCREEN TO SCAN OBJECTS', '#006633');
+
+    // Battery check
+    checkBattery();
+
+  } catch(e) {
+    btn.textContent = '⬡ ERROR — RETRY ⬡';
+    btn.disabled = false;
+    addLog('ERROR: ' + e.message, 'var(--red)');
+  }
+}
+
+async function requestOrientation() {
+  return new Promise((resolve) => {
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission()
+        .then(resp => {
+          if (resp === 'granted') {
+            window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+            window.addEventListener('deviceorientation', handleOrientation, true);
+            state.compassGranted = true;
+          }
+          resolve();
+        }).catch(() => resolve());
+    } else {
+      window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+      window.addEventListener('deviceorientation', handleOrientation, true);
+      state.compassGranted = true;
+      resolve();
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+//  VIEWFINDER SIZING
+// ═══════════════════════════════════════════════════════════
+function setupViewfinder() {
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  const r = Math.min(W, H) * 0.36;
+  const cy = H * 0.44;
+
+  document.documentElement.style.setProperty('--vf-r', r + 'px');
+  document.documentElement.style.setProperty('--vf-cy', cy + 'px');
+
+  const rings = [
+    { id: 'vf-ring-outer', size: r * 2 + 24 },
+    { id: 'vf-ring-inner', size: r * 2 - 24 }
+  ];
+  rings.forEach(({ id, size }) => {
+    const el = document.getElementById(id);
+    el.style.width = size + 'px';
+    el.style.height = size + 'px';
+    el.style.top = cy + 'px';
+  });
+
+  const ch = document.getElementById('vf-crosshair');
+  ch.style.top = cy + 'px';
+  ch.style.width = '20px';
+  ch.style.height = '20px';
+
+  const seek = document.getElementById('seek-ring');
+  seek.style.width = (r * 2 + 60) + 'px';
+  seek.style.height = (r * 2 + 60) + 'px';
+  seek.style.top = cy + 'px';
+
+  // Compass position
+  document.getElementById('compass-wrap').style.top = (cy - r - 60) + 'px';
+  // Seq pips
+  document.getElementById('seq-track').style.top = (cy - 60) + 'px';
+  // Lock panel position
+  document.getElementById('lock-panel').style.top = (cy + r + 20) + 'px';
+  // Ghost signal
+  document.getElementById('ghost-signal').style.top = (cy - r - 90) + 'px';
+  // Azul sprite
+  const az = document.getElementById('azul-sprite');
+  az.style.left = '50%';
+  az.style.top = (cy - r * 0.6) + 'px';
+
+  // Store for tap sampling
+  state.vfCx = W / 2;
+  state.vfCy = cy;
+  state.vfR = r;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TERMINAL RAIN
+// ═══════════════════════════════════════════════════════════
+const RAIN_WORDS = ['REDACT','VOID','PROTOCOL','CITIZEN','BUREAU','SIGNAL','ANOMALY',
+  'DECRYPT','MAXIMUM','REALITY','CLASSIFIED','AZUL','MOCHKIL','ENTITY',
+  'BREACH','SECTOR','DELTA','OMEGA','DIRECTIVE','COMPLY','OBSERVE','REDSHIFT',
+  'QUANTUM','SIMULATION','COLLAPSE','ANCHOR','TIMELINE','EXTRACT','FIELD'];
+
+let rainCtx, rainCols, rainDrops;
+function startTerminalRain() {
+  const canvas = document.getElementById('terminal-canvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  rainCtx = canvas.getContext('2d');
+  const colW = 14;
+  rainCols = Math.floor(canvas.width / colW);
+  rainDrops = Array.from({ length: rainCols }, () => Math.random() * -canvas.height);
+  setInterval(drawRain, 80);
+}
+
+function drawRain() {
+  const canvas = document.getElementById('terminal-canvas');
+  const W = canvas.width, H = canvas.height;
+  const cx = state.vfCx, cy = state.vfCy, r = state.vfR;
+
+  rainCtx.fillStyle = 'rgba(0,10,4,0.18)';
+  rainCtx.fillRect(0, 0, W, H);
+
+  rainCtx.font = '12px Share Tech Mono';
+  const colW = 14;
+
+  for (let i = 0; i < rainCols; i++) {
+    const x = i * colW + 7;
+    const y = rainDrops[i];
+    // Mask: skip if inside viewfinder circle
+    const dx = x - cx, dy = y - cy;
+    if (dx * dx + dy * dy < r * r * 1.1) { rainDrops[i] += 14; continue; }
+
+    const word = RAIN_WORDS[Math.floor(Math.random() * RAIN_WORDS.length)];
+    const ch = word[Math.floor(Math.random() * word.length)];
+
+    // Head glow
+    rainCtx.fillStyle = '#aaffcc';
+    rainCtx.fillText(ch, x, y);
+
+    // Trail
+    const trail = RAIN_WORDS[Math.floor(Math.random() * RAIN_WORDS.length)][0];
+    rainCtx.fillStyle = 'rgba(0,255,136,0.25)';
+    rainCtx.fillText(trail, x, y - 14);
+
+    rainDrops[i] += 14;
+    if (rainDrops[i] > H + 20) rainDrops[i] = Math.random() * -200;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  ORIENTATION / COMPASS
+// ═══════════════════════════════════════════════════════════
+function handleOrientation(e) {
+  let heading = 0;
+  if (e.webkitCompassHeading !== undefined) {
+    heading = e.webkitCompassHeading; // iOS
+  } else if (e.alpha !== null) {
+    heading = 360 - e.alpha; // Android
+  }
+  state.heading = heading;
+}
+
+const DIRS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+function headingToDir(h) { return DIRS[Math.round(h / 22.5) % 16]; }
+
+function startCompassTick() {
+  setInterval(() => {
+    const h = Math.round(state.heading);
+    document.getElementById('hud-heading').textContent = h + '°';
+    document.getElementById('hud-dir').textContent = headingToDir(h);
+    updateCompassArc(h);
+
+    if (state.targetHeading !== null && !state.locked) {
+      const diff = Math.abs(((h - state.targetHeading) + 360) % 360);
+      const delta = Math.min(diff, 360 - diff);
+      const sig = Math.max(0, 100 - delta * 2);
+      state.signalStrength = sig;
+      document.getElementById('hud-signal').textContent = Math.round(sig) + '%';
+
+      if (sig > 60) {
+        document.getElementById('seek-ring').style.display = 'block';
+        document.getElementById('hud-mode').textContent = 'SEEKING';
+        document.getElementById('hud-signal').style.color = 'var(--orange)';
+      } else {
+        document.getElementById('seek-ring').style.display = 'none';
+        document.getElementById('hud-mode').textContent = 'SCANNING';
+        document.getElementById('hud-signal').style.color = 'var(--green)';
+      }
+
+      if (delta < 8 && !state.locked) {
+        compassLock();
+      }
+    }
+  }, 200);
+}
+
+function updateCompassArc(h) {
+  // Scroll the compass text to show current heading region
+  const labels = ['N','NE','E','SE','S','SW','W','NW','N'];
+  const idx = Math.floor(((h + 22) % 360) / 45);
+  const slice = labels.slice(idx, idx + 5).join('    ');
+  document.getElementById('compass-text').textContent = slice;
+}
+
+function setTarget() {
+  state.targetHeading = Math.floor(Math.random() * 360);
+  state.locked = false;
+  document.getElementById('hud-signal').style.color = 'var(--green)';
+  document.getElementById('hud-mode').textContent = 'SCANNING';
+  const msg = getLore('compass', state.anomalyLevel, state.targetHeading);
+  addLog('◈ ' + msg, 'var(--orange)');
+}
+
+function compassLock() {
+  state.locked = true;
+  document.getElementById('seek-ring').style.display = 'none';
+  document.getElementById('hud-signal').textContent = '100%';
+  document.getElementById('hud-mode').textContent = 'LOCKED';
+  document.getElementById('hud-signal').style.color = 'var(--cyan)';
+
+  // Ring color change
+  const ro = document.getElementById('vf-ring-outer');
+  ro.style.animation = 'ringLocked 0.8s ease-in-out 3';
+
+  triggerGlitch();
+  showAzul();
+  const msg = getLore('compassLock', state.anomalyLevel, state.targetHeading);
+  showLockPanel(msg, 'COMPASS LOCK');
+  addLog('✓ HEADING LOCKED: ' + Math.round(state.targetHeading) + '°', 'var(--cyan)');
+  state.anomalyLevel = Math.min(9, state.anomalyLevel + 1);
+  document.getElementById('hud-level').textContent = String(state.anomalyLevel).padStart(2, '0');
+
+  setTimeout(() => {
+    ro.style.animation = 'ringPulse 4s ease-in-out infinite';
+    // New target after delay
+    setTimeout(setTarget, 6000);
+  }, 3000);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  COLOR DETECTION (tap)
+// ═══════════════════════════════════════════════════════════
+function onTap(e) {
+  if (state.locked) return;
+  const x = e.clientX || e.touches?.[0]?.clientX || state.vfCx;
+  const y = e.clientY || e.touches?.[0]?.clientY || state.vfCy;
+
+  // Burst effect
+  spawnBurst(x, y);
+
+  // Sample from video
+  const video = document.getElementById('video-bg');
+  const canvas = document.getElementById('video-canvas');
+  canvas.width = video.videoWidth || 320;
+  canvas.height = video.videoHeight || 240;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  // Map tap to video coordinates
+  const scaleX = canvas.width / window.innerWidth;
+  const scaleY = canvas.height / window.innerHeight;
+  const px = Math.floor(x * scaleX);
+  const py = Math.floor(y * scaleY);
+  const pixel = ctx.getImageData(
+    Math.min(px, canvas.width - 1),
+    Math.min(py, canvas.height - 1),
+    1, 1
+  ).data;
+
+  const [r, g, b] = pixel;
+  const colorName = classifyColor(r, g, b);
+  state.lastColor = colorName;
+  state.scanCount++;
+
+  // Update sequence
+  checkSequence(colorName);
+
+  const msg = getLore(colorName, state.anomalyLevel);
+  showLockPanel(msg, colorName + ' SIGNATURE');
+
+  const hex = '#' + [r, g, b].map(v => v.toString(16).padStart(2,'0')).join('').toUpperCase();
+  addLog(`⬡ SCAN ${String(state.scanCount).padStart(3,'0')}: ${colorName} [${hex}]`, colorColorOf(colorName));
+
+  triggerGlitch();
+
+  // Ring reaction
+  const ro = document.getElementById('vf-ring-outer');
+  if (colorName === 'RED') {
+    ro.style.animation = 'ringAlert 0.4s step-end 4';
+    setTimeout(() => { ro.style.animation = 'ringPulse 4s ease-in-out infinite'; }, 2000);
+  }
+}
+
+function classifyColor(r, g, b) {
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const sat = max === 0 ? 0 : (max - min) / max;
+
+  if (sat < 0.2) return 'NEUTRAL';
+
+  if (r > g * 1.5 && r > b * 1.5 && r > 100) return 'RED';
+  if (b > r * 1.3 && b > g * 1.1 && b > 80)  return 'BLUE';
+  if (g > r * 1.2 && g > b * 1.5 && g > 80)  return 'GREEN';
+  if (r > 150 && g > 120 && b < 80)           return 'YELLOW';
+  return 'NEUTRAL';
+}
+
+function colorColorOf(name) {
+  return { RED: 'var(--red)', BLUE: 'var(--cyan)', GREEN: 'var(--green)',
+           YELLOW: 'var(--orange)', NEUTRAL: '#006633' }[name] || '#006633';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SEQUENCE PUZZLE
+// ═══════════════════════════════════════════════════════════
+function buildSeqPips() {
+  const track = document.getElementById('seq-track');
+  track.innerHTML = '';
+  state.seqGoal.forEach((_, i) => {
+    const pip = document.createElement('div');
+    pip.className = 'seq-pip' + (i === state.seqDone ? ' active' : '');
+    pip.id = 'pip-' + i;
+    track.appendChild(pip);
+  });
+}
+
+function checkSequence(color) {
+  if (state.seqDone >= state.seqGoal.length) return;
+  if (color === state.seqGoal[state.seqDone]) {
+    document.getElementById('pip-' + state.seqDone).className = 'seq-pip done';
+    state.seqDone++;
+    if (state.seqDone >= state.seqGoal.length) {
+      // LEVEL 4 UNLOCK
+      setTimeout(() => {
+        triggerGlitch();
+        showAzul();
+        showLockPanel(
+          "LEVEL 4 CLEARANCE ACHIEVED. You found all Bureau signatures in sequence. " +
+          "Mochkil and Azul acknowledge your compliance. The Maximum Reality has been updated. " +
+          "CITIZEN: You are now a simulation variable.",
+          'LEVEL 4 BREACH'
+        );
+        addLog('⬛ LEVEL 4 SEQUENCE COMPLETE', 'var(--purple)');
+        state.anomalyLevel = 4;
+        document.getElementById('hud-level').textContent = '04';
+        // Reset sequence after 10s
+        setTimeout(() => {
+          state.seqDone = 0;
+          state.seqGoal = shuffleGoal();
+          buildSeqPips();
+          addLog('▶ NEW SEQUENCE INITIATED', 'var(--orange)');
+        }, 10000);
+      }, 800);
+    } else {
+      const next = state.seqGoal[state.seqDone];
+      addLog(`◈ SEQUENCE ${state.seqDone}/${state.seqGoal.length}: FIND ${next}`, 'var(--orange)');
+    }
+  }
+}
+
+function shuffleGoal() {
+  const pool = ['RED','BLUE','GREEN'];
+  return pool.sort(() => Math.random() - 0.5);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  AZUL SPRITE (pixel art drawn on canvas)
+// ═══════════════════════════════════════════════════════════
+function drawAzulSprite(canvas) {
+  const S = 6; // pixel size
+  const px = [
+    // 16x16 sphynx cat pixel map (0=transparent,1=body,2=eyes,3=ear,4=blush)
+    [0,0,0,3,3,0,0,0,0,0,0,3,3,0,0,0],
+    [0,0,3,1,1,3,0,0,0,0,3,1,1,3,0,0],
+    [0,3,1,1,1,1,3,0,0,3,1,1,1,1,3,0],
+    [0,1,1,1,1,1,1,3,3,1,1,1,1,1,1,0],
+    [0,1,2,1,1,1,2,1,1,2,1,1,1,2,1,0],
+    [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+    [0,1,1,4,1,1,1,1,1,1,1,1,4,1,1,0],
+    [0,0,1,1,1,0,1,1,1,1,0,1,1,1,0,0],
+    [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0],
+    [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
+    [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+    [0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0],
+    [0,1,0,0,1,1,1,1,1,1,1,1,0,0,1,0],
+    [0,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0],
+    [0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  ];
+  canvas.width  = 16 * S;
+  canvas.height = 16 * S;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const colors = {
+    1: '#00ccff',  // body (cyan-tinted hairless)
+    2: '#00ffff',  // eyes
+    3: '#0088aa',  // ears
+    4: '#ff88aa'   // blush
+  };
+
+  px.forEach((row, ry) => {
+    row.forEach((v, cx) => {
+      if (!v) return;
+      ctx.fillStyle = colors[v] || '#fff';
+      ctx.fillRect(cx * S, ry * S, S, S);
+    });
+  });
+}
+
+function showAzul() {
+  const canvas = document.getElementById('azul-sprite');
+  drawAzulSprite(canvas);
+  canvas.style.display = 'block';
+  canvas.style.animation = 'none';
+  void canvas.offsetWidth;
+  canvas.style.animation = 'spriteFloat 2s ease-in-out infinite, spriteIn 0.6s ease-out forwards';
+  setTimeout(() => {
+    canvas.style.display = 'none';
+  }, 5000);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  LOCK PANEL
+// ═══════════════════════════════════════════════════════════
+let typeTimer = null;
+function showLockPanel(msg, header) {
+  const panel = document.getElementById('lock-panel');
+  const msgEl = document.getElementById('lock-msg');
+  document.getElementById('lock-header').children[0].textContent = '▶ ' + header;
+  document.getElementById('lock-level').textContent = 'THREAT: LVL ' + String(state.anomalyLevel).padStart(2,'0');
+  msgEl.textContent = '';
+  panel.classList.add('active');
+
+  if (typeTimer) clearInterval(typeTimer);
+  let i = 0;
+  typeTimer = setInterval(() => {
+    msgEl.textContent += msg[i];
+    i++;
+    if (i >= msg.length) clearInterval(typeTimer);
+  }, 28);
+}
+
+function dismissLock() {
+  document.getElementById('lock-panel').classList.remove('active');
+  document.getElementById('azul-sprite').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  SCAN LOG
+// ═══════════════════════════════════════════════════════════
+function addLog(text, color = 'var(--green)') {
+  const log = document.getElementById('scan-log');
+  const el = document.createElement('div');
+  el.className = 'log-entry';
+  el.style.color = color;
+  el.textContent = '[' + timestamp() + '] ' + text;
+  log.prepend(el);
+  // Keep max 6 entries
+  while (log.children.length > 6) log.removeChild(log.lastChild);
+}
+
+function timestamp() {
+  const d = new Date();
+  return [d.getHours(), d.getMinutes(), d.getSeconds()].map(n => String(n).padStart(2,'0')).join(':');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GLITCH FX
+// ═══════════════════════════════════════════════════════════
+function triggerGlitch() {
+  const g = document.getElementById('glitch-frame');
+  g.style.display = 'block';
+  g.style.animation = 'none';
+  void g.offsetWidth;
+  g.style.animation = 'glitchFlicker 0.15s step-end 4';
+  setTimeout(() => { g.style.display = 'none'; }, 700);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  BURST EFFECT
+// ═══════════════════════════════════════════════════════════
+function spawnBurst(x, y) {
+  const el = document.createElement('div');
+  el.className = 'burst';
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+  el.style.border = '1px solid var(--green)';
+  document.getElementById('app').appendChild(el);
+  setTimeout(() => el.remove(), 700);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GHOST SIGNALS
+// ═══════════════════════════════════════════════════════════
+function startGhostSignals() {
+  function fire() {
+    const h = Math.floor(Math.random() * 360);
+    const msg = lore.ghost[Math.floor(Math.random() * lore.ghost.length)]
+      .replace('{H}', h);
+    const el = document.getElementById('ghost-signal');
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.style.animation = 'none';
+    void el.offsetWidth;
+    el.style.animation = 'ghostFade 3s forwards';
+    addLog('◌ GHOST: ' + msg, 'var(--purple)');
+    setTimeout(() => { el.style.display = 'none'; }, 3100);
+
+    // Schedule next
+    const next = 30000 + Math.random() * 30000;
+    setTimeout(fire, next);
+  }
+  setTimeout(fire, 15000 + Math.random() * 20000);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  STATUS TICK
+// ═══════════════════════════════════════════════════════════
+function startStatusTick() {
+  setInterval(() => {
+    const d = new Date();
+    document.getElementById('stat-right').textContent =
+      [d.getHours(), d.getMinutes(), d.getSeconds()]
+        .map(n => String(n).padStart(2,'0')).join(':') + ' // BUREAU FIELD OPS';
+    const net = navigator.connection;
+    if (net) {
+      document.getElementById('stat-left').textContent =
+        'LINK: ' + (net.effectiveType || '??').toUpperCase() + ' // BUREAU LENS ACTIVE';
+    }
+  }, 1000);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  BATTERY CHECK
+// ═══════════════════════════════════════════════════════════
+async function checkBattery() {
+  try {
+    const batt = await navigator.getBattery();
+    const check = () => {
+      const pct = Math.round(batt.level * 100);
+      if (pct < 20) showSysAlert(`WARNING: HOST DEVICE ${pct}% // BUREAU EXTRACTION IMMINENT`);
+      else if (pct < 50) showSysAlert(`DEVICE POWER: ${pct}% // MAINTAIN FIELD READINESS`);
+    };
+    check();
+    batt.addEventListener('levelchange', check);
+  } catch(e) {}
+}
+
+function checkSystemStatus() {
+  const net = navigator.connection;
+  if (net && net.effectiveType) {
+    const type = net.effectiveType;
+    if (type === '2g' || type === 'slow-2g') {
+      showSysAlert('SIGNAL DEGRADED: BUREAU UPLINK COMPROMISED // LOW BANDWIDTH');
+    } else if (type === '4g' || type === 'wifi') {
+      showSysAlert('SIGNAL OPTIMAL: BUREAU UPLINK ESTABLISHED // ' + type.toUpperCase());
+    }
+  }
+}
+
+function showSysAlert(msg) {
+  const el = document.getElementById('sys-alert');
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.style.animation = 'none';
+  void el.offsetWidth;
+  el.style.animation = 'sysFade 4s forwards';
+  setTimeout(() => { el.style.display = 'none'; }, 4200);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  RESIZE
+// ═══════════════════════════════════════════════════════════
+window.addEventListener('resize', () => {
+  setupViewfinder();
+  const canvas = document.getElementById('terminal-canvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+// Prevent scroll/zoom
+document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+</script>
+</body>
+</html>
