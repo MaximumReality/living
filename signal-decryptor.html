@@ -15,48 +15,105 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Share Tech Mono',monospace;color:var(--green);user-select:none}
-#boot{position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:36px}
-.boot-logo{font-family:'VT323',monospace;font-size:clamp(24px,7vw,42px);color:var(--green);text-align:center;line-height:1.2;text-shadow:0 0 20px var(--green),0 0 40px var(--green-dim);letter-spacing:4px}
-.boot-divider{width:80%;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
+
+/* BOOT */
+/* BOOT CONTAINER: Centers everything and keeps it tight */
+#boot {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px; /* Even spacing between logo, warnings, and button */
+  padding: 20px;
+}
+
+/* LOGO: The "No-Split" Enforcer */
+.boot-logo {
+  font-family: 'VT323', monospace;
+  /* Scales between 20px and 38px based on screen size */
+  font-size: clamp(20px, 7vw, 38px); 
+  color: var(--green);
+  text-align: center;
+  line-height: 1.1;
+  text-shadow: 0 0 20px var(--green), 0 0 40px var(--green-dim);
+  letter-spacing: 2px; /* Tightened slightly so DECRYPTOR stays on the line */
+  white-space: nowrap; /* Forces SIGNAL DECRYPTOR to stay on one line */
+  width: 100%;
+}
+
+/* SUBTITLE / VERSION INFO */
+.boot-logo span {
+  display: block;
+  font-size: 0.45em;
+  color: #006633;
+  letter-spacing: 2px;
+  margin-top: 8px;
+  white-space: normal; /* Allows the small text to wrap if it ever needs to */
+}
+
+.boot-divider{width:80%;height:1px;background:linear-gradient(90deg,transparent,var(–green),transparent)}
 .boot-warnings{font-size:10px;color:#004422;text-align:left;width:100%;line-height:1.9}
-.boot-warnings span{color:var(--green)}
+.boot-warnings span{color:var(–green)}
 .boot-sub{font-size:10px;color:#006633;letter-spacing:3px;text-align:center}
-#boot-btn{padding:16px 28px;background:transparent;border:1px solid var(--green);color:var(--green);font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:4px;cursor:pointer;box-shadow:0 0 20px var(--green-dim),inset 0 0 20px var(--green-faint)}
-#boot-btn:active{background:var(--green);color:#000}
-#portal-return{cursor:pointer;color:var(--green-dim);font-size:9px;margin-top:4px;letter-spacing:2px;text-align:center}
-#portal-return:active{color:var(--green)}
+
+/* TWO BOOT BUTTONS */
+/* TWO BOOT BUTTONS */
+.boot-btn-wrap{display:flex;flex-direction:column;gap:10px;width:100%}
+.boot-btn{
+  width:100%;padding:14px 20px;background:transparent;
+  font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:3px;cursor:pointer;text-align:center;
+  transition:all 0.2s;
+}
+
+#btn-sensors{
+border:1px solid var(–orange);color:var(–orange);
+box-shadow:0 0 16px rgba(255,136,0,0.2),inset 0 0 16px rgba(255,136,0,0.05);
+}
+#btn-sensors:active{background:var(–orange);color:#000}
+#btn-sensors.done{
+border-color:var(–green);color:var(–green);
+box-shadow:0 0 16px var(–green-dim);
+pointer-events:none;
+}
+#btn-camera{
+border:1px solid var(–green);color:var(–green);
+box-shadow:0 0 16px var(–green-dim),inset 0 0 16px var(–green-faint);
+opacity:0.4;pointer-events:none;
+}
+#btn-camera.ready{opacity:1;pointer-events:all}
+#btn-camera:active{background:var(–green);color:#000}
+
+.boot-step{font-size:9px;color:#006633;letter-spacing:2px;text-align:center;min-height:14px}
+#portal-return{cursor:pointer;color:var(–green-dim);font-size:9px;letter-spacing:2px;text-align:center}
+#portal-return:active{color:var(–green)}
+
+/* APP */
 #app{display:none;position:fixed;inset:0;width:100%;height:100%}
 #video-bg{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;display:block;-webkit-transform:translateZ(0);transform:translateZ(0)}
 #terminal-canvas,#ring-canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;pointer-events:none;background:transparent}
 #ring-canvas{z-index:3}
 #scanlines{position:absolute;top:0;left:0;width:100%;height:100%;z-index:4;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.08) 3px,rgba(0,0,0,0.08) 4px)}
+
+/* HUD */
 #hud-top{position:fixed;top:0;left:0;right:0;z-index:6;padding:18px 18px 10px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
 .hud-block{display:flex;flex-direction:column;gap:3px}
 .hud-label{font-size:8px;color:#006633;letter-spacing:3px}
-.hud-value{font-family:'VT323',monospace;font-size:22px;color:var(--green);text-shadow:0 0 8px var(--green-dim);line-height:1}
+.hud-value{font-family:‘VT323’,monospace;font-size:22px;color:var(–green);text-shadow:0 0 8px var(–green-dim);line-height:1}
 .hud-right{text-align:right}
 
-  /* Inside HUD Return Button */
-#hud-return {
-  position: fixed;
-  bottom: 18px;
-  left: 18px;
-  z-index: 10; /* Above the tap-zone */
-  font-size: 9px;
-  color: var(--green-dim);
-  letter-spacing: 2px;
-  cursor: pointer;
-  pointer-events: all; /* CRITICAL: Allows clicking through the HUD */
-  text-decoration: none;
-  border: 1px solid rgba(0, 255, 136, 0.2);
-  padding: 4px 8px;
-  background: rgba(0, 8, 3, 0.6);
+#hud-return{
+position:fixed;bottom:18px;left:18px;z-index:10;
+font-size:9px;color:var(–green-dim);letter-spacing:2px;cursor:pointer;
+pointer-events:all;border:1px solid rgba(0,255,136,0.2);
+padding:4px 8px;background:rgba(0,8,3,0.6);
+font-family:‘Share Tech Mono’,monospace;
 }
-#hud-return:active {
-  color: var(--green);
-  border-color: var(--green);
-  background: var(--green-faint);
-}
+#hud-return:active{color:var(–green);border-color:var(–green);background:var(–green-faint)}
 
 #compass-wrap{position:fixed;z-index:6;left:50%;transform:translateX(-50%);pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:3px}
 #compass-label{font-size:8px;color:#006633;letter-spacing:3px;text-align:center}
@@ -65,58 +122,76 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Sh
 #scan-log{height:52px;overflow:hidden;display:flex;flex-direction:column-reverse;gap:2px}
 .log-entry{font-size:9px;letter-spacing:1px;line-height:1.4;opacity:0;transform:translateY(4px);animation:logIn 0.3s forwards;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @keyframes logIn{to{opacity:1;transform:translateY(0)}}
+
 #tap-zone{position:fixed;inset:0;z-index:7;cursor:crosshair}
-#lock-panel{position:fixed;left:50%;transform:translateX(-50%);z-index:9;width:calc(100% - 36px);max-width:380px;background:rgba(0,6,2,0.97);border:1px solid var(--green);padding:18px;display:none;box-shadow:0 0 40px var(--green-dim)}
+#lock-panel{position:fixed;left:50%;transform:translateX(-50%);z-index:9;width:calc(100% - 36px);max-width:380px;background:rgba(0,6,2,0.97);border:1px solid var(–green);padding:18px;display:none;box-shadow:0 0 40px var(–green-dim)}
 #lock-panel.active{display:block}
-#lock-header{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:3px;color:var(--green);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
-#lock-leveltext{font-size:9px;color:var(--orange);letter-spacing:2px}
-#lock-msg{font-family:'VT323',monospace;font-size:18px;color:var(--green);line-height:1.4;min-height:56px;text-shadow:0 0 8px var(--green-dim)}
+#lock-header{font-family:‘Orbitron’,sans-serif;font-size:10px;letter-spacing:3px;color:var(–green);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+#lock-leveltext{font-size:9px;color:var(–orange);letter-spacing:2px}
+#lock-msg{font-family:‘VT323’,monospace;font-size:18px;color:var(–green);line-height:1.4;min-height:56px;text-shadow:0 0 8px var(–green-dim)}
 #lock-dismiss{margin-top:14px;font-size:9px;color:#006633;letter-spacing:3px;text-align:center;cursor:pointer;pointer-events:all;animation:blinkDim 1.5s step-end infinite}
 @keyframes blinkDim{0%,100%{opacity:0.6}50%{opacity:0.2}}
-#azul-sprite{position:fixed;z-index:8;pointer-events:none;display:none;image-rendering:pixelated;filter:drop-shadow(0 0 8px var(--cyan)) drop-shadow(0 0 16px var(--cyan));left:50%}
+
+#azul-sprite{position:fixed;z-index:8;pointer-events:none;display:none;image-rendering:pixelated;filter:drop-shadow(0 0 8px var(–cyan)) drop-shadow(0 0 16px var(–cyan));left:50%}
 @keyframes spriteFloat{0%,100%{transform:translateY(0) translateX(-50%)}50%{transform:translateY(-10px) translateX(-50%)}}
-@keyframes spriteIn{0%{opacity:0;filter:drop-shadow(0 0 40px var(--cyan)) brightness(3)}100%{opacity:1}}
+@keyframes spriteIn{0%{opacity:0;filter:drop-shadow(0 0 40px var(–cyan)) brightness(3)}100%{opacity:1}}
+
 #glitch-frame{position:fixed;inset:0;z-index:10;pointer-events:none;display:none}
 @keyframes glitchFlicker{
-  0%{opacity:1;clip-path:inset(8% 0 88% 0);background:rgba(0,255,136,0.07)}
-  33%{opacity:0;clip-path:inset(0 0 0 0);background:transparent}
-  66%{opacity:1;clip-path:inset(55% 0 8% 0);background:rgba(255,34,68,0.05)}
-  100%{opacity:0}
+0%{opacity:1;clip-path:inset(8% 0 88% 0);background:rgba(0,255,136,0.07)}
+33%{opacity:0;clip-path:inset(0 0 0 0);background:transparent}
+66%{opacity:1;clip-path:inset(55% 0 8% 0);background:rgba(255,34,68,0.05)}
+100%{opacity:0}
 }
 .burst{position:fixed;border-radius:50%;pointer-events:none;z-index:6;transform:translate(-50%,-50%);animation:burstOut 0.5s ease-out forwards}
 @keyframes burstOut{0%{width:0;height:0;opacity:0.9}100%{width:100px;height:100px;opacity:0}}
-#sys-alert{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:9;font-size:9px;color:var(--orange);letter-spacing:2px;background:rgba(0,0,0,0.85);border:1px solid var(--orange);padding:5px 12px;display:none;white-space:nowrap}
+#sys-alert{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:9;font-size:9px;color:var(–orange);letter-spacing:2px;background:rgba(0,0,0,0.85);border:1px solid var(–orange);padding:5px 12px;display:none;white-space:nowrap}
 @keyframes sysFade{0%,70%{opacity:1}100%{opacity:0}}
 #seq-track{position:fixed;z-index:6;right:18px;display:flex;flex-direction:column;gap:6px;pointer-events:none}
 .seq-pip{width:8px;height:8px;border-radius:50%;border:1px solid #006633;transition:all 0.3s}
-.seq-pip.done{background:var(--green);border-color:var(--green);box-shadow:0 0 8px var(--green)}
-.seq-pip.active{background:var(--orange);border-color:var(--orange);box-shadow:0 0 8px var(--orange)}
-#ghost-signal{position:fixed;z-index:8;left:50%;transform:translateX(-50%);font-family:'VT323',monospace;font-size:19px;color:var(--purple);letter-spacing:2px;text-shadow:0 0 16px var(--purple);pointer-events:none;display:none;text-align:center;white-space:nowrap}
+.seq-pip.done{background:var(–green);border-color:var(–green);box-shadow:0 0 8px var(–green)}
+.seq-pip.active{background:var(–orange);border-color:var(–orange);box-shadow:0 0 8px var(–orange)}
+#ghost-signal{position:fixed;z-index:8;left:50%;transform:translateX(-50%);font-family:‘VT323’,monospace;font-size:19px;color:var(–purple);letter-spacing:2px;text-shadow:0 0 16px var(–purple);pointer-events:none;display:none;text-align:center;white-space:nowrap}
 @keyframes ghostFade{0%{opacity:0}10%{opacity:1}70%{opacity:1}100%{opacity:0}}
-#screenshot-btn{position:fixed;bottom:104px;right:16px;z-index:8;width:42px;height:42px;background:rgba(0,8,3,0.85);border:1px solid var(--green-dim);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;pointer-events:all}
-#screenshot-btn:active{background:var(--green-faint);border-color:var(--green)}
+#screenshot-btn{position:fixed;bottom:104px;right:16px;z-index:8;width:42px;height:42px;background:rgba(0,8,3,0.85);border:1px solid var(–green-dim);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;pointer-events:all}
+#screenshot-btn:active{background:var(–green-faint);border-color:var(–green)}
 #screenshot-flash{position:fixed;inset:0;z-index:11;background:#fff;opacity:0;pointer-events:none;transition:opacity 0.08s}
 </style>
+
 </head>
 <body>
 
+<!-- BOOT: two-step permission sequence -->
+
 <div id="boot">
-  <div class="boot-logo">BUREAU OF REALITY<br>░░SIGNAL DECRYPTOR░░<br><span style="font-size:0.48em;color:#006633">FIELD UNIT v3.7 // CLASSIFIED</span></div>
-  <div class="boot-divider"></div>
+  <div class="boot-logo">
+  BUREAU OF REALITY<br>
+  ░░ SIGNAL DECRYPTOR ░░<br>
+  <span style="font-size:0.45em; color:#006633; letter-spacing: 1px;">FIELD UNIT v3.7 // CLASSIFIED</span>
+</div>
+<div class="boot-divider"></div>
+
   <div class="boot-warnings">
     <span>SYS:</span> Loading perception filters...<br>
     <span>SYS:</span> Calibrating reality index...<br>
-    <span>WARN:</span> Simulation anomalies in local sector<br>
-    <span>WARN:</span> Do not share Bureau materials with uncleared citizens<br>
-    <span>NOTE:</span> Camera + motion access required
+    <span>WARN:</span> Two permissions required on iOS<br>
+    <span>NOTE:</span> Tap STEP 1 first, then STEP 2
   </div>
   <div class="boot-divider"></div>
-  <button id="boot-btn" onclick="initLens()">⬡ INITIALIZE BUREAU LENS ⬡</button>
+  <div class="boot-btn-wrap">
+    <!-- STEP 1: sensors must be requested first, directly from tap -->
+    <button class="boot-btn" id="btn-sensors" onclick="grantSensors()">
+      ① AUTHORIZE MOTION SENSORS
+    </button>
+    <!-- STEP 2: camera, enabled after sensors granted -->
+    <button class="boot-btn" id="btn-camera" onclick="startLens()">
+      ② INITIALIZE BUREAU LENS
+    </button>
+  </div>
+  <div class="boot-step" id="boot-step">TAP ① TO BEGIN AUTHORIZATION</div>
   <div id="portal-return" onclick="window.location.href='Portal.html'">◀ RETURN TO BUREAU PORTAL</div>
-  <div class="boot-sub">MAXIMUM REALITY // BUREAU FIELD DIVISION</div>
+  <div style="font-size:10px;color:#006633;letter-spacing:3px;text-align:center">MAXIMUM REALITY // BUREAU FIELD DIVISION</div>
 </div>
-
-  
 
 <div id="app">
   <video id="video-bg" autoplay playsinline muted></video>
@@ -124,14 +199,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Sh
   <canvas id="ring-canvas"></canvas>
   <div id="scanlines"></div>
   <canvas id="video-canvas" style="display:none"></canvas>
- <div id="hud-return" onclick="window.location.href='Portal.html'">◀ EXIT LENS</div>
-  
+  <div id="hud-return" onclick="window.location.href='Portal.html'">◀ EXIT LENS</div>
   <div id="tap-zone" onclick="onTap(event)"></div>
+
   <div id="hud-top">
     <div class="hud-block">
       <div class="hud-label">HEADING</div>
       <div class="hud-value" id="hud-heading">---°</div>
-      <div class="hud-label" id="hud-dir">SCANNING</div>
+      <div class="hud-label" id="hud-dir">---</div>
     </div>
     <div class="hud-block" style="align-items:center">
       <div class="hud-label">ANOMALY LVL</div>
@@ -182,7 +257,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Sh
 
   <div id="screenshot-btn" onclick="takeScreenshot()">📷</div>
   <div id="screenshot-flash"></div>
-  <div id="tap-zone" onclick="onTap(event)"></div>
 </div>
 
 <script>
@@ -192,7 +266,8 @@ const S={
   seqGoal:['RED','BLUE','GREEN'],seqDone:0,
   scanCount:0,vfCx:0,vfCy:0,vfR:140,
   ringAlert:false,ringLock:false,seekActive:false,
-  ringPhase:0,lastDetectedColor:null
+  ringPhase:0,lastDetectedColor:null,
+  compassLive:false
 };
 
 const LORE={
@@ -205,15 +280,60 @@ const LORE={
   compassLock:["TRANSMISSION DECRYPTED. You faced the void and it blinked first. Azul acknowledges your compliance.","HEADING CONFIRMED. The simulation logged this moment. You are now a Bureau variable.","SIGNAL INTERCEPTED. The message: There is only the Bureau. There is only Maximum Reality."],
   ghost:["ANOMALY AT {H} DEG -- RESOLVING...","PHANTOM SIGNAL // TRACE LOST","ENTITY DETECTED // SIGNAL DEGRADED","VOID BREACH AT {H} DEG -- CLOSING...","CLASSIFIED // REDACTED // PROCEED"]
 };
-
 function getLore(k,lvl,h){
   const a=LORE[k]||LORE.NEUTRAL;
   return a[Math.floor(Math.random()*a.length)].replace('{L}',lvl||1).replace('{H}',Math.round(h!=null?h:S.heading));
 }
 
-async function initLens(){
-  const btn=document.getElementById('boot-btn');
-  btn.textContent='INITIALIZING...';btn.disabled=true;
+// ── STEP 1: SENSOR PERMISSION ──
+// This runs synchronously from the button tap — no await before it.
+// iOS requires requestPermission to be called in the direct synchronous
+// handler of a user gesture. Any await before this breaks it.
+function grantSensors(){
+  const btn=document.getElementById('btn-sensors');
+  const step=document.getElementById('boot-step');
+
+  // Attach listeners immediately regardless of permission result
+  window.addEventListener('deviceorientationabsolute',handleOrientation,true);
+  window.addEventListener('deviceorientation',handleOrientation,true);
+
+  if(typeof DeviceOrientationEvent!=='undefined'&&
+     typeof DeviceOrientationEvent.requestPermission==='function'){
+    // iOS 13+ path — called synchronously from tap
+    DeviceOrientationEvent.requestPermission()
+      .then(response=>{
+        if(response==='granted'){
+          btn.textContent='① MOTION SENSORS: AUTHORIZED';
+          btn.classList.add('done');
+          step.textContent='SENSORS ONLINE // TAP ② TO ACTIVATE LENS';
+          step.style.color='var(--green)';
+        }else{
+          btn.textContent='① SENSORS DENIED — COMPASS OFFLINE';
+          step.textContent='COMPASS INACTIVE // TAP ② TO CONTINUE WITHOUT';
+          step.style.color='var(--orange)';
+        }
+        // Unlock camera button either way
+        document.getElementById('btn-camera').classList.add('ready');
+      })
+      .catch(()=>{
+        btn.textContent='① SENSOR ERROR — SEE CONSOLE';
+        document.getElementById('btn-camera').classList.add('ready');
+      });
+  }else{
+    // Android / non-iOS — no permission needed, sensors already attached
+    btn.textContent='① MOTION SENSORS: ACTIVE';
+    btn.classList.add('done');
+    step.textContent='SENSORS ONLINE // TAP ② TO ACTIVATE LENS';
+    step.style.color='var(--green)';
+    document.getElementById('btn-camera').classList.add('ready');
+  }
+}
+
+// ── STEP 2: CAMERA + LAUNCH ──
+async function startLens(){
+  const btn=document.getElementById('btn-camera');
+  btn.textContent='② INITIALIZING...'; btn.style.pointerEvents='none';
+  document.getElementById('boot-step').textContent='ACQUIRING CAMERA FEED...';
   try{
     const stream=await navigator.mediaDevices.getUserMedia({
       video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}
@@ -221,9 +341,10 @@ async function initLens(){
     const vid=document.getElementById('video-bg');
     vid.srcObject=stream;
     vid.onloadedmetadata=()=>vid.play().catch(()=>{});
-    await requestOrientation();
+
     document.getElementById('boot').style.display='none';
     document.getElementById('app').style.display='block';
+
     setupLayout();
     startTerminalRain();
     startRingLoop();
@@ -236,31 +357,36 @@ async function initLens(){
     checkSystemStatus();
     addLog('BUREAU LENS ACTIVE','var(--green)');
     addLog('TAP SCREEN TO SCAN OBJECTS','#006633');
-    addLog('EXIT PROTOCOL: LOADED', '#004422');
   }catch(e){
-    btn.textContent='ERROR -- RETRY';btn.disabled=false;
-    console.error(e);
+    btn.textContent='② CAMERA ERROR — RETRY';
+    btn.style.pointerEvents='all';
+    document.getElementById('boot-step').textContent='CAMERA FAILED: '+e.message;
+    document.getElementById('boot-step').style.color='var(--red)';
   }
 }
 
-async function requestOrientation(){
-  return new Promise(res=>{
-    if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
-      DeviceOrientationEvent.requestPermission().then(r=>{
-        if(r==='granted'){
-          window.addEventListener('deviceorientationabsolute',handleOrientation,true);
-          window.addEventListener('deviceorientation',handleOrientation,true);
-        }
-        res();
-      }).catch(()=>res());
-    }else{
-      window.addEventListener('deviceorientationabsolute',handleOrientation,true);
-      window.addEventListener('deviceorientation',handleOrientation,true);
-      res();
+// ── ORIENTATION HANDLER ──
+function handleOrientation(e){
+  let h=null;
+  if(e.webkitCompassHeading!==undefined&&e.webkitCompassHeading!==null){
+    h=e.webkitCompassHeading;
+  }else if(e.alpha!==null){
+    h=(360-e.alpha+360)%360;
+  }
+  if(h!==null){
+    S.heading=h;
+    if(!S.compassLive){
+      S.compassLive=true;
+      // Log to scan log if app is already running
+      const log=document.getElementById('scan-log');
+      if(log&&document.getElementById('app').style.display==='block'){
+        addLog('COMPASS: SIGNAL ACQUIRED','var(--green)');
+      }
     }
-  });
+  }
 }
 
+// ── LAYOUT ──
 function setupLayout(){
   const W=window.innerWidth,H=window.innerHeight;
   const r=Math.min(W,H)*0.36;
@@ -279,6 +405,7 @@ function setupLayout(){
   az.style.left='50%';az.style.top=(cy-r*0.55)+'px';
 }
 
+// ── TERMINAL RAIN ──
 const WORDS=['REDACT','VOID','PROTOCOL','CITIZEN','BUREAU','SIGNAL','ANOMALY','DECRYPT','MAXIMUM','REALITY','CLASSIFIED','AZUL','MOCHKIL','ENTITY','BREACH','SECTOR','DELTA','OMEGA','DIRECTIVE','COMPLY','QUANTUM','SIMULATION','COLLAPSE','TIMELINE','FIELD','OBSERVE'];
 let rainCtx,rainCols,rainDrops,rainInited=false;
 
@@ -294,8 +421,7 @@ function startTerminalRain(){
 function drawRain(){
   if(!rainInited)return;
   const c=document.getElementById('terminal-canvas');
-  const W=c.width,H=c.height;
-  const cx=S.vfCx,cy=S.vfCy,r=S.vfR;
+  const W=c.width,H=c.height,cx=S.vfCx,cy=S.vfCy,r=S.vfR;
   rainCtx.fillStyle='rgba(0,8,3,0.22)';
   rainCtx.fillRect(0,0,W,H);
   rainCtx.save();
@@ -320,6 +446,7 @@ function drawRain(){
   }
 }
 
+// ── RING LOOP ──
 function startRingLoop(){
   const c=document.getElementById('ring-canvas');
   const ctx=c.getContext('2d');
@@ -386,18 +513,15 @@ function drawRing(ctx){
   ctx.beginPath();ctx.arc(cx,cy,2,0,Math.PI*2);ctx.fill();
 }
 
-function handleOrientation(e){
-  if(e.webkitCompassHeading!=null)S.heading=e.webkitCompassHeading;
-  else if(e.alpha!=null)S.heading=(360-e.alpha+360)%360;
-}
+// ── COMPASS TICK ──
 const DIRS=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
-function hDir(h){return DIRS[Math.round(h/22.5)%16];}
+function hDir(h){return DIRS[Math.round(((h%360)+360)%360/22.5)%16];}
 
 function startCompassTick(){
   setInterval(()=>{
     const h=Math.round(S.heading);
     document.getElementById('hud-heading').textContent=h+'°';
-    document.getElementById('hud-dir').textContent=hDir(h);
+    document.getElementById('hud-dir').textContent=S.compassLive?hDir(h):'---';
     updateCompassArc(h);
     if(S.targetHeading!=null&&!S.locked){
       const diff=Math.abs(((h-S.targetHeading)+360)%360);
@@ -448,6 +572,7 @@ function compassLock(){
   setTimeout(()=>{S.ringLock=false;setTimeout(setTarget,5000);},3500);
 }
 
+// ── COLOR TAP ──
 function onTap(e){
   if(S.locked)return;
   const x=e.clientX||S.vfCx,y=e.clientY||S.vfCy;
@@ -485,6 +610,7 @@ function classifyColor(r,g,b){
 }
 function colColor(n){return{RED:'var(--red)',BLUE:'var(--cyan)',GREEN:'var(--green)',YELLOW:'var(--orange)',NEUTRAL:'#006633'}[n]||'#006633';}
 
+// ── SEQUENCE ──
 function buildSeqPips(){
   const t=document.getElementById('seq-track');t.innerHTML='';
   S.seqGoal.forEach((_,i)=>{
@@ -493,7 +619,6 @@ function buildSeqPips(){
     p.id='pip-'+i;t.appendChild(p);
   });
 }
-
 function checkSequence(color){
   if(S.seqDone>=S.seqGoal.length)return;
   if(color===S.seqGoal[S.seqDone]){
@@ -516,13 +641,37 @@ function checkSequence(color){
   }
 }
 
+// ── AZUL SPRITE ──
 function drawAzulSprite(canvas){
   const Z=6;
-  const P=[[0,0,0,3,3,0,0,0,0,0,0,3,3,0,0,0],[0,0,3,1,1,3,0,0,0,0,3,1,1,3,0,0],[0,3,1,1,1,1,3,0,0,3,1,1,1,1,3,0],[0,1,1,1,1,1,1,3,3,1,1,1,1,1,1,0],[0,1,2,1,1,1,2,1,1,2,1,1,1,2,1,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,1,1,4,1,1,1,1,1,1,1,1,4,1,1,0],[0,0,1,1,1,0,1,1,1,1,0,1,1,1,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0],[0,1,0,0,1,1,1,1,1,1,1,1,0,0,1,0],[0,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0],[0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]];
+  const P=[
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+    [0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0],
+    [0,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0],
+    [0,1,0,0,1,1,1,1,1,1,1,1,0,0,1,0],
+    [0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0],
+    [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+    [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
+    [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0],
+    [0,0,1,1,1,0,1,1,1,1,0,1,1,1,0,0],
+    [0,1,1,4,1,1,1,1,1,1,1,1,4,1,1,0],
+    [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+    [0,1,2,1,1,1,2,1,1,2,1,1,1,2,1,0],
+    [0,1,1,1,1,1,1,3,3,1,1,1,1,1,1,0],
+    [0,3,1,1,1,1,3,0,0,3,1,1,1,1,3,0],
+    [0,0,3,1,1,3,0,0,0,0,3,1,1,3,0,0],
+    [0,0,0,3,3,0,0,0,0,0,0,3,3,0,0,0]
+  ];
   canvas.width=16*Z;canvas.height=16*Z;
-  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.shadowBlur=15;ctx.shadowColor='#00ffff';
   const C={1:'#00ccff',2:'#00ffff',3:'#0088aa',4:'#ff88aa'};
-  P.forEach((row,ry)=>row.forEach((v,x)=>{if(!v)return;ctx.fillStyle=C[v];ctx.fillRect(x*Z,ry*Z,Z,Z);}));
+  P.forEach((row,ry)=>row.forEach((v,x)=>{
+    if(!v)return;
+    ctx.fillStyle=C[v];
+    ctx.fillRect(x*Z,ry*Z,Z,Z);
+  }));
 }
 function showAzul(){
   const c=document.getElementById('azul-sprite');
@@ -532,6 +681,7 @@ function showAzul(){
   setTimeout(()=>{c.style.display='none';},5000);
 }
 
+// ── LOCK PANEL ──
 let typeTimer=null;
 function showLockPanel(msg,header){
   document.getElementById('lock-title').textContent=header;
@@ -546,6 +696,7 @@ function dismissLock(){
   document.getElementById('azul-sprite').style.display='none';
 }
 
+// ── LOG ──
 function addLog(text,color){
   const log=document.getElementById('scan-log');
   const el=document.createElement('div');el.className='log-entry';el.style.color=color||'var(--green)';
@@ -560,7 +711,6 @@ function triggerGlitch(){
   g.style.animation='glitchFlicker 0.15s step-end 3';
   setTimeout(()=>{g.style.display='none';},600);
 }
-
 function spawnBurst(x,y){
   const el=document.createElement('div');el.className='burst';
   el.style.left=x+'px';el.style.top=y+'px';el.style.border='1px solid var(--green)';
@@ -568,42 +718,31 @@ function spawnBurst(x,y){
   setTimeout(()=>el.remove(),600);
 }
 
+// ── SCREENSHOT ──
 function takeScreenshot(){
   const flash=document.getElementById('screenshot-flash');
   flash.style.opacity='1';setTimeout(()=>{flash.style.opacity='0';},120);
-  
   const W=window.innerWidth,H=window.innerHeight;
   const out=document.createElement('canvas');out.width=W;out.height=H;
   const ctx=out.getContext('2d');
-  
-  // 1. Draw the layers
   ctx.drawImage(document.getElementById('video-bg'),0,0,W,H);
   ctx.drawImage(document.getElementById('terminal-canvas'),0,0);
   ctx.drawImage(document.getElementById('ring-canvas'),0,0);
-  
-  // 2. Add Tactical Metadata (Bottom Left)
-  ctx.fillStyle = 'rgba(0, 255, 136, 0.9)';
-  ctx.font = '14px "Share Tech Mono"';
-  ctx.fillText(`ANOMALY LVL: ${S.anomalyLevel}`, 20, H - 55);
-  ctx.fillText(`SECTOR: ${document.getElementById('hud-dir').textContent}`, 20, H - 35);
-  
-  // 3. Add Bureau Watermark (Bottom Right)
-  // We use text-align right so it stays tucked in the corner regardless of screen size
-  ctx.textAlign = "right";
-  ctx.fillStyle = 'rgba(0, 255, 136, 0.55)';
-  ctx.font = 'bold 10px "Share Tech Mono"';
-  ctx.fillText(`BUREAU OF REALITY // FIELD SCAN // ${ts()}`, W - 20, H - 20);
-  
-  // Reset alignment for future draws
-  ctx.textAlign = "left";
-
+  ctx.fillStyle='rgba(0,255,136,0.9)';
+  ctx.font='14px Share Tech Mono';
+  ctx.fillText('ANOMALY LVL: '+S.anomalyLevel,20,H-55);
+  ctx.fillText('SECTOR: '+document.getElementById('hud-dir').textContent,20,H-35);
+  ctx.textAlign='right';
+  ctx.fillStyle='rgba(0,255,136,0.55)';
+  ctx.font='bold 10px Share Tech Mono';
+  ctx.fillText('BUREAU OF REALITY // FIELD SCAN // '+ts(),W-20,H-20);
+  ctx.textAlign='left';
   const link=document.createElement('a');
   link.download='bureau-scan-'+Date.now()+'.png';
   link.href=out.toDataURL('image/png');
   link.click();
   addLog('SCAN CAPTURED // EVIDENCE LOGGED','var(--cyan)');
 }
-
 
 function startGhostSignals(){
   function fire(){
