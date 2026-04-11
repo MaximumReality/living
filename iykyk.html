@@ -32,13 +32,12 @@ body { background: #111; padding: 15px; }
   content: " ";
   position: absolute;
   top: 0; left: 0; bottom: 0; right: 0;
-  /* Horizontal scanlines + RGB grain mask */
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%), 
-              linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05));
-  z-index: 10; /* Put it on top of everything */
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), 
+              linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  z-index: 10;
   background-size: 100% 3px, 3px 100%;
   pointer-events: none;
-  opacity: 0.6; /* Made them punchier */
+  opacity: 0.5;
 }
 
 /* CLASSIFIED Watermark */
@@ -50,11 +49,13 @@ body { background: #111; padding: 15px; }
   transform: translate(-50%, -50%) rotate(-12deg);
   font-family: 'VT323', monospace;
   font-size: 5rem; /* Slightly larger */
+   -webkit-text-stroke: 1px rgba(57, 255, 20, 0.15); 
   color: rgba(57, 255, 20, 0.08); /* Bumped from 0.03 to 0.08 */
   pointer-events: none;
   z-index: 1; /* Sits behind the text (z-index 2) but above the background */
   text-transform: uppercase;
-  letter-spacing: 10px;
+    letter-spacing: 12px;
+  white-space: nowrap;
 }
 
 
@@ -77,10 +78,10 @@ body { background: #111; padding: 15px; }
   line-height: 1.6;
   min-height: 200px;
   margin-bottom: 30px;
-  text-shadow: 0 0 10px var(--bureau-green);
   white-space: pre-wrap;
   position: relative;
-  z-index: 2; 
+  z-index: 5; /* Puts text ABOVE the stamp but BELOW the scanlines */
+  text-shadow: 0 0 12px var(--bureau-green);
   animation: flicker 0.1s infinite;
 }
 
