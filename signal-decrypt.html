@@ -543,6 +543,8 @@ function drawAzulSprite(canvas){
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   
   const C = { 1: '#00ccff', 2: '#00ffff', 3: '#0088aa', 4: '#ff88aa' };
+ctx.shadowBlur = 15;
+ctx.shadowColor = '#00ffff';
 
   // This is the manual reverse loop
   for (let ry = 0; ry < P.length; ry++) {
