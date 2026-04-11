@@ -300,6 +300,49 @@ aside::-webkit-scrollbar{display:none}
   padding:7px 14px;cursor:pointer;letter-spacing:2px;margin:8px 12px;
   transition:all 0.15s;
 }
+  /* Portal Button Styling */
+#portal-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: transparent;
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px;
+  padding: 3px 8px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  text-decoration: none;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 5px rgba(0, 238, 255, 0.2);
+}
+
+#portal-btn:hover {
+  background: rgba(0, 238, 255, 0.1);
+  box-shadow: 0 0 12px var(--cyan);
+  color: #fff;
+}
+
+/* The "Active Signal" dot inside the portal button */
+#portal-btn::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  background: var(--cyan);
+  border-radius: 50%;
+  display: inline-block;
+  animation: portal-pulse 1s infinite;
+}
+
+@keyframes portal-pulse {
+  0% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(0, 238, 255, 0.7); }
+  70% { transform: scale(1.5); opacity: 0; box-shadow: 0 0 0 6px rgba(0, 238, 255, 0); }
+  100% { transform: scale(1); opacity: 0; }
+}
+
 #restart-btn:hover{background:rgba(255,170,0,0.1);box-shadow:0 0 10px rgba(255,170,0,0.3)}
 .audio-toggle {
   background:transparent; border:1px solid var(--border);
@@ -423,6 +466,7 @@ body.music-active #terminal  { animation: border-pulse 2s infinite ease-in-out; 
         <div class="term-title">VOID_TERMINAL v3.0 // AI_UPLINK_ACTIVE</div>
         <div style="display:flex;align-items:center;gap:10px">
           <a id="home-btn" href="https://maximumreality.xyz" target="_blank">HOME</a>
+          <a id="portal-btn" href="https://maximumreality.github.io/living/Portal.html" target="_blank">PORTAL_ADDR</a>
           <div class="term-controls">
             <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
           </div>
@@ -1079,6 +1123,14 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW reg failed:', err));
   });
 }
+  document.getElementById('portal-btn').addEventListener('mouseenter', () => {
+  addMsg('system', 'NET', 'PORTAL_STABILIZING: MAXIMUMREALITY.XYZ');
+});
+
+document.getElementById('portal-btn').addEventListener('click', () => {
+  addMsg('warn', 'SYS', 'LEAVING VOID... REDIRECTING TO CORE');
+});
+
 </script>
 </body>
 </html>
