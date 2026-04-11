@@ -571,19 +571,31 @@ function spawnBurst(x,y){
 function takeScreenshot(){
   const flash=document.getElementById('screenshot-flash');
   flash.style.opacity='1';setTimeout(()=>{flash.style.opacity='0';},120);
+  
   const W=window.innerWidth,H=window.innerHeight;
   const out=document.createElement('canvas');out.width=W;out.height=H;
   const ctx=out.getContext('2d');
+  
+  // 1. Draw the layers
   ctx.drawImage(document.getElementById('video-bg'),0,0,W,H);
   ctx.drawImage(document.getElementById('terminal-canvas'),0,0);
   ctx.drawImage(document.getElementById('ring-canvas'),0,0);
-  ctx.fillStyle='rgba(0,255,136,0.55)';ctx.font='bold 10px Share Tech Mono';
-  ctx.fillText('BUREAU OF REALITY // FIELD SCAN // '+ts(),12,H-14);
-  // Inside takeScreenshot()
-ctx.fillStyle = 'rgba(0, 255, 136, 0.8)';
-ctx.font = '14px "Share Tech Mono"';
-ctx.fillText(`ANOMALY LVL: ${S.anomalyLevel}`, 20, H - 40);
-ctx.fillText(`SECTOR: ${document.getElementById('hud-dir').textContent}`, 20, H - 20);
+  
+  // 2. Add Tactical Metadata (Bottom Left)
+  ctx.fillStyle = 'rgba(0, 255, 136, 0.9)';
+  ctx.font = '14px "Share Tech Mono"';
+  ctx.fillText(`ANOMALY LVL: ${S.anomalyLevel}`, 20, H - 55);
+  ctx.fillText(`SECTOR: ${document.getElementById('hud-dir').textContent}`, 20, H - 35);
+  
+  // 3. Add Bureau Watermark (Bottom Right)
+  // We use text-align right so it stays tucked in the corner regardless of screen size
+  ctx.textAlign = "right";
+  ctx.fillStyle = 'rgba(0, 255, 136, 0.55)';
+  ctx.font = 'bold 10px "Share Tech Mono"';
+  ctx.fillText(`BUREAU OF REALITY // FIELD SCAN // ${ts()}`, W - 20, H - 20);
+  
+  // Reset alignment for future draws
+  ctx.textAlign = "left";
 
   const link=document.createElement('a');
   link.download='bureau-scan-'+Date.now()+'.png';
@@ -591,6 +603,7 @@ ctx.fillText(`SECTOR: ${document.getElementById('hud-dir').textContent}`, 20, H 
   link.click();
   addLog('SCAN CAPTURED // EVIDENCE LOGGED','var(--cyan)');
 }
+
 
 function startGhostSignals(){
   function fire(){
