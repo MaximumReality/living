@@ -15,58 +15,25 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Share Tech Mono',monospace;color:var(--green);user-select:none}
-
-/* ── BOOT ── */
 #boot{position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:36px}
-.boot-logo{font-family:‘VT323’,monospace;font-size:clamp(24px,7vw,42px);color:var(–green);text-align:center;line-height:1.2;text-shadow:0 0 20px var(–green),0 0 40px var(–green-dim);letter-spacing:4px}
-.boot-divider{width:80%;height:1px;background:linear-gradient(90deg,transparent,var(–green),transparent)}
+.boot-logo{font-family:'VT323',monospace;font-size:clamp(24px,7vw,42px);color:var(--green);text-align:center;line-height:1.2;text-shadow:0 0 20px var(--green),0 0 40px var(--green-dim);letter-spacing:4px}
+.boot-divider{width:80%;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent)}
 .boot-warnings{font-size:10px;color:#004422;text-align:left;width:100%;line-height:1.9}
-.boot-warnings span{color:var(–green)}
+.boot-warnings span{color:var(--green)}
 .boot-sub{font-size:10px;color:#006633;letter-spacing:3px;text-align:center}
-#boot-btn{padding:16px 28px;background:transparent;border:1px solid var(–green);color:var(–green);font-family:‘Orbitron’,sans-serif;font-size:12px;font-weight:700;letter-spacing:4px;cursor:pointer;box-shadow:0 0 20px var(–green-dim),inset 0 0 20px var(–green-faint)}
-#boot-btn:active{background:var(–green);color:#000}
-#portal-return{cursor:pointer;color:var(–green-dim);font-size:9px;margin-top:4px;letter-spacing:2px;text-align:center}
-#portal-return:active{color:var(–green)}
-
-/* ── APP ── */
+#boot-btn{padding:16px 28px;background:transparent;border:1px solid var(--green);color:var(--green);font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:4px;cursor:pointer;box-shadow:0 0 20px var(--green-dim),inset 0 0 20px var(--green-faint)}
+#boot-btn:active{background:var(--green);color:#000}
+#portal-return{cursor:pointer;color:var(--green-dim);font-size:9px;margin-top:4px;letter-spacing:2px;text-align:center}
+#portal-return:active{color:var(--green)}
 #app{display:none;position:fixed;inset:0;width:100%;height:100%}
-
-/* VIDEO — explicit absolute sizing, no filter, no transform */
-#video-bg{
-position:absolute;
-top:0;left:0;
-width:100%;height:100%;
-object-fit:cover;
-z-index:1;
-display:block;
-/* iOS Safari sometimes needs this */
--webkit-transform:translateZ(0);
-transform:translateZ(0);
-}
-
-/* ALL canvas layers — must be transparent background */
-#terminal-canvas,#ring-canvas{
-position:absolute;
-top:0;left:0;
-width:100%;height:100%;
-z-index:2;
-pointer-events:none;
-background:transparent;
-}
-#ring-canvas{z-index:3;}
-
-/* Scanline overlay — very subtle, normal blend so it doesn’t darken video */
-#scanlines{
-position:absolute;top:0;left:0;width:100%;height:100%;
-z-index:4;pointer-events:none;
-background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.08) 3px,rgba(0,0,0,0.08) 4px);
-}
-
-/* HUD layers all z-index 5+ */
+#video-bg{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;display:block;-webkit-transform:translateZ(0);transform:translateZ(0)}
+#terminal-canvas,#ring-canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;pointer-events:none;background:transparent}
+#ring-canvas{z-index:3}
+#scanlines{position:absolute;top:0;left:0;width:100%;height:100%;z-index:4;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.08) 3px,rgba(0,0,0,0.08) 4px)}
 #hud-top{position:fixed;top:0;left:0;right:0;z-index:6;padding:18px 18px 10px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
 .hud-block{display:flex;flex-direction:column;gap:3px}
 .hud-label{font-size:8px;color:#006633;letter-spacing:3px}
-.hud-value{font-family:‘VT323’,monospace;font-size:22px;color:var(–green);text-shadow:0 0 8px var(–green-dim);line-height:1}
+.hud-value{font-family:'VT323',monospace;font-size:22px;color:var(--green);text-shadow:0 0 8px var(--green-dim);line-height:1}
 .hud-right{text-align:right}
 #compass-wrap{position:fixed;z-index:6;left:50%;transform:translateX(-50%);pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:3px}
 #compass-label{font-size:8px;color:#006633;letter-spacing:3px;text-align:center}
@@ -75,61 +42,40 @@ background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0
 #scan-log{height:52px;overflow:hidden;display:flex;flex-direction:column-reverse;gap:2px}
 .log-entry{font-size:9px;letter-spacing:1px;line-height:1.4;opacity:0;transform:translateY(4px);animation:logIn 0.3s forwards;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @keyframes logIn{to{opacity:1;transform:translateY(0)}}
-
-/* tap zone on top of everything visible but below modals */
 #tap-zone{position:fixed;inset:0;z-index:7;cursor:crosshair}
-
-/* lock panel */
-#lock-panel{position:fixed;left:50%;transform:translateX(-50%);z-index:9;width:calc(100% - 36px);max-width:380px;background:rgba(0,6,2,0.97);border:1px solid var(–green);padding:18px;display:none;box-shadow:0 0 40px var(–green-dim)}
+#lock-panel{position:fixed;left:50%;transform:translateX(-50%);z-index:9;width:calc(100% - 36px);max-width:380px;background:rgba(0,6,2,0.97);border:1px solid var(--green);padding:18px;display:none;box-shadow:0 0 40px var(--green-dim)}
 #lock-panel.active{display:block}
-#lock-header{font-family:‘Orbitron’,sans-serif;font-size:10px;letter-spacing:3px;color:var(–green);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
-#lock-leveltext{font-size:9px;color:var(–orange);letter-spacing:2px}
-#lock-msg{font-family:‘VT323’,monospace;font-size:18px;color:var(–green);line-height:1.4;min-height:56px;text-shadow:0 0 8px var(–green-dim)}
+#lock-header{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:3px;color:var(--green);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+#lock-leveltext{font-size:9px;color:var(--orange);letter-spacing:2px}
+#lock-msg{font-family:'VT323',monospace;font-size:18px;color:var(--green);line-height:1.4;min-height:56px;text-shadow:0 0 8px var(--green-dim)}
 #lock-dismiss{margin-top:14px;font-size:9px;color:#006633;letter-spacing:3px;text-align:center;cursor:pointer;pointer-events:all;animation:blinkDim 1.5s step-end infinite}
 @keyframes blinkDim{0%,100%{opacity:0.6}50%{opacity:0.2}}
-
-/* azul sprite */
-#azul-sprite{position:fixed;z-index:8;pointer-events:none;display:none;image-rendering:pixelated;filter:drop-shadow(0 0 8px var(–cyan)) drop-shadow(0 0 16px var(–cyan));left:50%}
+#azul-sprite{position:fixed;z-index:8;pointer-events:none;display:none;image-rendering:pixelated;filter:drop-shadow(0 0 8px var(--cyan)) drop-shadow(0 0 16px var(--cyan));left:50%}
 @keyframes spriteFloat{0%,100%{transform:translateY(0) translateX(-50%)}50%{transform:translateY(-10px) translateX(-50%)}}
-@keyframes spriteIn{0%{opacity:0;filter:drop-shadow(0 0 40px var(–cyan)) brightness(3)}100%{opacity:1}}
-
-/* glitch frame */
+@keyframes spriteIn{0%{opacity:0;filter:drop-shadow(0 0 40px var(--cyan)) brightness(3)}100%{opacity:1}}
 #glitch-frame{position:fixed;inset:0;z-index:10;pointer-events:none;display:none}
 @keyframes glitchFlicker{
-0%{opacity:1;clip-path:inset(8% 0 88% 0);background:rgba(0,255,136,0.07)}
-33%{opacity:0;clip-path:inset(0 0 0 0);background:transparent}
-66%{opacity:1;clip-path:inset(55% 0 8% 0);background:rgba(255,34,68,0.05)}
-100%{opacity:0}
+  0%{opacity:1;clip-path:inset(8% 0 88% 0);background:rgba(0,255,136,0.07)}
+  33%{opacity:0;clip-path:inset(0 0 0 0);background:transparent}
+  66%{opacity:1;clip-path:inset(55% 0 8% 0);background:rgba(255,34,68,0.05)}
+  100%{opacity:0}
 }
-
-/* burst */
 .burst{position:fixed;border-radius:50%;pointer-events:none;z-index:6;transform:translate(-50%,-50%);animation:burstOut 0.5s ease-out forwards}
 @keyframes burstOut{0%{width:0;height:0;opacity:0.9}100%{width:100px;height:100px;opacity:0}}
-
-/* sys alert */
-#sys-alert{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:9;font-size:9px;color:var(–orange);letter-spacing:2px;background:rgba(0,0,0,0.85);border:1px solid var(–orange);padding:5px 12px;display:none;white-space:nowrap}
+#sys-alert{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:9;font-size:9px;color:var(--orange);letter-spacing:2px;background:rgba(0,0,0,0.85);border:1px solid var(--orange);padding:5px 12px;display:none;white-space:nowrap}
 @keyframes sysFade{0%,70%{opacity:1}100%{opacity:0}}
-
-/* seq pips */
 #seq-track{position:fixed;z-index:6;right:18px;display:flex;flex-direction:column;gap:6px;pointer-events:none}
 .seq-pip{width:8px;height:8px;border-radius:50%;border:1px solid #006633;transition:all 0.3s}
-.seq-pip.done{background:var(–green);border-color:var(–green);box-shadow:0 0 8px var(–green)}
-.seq-pip.active{background:var(–orange);border-color:var(–orange);box-shadow:0 0 8px var(–orange)}
-
-/* ghost signal */
-#ghost-signal{position:fixed;z-index:8;left:50%;transform:translateX(-50%);font-family:‘VT323’,monospace;font-size:19px;color:var(–purple);letter-spacing:2px;text-shadow:0 0 16px var(–purple);pointer-events:none;display:none;text-align:center;white-space:nowrap}
+.seq-pip.done{background:var(--green);border-color:var(--green);box-shadow:0 0 8px var(--green)}
+.seq-pip.active{background:var(--orange);border-color:var(--orange);box-shadow:0 0 8px var(--orange)}
+#ghost-signal{position:fixed;z-index:8;left:50%;transform:translateX(-50%);font-family:'VT323',monospace;font-size:19px;color:var(--purple);letter-spacing:2px;text-shadow:0 0 16px var(--purple);pointer-events:none;display:none;text-align:center;white-space:nowrap}
 @keyframes ghostFade{0%{opacity:0}10%{opacity:1}70%{opacity:1}100%{opacity:0}}
-
-/* screenshot btn */
-#screenshot-btn{position:fixed;bottom:104px;right:16px;z-index:8;width:42px;height:42px;background:rgba(0,8,3,0.85);border:1px solid var(–green-dim);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;pointer-events:all}
-#screenshot-btn:active{background:var(–green-faint);border-color:var(–green)}
+#screenshot-btn{position:fixed;bottom:104px;right:16px;z-index:8;width:42px;height:42px;background:rgba(0,8,3,0.85);border:1px solid var(--green-dim);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;pointer-events:all}
+#screenshot-btn:active{background:var(--green-faint);border-color:var(--green)}
 #screenshot-flash{position:fixed;inset:0;z-index:11;background:#fff;opacity:0;pointer-events:none;transition:opacity 0.08s}
 </style>
-
 </head>
 <body>
-
-<!-- BOOT -->
 
 <div id="boot">
   <div class="boot-logo">BUREAU OF REALITY<br>░░ SIGNAL DECRYPTOR ░░<br><span style="font-size:0.48em;color:#006633">FIELD UNIT v3.7 // CLASSIFIED</span></div>
@@ -147,19 +93,12 @@ background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0
   <div class="boot-sub">MAXIMUM REALITY // BUREAU FIELD DIVISION</div>
 </div>
 
-<!-- APP -->
-
 <div id="app">
-  <!-- z-index 1: raw video, nothing above it in the circle area -->
   <video id="video-bg" autoplay playsinline muted></video>
-  <!-- z-index 2: terminal rain — circle area cleared each frame -->
   <canvas id="terminal-canvas"></canvas>
-  <!-- z-index 3: ring/HUD drawn on canvas -->
   <canvas id="ring-canvas"></canvas>
-  <!-- z-index 4: very light scanlines only -->
   <div id="scanlines"></div>
-
-<canvas id="video-canvas" style="display:none"></canvas>
+  <canvas id="video-canvas" style="display:none"></canvas>
 
   <div id="hud-top">
     <div class="hud-block">
@@ -220,17 +159,15 @@ background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0
 </div>
 
 <script>
-// ── STATE ──
 const S={
   heading:0,targetHeading:null,signalStrength:0,
   anomalyLevel:1,locked:false,
   seqGoal:['RED','BLUE','GREEN'],seqDone:0,
   scanCount:0,vfCx:0,vfCy:0,vfR:140,
   ringAlert:false,ringLock:false,seekActive:false,
-  ringPhase:0
+  ringPhase:0,lastDetectedColor:null
 };
 
-// ── LORE ──
 const LORE={
   RED:["DANGER: RED-SHIFT ANOMALY DETECTED. This object is a Level {L} simulation error. Do not touch. Proceed to the nearest shredder.","ALERT: CRIMSON BREACH. Bureau analysts confirm this object should not exist in Sector 7G. Report immediately.","WARNING: RED SIGNATURE. A remnant from Timeline 3. It bleeds entropy into your local reality matrix."],
   BLUE:["AZUL QUANTUM SIGNATURE FOUND. Entity trace detected. Azul was here. The hairless one watches from the void.","CYAN RESONANCE: Bureau frequency match 99.7%. This object vibrates at quantum field frequency. Do not look directly.","BLUE-PHASE LOCK. A Bureau-issued reality anchor detected. It prevents local simulation collapse. Step away slowly."],
@@ -241,12 +178,12 @@ const LORE={
   compassLock:["TRANSMISSION DECRYPTED. You faced the void and it blinked first. Azul acknowledges your compliance.","HEADING CONFIRMED. The simulation logged this moment. You are now a Bureau variable.","SIGNAL INTERCEPTED. The message: There is only the Bureau. There is only Maximum Reality."],
   ghost:["ANOMALY AT {H} DEG -- RESOLVING...","PHANTOM SIGNAL // TRACE LOST","ENTITY DETECTED // SIGNAL DEGRADED","VOID BREACH AT {H} DEG -- CLOSING...","CLASSIFIED // REDACTED // PROCEED"]
 };
+
 function getLore(k,lvl,h){
   const a=LORE[k]||LORE.NEUTRAL;
   return a[Math.floor(Math.random()*a.length)].replace('{L}',lvl||1).replace('{H}',Math.round(h!=null?h:S.heading));
 }
 
-// ── BOOT ──
 async function initLens(){
   const btn=document.getElementById('boot-btn');
   btn.textContent='INITIALIZING...';btn.disabled=true;
@@ -256,13 +193,10 @@ async function initLens(){
     });
     const vid=document.getElementById('video-bg');
     vid.srcObject=stream;
-    // iOS needs play() called explicitly after srcObject
     vid.onloadedmetadata=()=>vid.play().catch(()=>{});
-
     await requestOrientation();
     document.getElementById('boot').style.display='none';
     document.getElementById('app').style.display='block';
-
     setupLayout();
     startTerminalRain();
     startRingLoop();
@@ -299,19 +233,16 @@ async function requestOrientation(){
   });
 }
 
-// ── LAYOUT ──
 function setupLayout(){
   const W=window.innerWidth,H=window.innerHeight;
   const r=Math.min(W,H)*0.36;
   const cy=H*0.42;
   S.vfCx=W/2;S.vfCy=cy;S.vfR=r;
-
   ['terminal-canvas','ring-canvas'].forEach(id=>{
     const c=document.getElementById(id);
     c.width=W;c.height=H;
     c.style.width=W+'px';c.style.height=H+'px';
   });
-
   document.getElementById('compass-wrap').style.top=(cy-r-60)+'px';
   document.getElementById('seq-track').style.top=(cy-48)+'px';
   document.getElementById('lock-panel').style.top=(cy+r+18)+'px';
@@ -320,8 +251,6 @@ function setupLayout(){
   az.style.left='50%';az.style.top=(cy-r*0.55)+'px';
 }
 
-// ── TERMINAL RAIN ──
-// Key fix: we clearRect the circle each frame so video shows through
 const WORDS=['REDACT','VOID','PROTOCOL','CITIZEN','BUREAU','SIGNAL','ANOMALY','DECRYPT','MAXIMUM','REALITY','CLASSIFIED','AZUL','MOCHKIL','ENTITY','BREACH','SECTOR','DELTA','OMEGA','DIRECTIVE','COMPLY','QUANTUM','SIMULATION','COLLAPSE','TIMELINE','FIELD','OBSERVE'];
 let rainCtx,rainCols,rainDrops,rainInited=false;
 
@@ -339,12 +268,8 @@ function drawRain(){
   const c=document.getElementById('terminal-canvas');
   const W=c.width,H=c.height;
   const cx=S.vfCx,cy=S.vfCy,r=S.vfR;
-
-  // Darken outside only — fill full canvas dark, then punch circle back to transparent
   rainCtx.fillStyle='rgba(0,8,3,0.22)';
   rainCtx.fillRect(0,0,W,H);
-
-  // *** CRITICAL: clear the circle area so video shows through ***
   rainCtx.save();
   rainCtx.globalCompositeOperation='destination-out';
   rainCtx.beginPath();
@@ -352,8 +277,6 @@ function drawRain(){
   rainCtx.fillStyle='rgba(0,0,0,1)';
   rainCtx.fill();
   rainCtx.restore();
-
-  // Draw rain characters only outside the circle
   rainCtx.font='12px Share Tech Mono';
   for(let i=0;i<rainCols;i++){
     const x=i*14+7,y=rainDrops[i];
@@ -369,7 +292,6 @@ function drawRain(){
   }
 }
 
-// ── RING CANVAS LOOP ──
 function startRingLoop(){
   const c=document.getElementById('ring-canvas');
   const ctx=c.getContext('2d');
@@ -385,47 +307,33 @@ function startRingLoop(){
 function drawRing(ctx){
   const cx=S.vfCx,cy=S.vfCy,r=S.vfR;
   const pulse=0.35+0.15*Math.sin(S.ringPhase);
-
-  // Seek dashes (orange rotating)
   if(S.seekActive){
     ctx.save();
     ctx.strokeStyle='rgba(255,136,0,0.65)';
-    ctx.lineWidth=2;
-    ctx.setLineDash([10,10]);
+    ctx.lineWidth=2;ctx.setLineDash([10,10]);
     ctx.lineDashOffset=-S.ringPhase*25;
     ctx.beginPath();ctx.arc(cx,cy,r+26,0,Math.PI*2);ctx.stroke();
     ctx.restore();
   }
-
-  // Lock glow
   if(S.ringLock){
     ctx.save();
     ctx.shadowColor='rgba(0,255,255,0.8)';ctx.shadowBlur=24;
-    ctx.strokeStyle='rgba(0,255,255,0.9)';ctx.lineWidth=3;
-    ctx.setLineDash([]);
+    ctx.strokeStyle='rgba(0,255,255,0.9)';ctx.lineWidth=3;ctx.setLineDash([]);
     ctx.beginPath();ctx.arc(cx,cy,r+8,0,Math.PI*2);ctx.stroke();
     ctx.restore();
   }
-
-  // Alert flash (red)
   if(S.ringAlert){
     ctx.strokeStyle='rgba(255,34,68,0.9)';ctx.lineWidth=2;ctx.setLineDash([]);
     ctx.beginPath();ctx.arc(cx,cy,r+8,0,Math.PI*2);ctx.stroke();
   }
-
-  // Main outer ring
   if(!S.ringAlert&&!S.ringLock){
     ctx.strokeStyle=`rgba(0,255,136,${pulse})`;
     ctx.lineWidth=1.5;ctx.setLineDash([]);
     ctx.beginPath();ctx.arc(cx,cy,r+8,0,Math.PI*2);ctx.stroke();
   }
-
-  // Inner ring
   ctx.strokeStyle=`rgba(0,255,136,${pulse*0.35})`;
   ctx.lineWidth=1;ctx.setLineDash([]);
   ctx.beginPath();ctx.arc(cx,cy,r-10,0,Math.PI*2);ctx.stroke();
-
-  // Tick marks
   ctx.setLineDash([]);
   for(let a=0;a<360;a+=15){
     const rad=a*(Math.PI/180);
@@ -438,24 +346,18 @@ function drawRing(ctx){
     ctx.lineTo(cx+Math.cos(rad)*ro,cy+Math.sin(rad)*ro);
     ctx.stroke();
   }
-
-  // Corner bracket arcs
   const brackets=[[-.1,.3],[Math.PI*.4,Math.PI*.8],[Math.PI*.9,Math.PI*1.3],[Math.PI*1.4,Math.PI*1.8]];
   ctx.strokeStyle='rgba(0,255,136,0.85)';ctx.lineWidth=2.5;
   brackets.forEach(([s,e])=>{
     ctx.beginPath();ctx.arc(cx,cy,r+8,s,e);ctx.stroke();
   });
-
-  // Crosshair
   ctx.strokeStyle='rgba(0,255,136,0.4)';ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(cx,cy-18);ctx.lineTo(cx,cy+18);ctx.stroke();
   ctx.beginPath();ctx.moveTo(cx-18,cy);ctx.lineTo(cx+18,cy);ctx.stroke();
-  // Center dot
   ctx.fillStyle='rgba(0,255,136,0.5)';
   ctx.beginPath();ctx.arc(cx,cy,2,0,Math.PI*2);ctx.fill();
 }
 
-// ── ORIENTATION ──
 function handleOrientation(e){
   if(e.webkitCompassHeading!=null)S.heading=e.webkitCompassHeading;
   else if(e.alpha!=null)S.heading=(360-e.alpha+360)%360;
@@ -513,12 +415,11 @@ function compassLock(){
   showLockPanel(getLore('compassLock',S.anomalyLevel,S.targetHeading),'COMPASS LOCK');
   addLog('HEADING LOCKED: '+Math.round(S.targetHeading)+'°','var(--cyan)');
   S.anomalyLevel=Math.min(9,S.anomalyLevel+1);
-  document.getElementById('hud-level').textContent=String(S.anomalyLevel).padStart(2,'0'); localStorage.setItem('BUREAU_CLEARANCE', 'LVL_' + String(S.anomalyLevel).padStart(2,'0'));
-
+  document.getElementById('hud-level').textContent=String(S.anomalyLevel).padStart(2,'0');
+  localStorage.setItem('BUREAU_CLEARANCE','LVL_'+String(S.anomalyLevel).padStart(2,'0'));
   setTimeout(()=>{S.ringLock=false;setTimeout(setTarget,5000);},3500);
 }
 
-// ── COLOR TAP ──
 function onTap(e){
   if(S.locked)return;
   const x=e.clientX||S.vfCx,y=e.clientY||S.vfCy;
@@ -533,6 +434,9 @@ function onTap(e){
   const px=ctx.getImageData(sx,sy,1,1).data;
   const col=classifyColor(px[0],px[1],px[2]);
   S.scanCount++;
+  S.lastDetectedColor=col;
+  localStorage.setItem('BUREAU_LAST_SCAN',col);
+  localStorage.setItem('BUREAU_SCAN_COUNT',S.scanCount);
   checkSequence(col);
   showLockPanel(getLore(col,S.anomalyLevel),col+' SIGNATURE');
   const hex='#'+[px[0],px[1],px[2]].map(v=>v.toString(16).padStart(2,'0')).join('').toUpperCase();
@@ -553,7 +457,6 @@ function classifyColor(r,g,b){
 }
 function colColor(n){return{RED:'var(--red)',BLUE:'var(--cyan)',GREEN:'var(--green)',YELLOW:'var(--orange)',NEUTRAL:'#006633'}[n]||'#006633';}
 
-// ── SEQUENCE ──
 function buildSeqPips(){
   const t=document.getElementById('seq-track');t.innerHTML='';
   S.seqGoal.forEach((_,i)=>{
@@ -562,6 +465,7 @@ function buildSeqPips(){
     p.id='pip-'+i;t.appendChild(p);
   });
 }
+
 function checkSequence(color){
   if(S.seqDone>=S.seqGoal.length)return;
   if(color===S.seqGoal[S.seqDone]){
@@ -572,10 +476,10 @@ function checkSequence(color){
         triggerGlitch();showAzul();
         showLockPanel("LEVEL 4 CLEARANCE ACHIEVED. You found all Bureau signatures in sequence. Mochkil and Azul acknowledge your compliance. CITIZEN: You are now a simulation variable.",'LEVEL 4 BREACH');
         addLog('LEVEL 4 SEQUENCE COMPLETE','var(--purple)');
-    localStorage.setItem('BUREAU_CLEARANCE', 'LVL_04');
-localStorage.setItem('BUREAU_ANOMALY', S.lastDetectedColor || 'UNKNOWN');
-localStorage.setItem('BUREAU_TIMESTAMP', new Date().toISOString());
-    S.anomalyLevel=4;document.getElementById('hud-level').textContent='04';
+        localStorage.setItem('BUREAU_CLEARANCE','LVL_04');
+        localStorage.setItem('BUREAU_ANOMALY',S.lastDetectedColor||'UNKNOWN');
+        localStorage.setItem('BUREAU_TIMESTAMP',new Date().toISOString());
+        S.anomalyLevel=4;document.getElementById('hud-level').textContent='04';
         setTimeout(()=>{S.seqDone=0;S.seqGoal=['RED','BLUE','GREEN'].sort(()=>Math.random()-0.5);buildSeqPips();addLog('NEW SEQUENCE INITIATED','var(--orange)');},10000);
       },800);
     }else{
@@ -583,11 +487,7 @@ localStorage.setItem('BUREAU_TIMESTAMP', new Date().toISOString());
     }
   }
 }
-  localStorage.setItem('BUREAU_LAST_SCAN', col);
-localStorage.setItem('BUREAU_SCAN_COUNT', S.scanCount);
 
-
-// ── AZUL SPRITE ──
 function drawAzulSprite(canvas){
   const Z=6;
   const P=[[0,0,0,3,3,0,0,0,0,0,0,3,3,0,0,0],[0,0,3,1,1,3,0,0,0,0,3,1,1,3,0,0],[0,3,1,1,1,1,3,0,0,3,1,1,1,1,3,0],[0,1,1,1,1,1,1,3,3,1,1,1,1,1,1,0],[0,1,2,1,1,1,2,1,1,2,1,1,1,2,1,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,1,1,4,1,1,1,1,1,1,1,1,4,1,1,0],[0,0,1,1,1,0,1,1,1,1,0,1,1,1,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0],[0,1,0,0,1,1,1,1,1,1,1,1,0,0,1,0],[0,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0],[0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]];
@@ -604,7 +504,6 @@ function showAzul(){
   setTimeout(()=>{c.style.display='none';},5000);
 }
 
-// ── LOCK PANEL ──
 let typeTimer=null;
 function showLockPanel(msg,header){
   document.getElementById('lock-title').textContent=header;
@@ -619,7 +518,6 @@ function dismissLock(){
   document.getElementById('azul-sprite').style.display='none';
 }
 
-// ── LOG ──
 function addLog(text,color){
   const log=document.getElementById('scan-log');
   const el=document.createElement('div');el.className='log-entry';el.style.color=color||'var(--green)';
@@ -628,7 +526,6 @@ function addLog(text,color){
 }
 function ts(){const d=new Date();return[d.getHours(),d.getMinutes(),d.getSeconds()].map(n=>String(n).padStart(2,'0')).join(':');}
 
-// ── GLITCH ──
 function triggerGlitch(){
   const g=document.getElementById('glitch-frame');
   g.style.display='block';g.style.animation='none';void g.offsetWidth;
@@ -636,7 +533,6 @@ function triggerGlitch(){
   setTimeout(()=>{g.style.display='none';},600);
 }
 
-// ── BURST ──
 function spawnBurst(x,y){
   const el=document.createElement('div');el.className='burst';
   el.style.left=x+'px';el.style.top=y+'px';el.style.border='1px solid var(--green)';
@@ -644,7 +540,6 @@ function spawnBurst(x,y){
   setTimeout(()=>el.remove(),600);
 }
 
-// ── SCREENSHOT ──
 function takeScreenshot(){
   const flash=document.getElementById('screenshot-flash');
   flash.style.opacity='1';setTimeout(()=>{flash.style.opacity='0';},120);
@@ -663,7 +558,6 @@ function takeScreenshot(){
   addLog('SCAN CAPTURED // EVIDENCE LOGGED','var(--cyan)');
 }
 
-// ── GHOST SIGNALS ──
 function startGhostSignals(){
   function fire(){
     const h=Math.floor(Math.random()*360);
@@ -678,7 +572,6 @@ function startGhostSignals(){
   setTimeout(fire,18000+Math.random()*15000);
 }
 
-// ── STATUS TICK ──
 function startStatusTick(){
   setInterval(()=>{
     const d=new Date();
@@ -709,7 +602,6 @@ function showSysAlert(msg){
   setTimeout(()=>{el.style.display='none';},4200);
 }
 
-// ── RESIZE ──
 window.addEventListener('resize',setupLayout);
 document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 </script>
