@@ -579,6 +579,12 @@ function takeScreenshot(){
   ctx.drawImage(document.getElementById('ring-canvas'),0,0);
   ctx.fillStyle='rgba(0,255,136,0.55)';ctx.font='bold 10px Share Tech Mono';
   ctx.fillText('BUREAU OF REALITY // FIELD SCAN // '+ts(),12,H-14);
+  // Inside takeScreenshot()
+ctx.fillStyle = 'rgba(0, 255, 136, 0.8)';
+ctx.font = '14px "Share Tech Mono"';
+ctx.fillText(`ANOMALY LVL: ${S.anomalyLevel}`, 20, H - 40);
+ctx.fillText(`SECTOR: ${document.getElementById('hud-dir').textContent}`, 20, H - 20);
+
   const link=document.createElement('a');
   link.download='bureau-scan-'+Date.now()+'.png';
   link.href=out.toDataURL('image/png');
