@@ -45,14 +45,18 @@ body { background: #111; padding: 15px; }
 #bureau-terminal::before {
   content: "CLASSIFIED";
   position: absolute;
-  top: 50%; left: 50%;
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%) rotate(-12deg);
   font-family: 'VT323', monospace;
-  font-size: 4.5rem;
-  color: rgba(57,255,20,0.03);
+  font-size: 5rem; /* Slightly larger */
+  color: rgba(57, 255, 20, 0.08); /* Bumped from 0.03 to 0.08 */
   pointer-events: none;
-  z-index: 1;
+  z-index: 1; /* Sits behind the text (z-index 2) but above the background */
+  text-transform: uppercase;
+  letter-spacing: 10px;
 }
+
 
 .terminal-header {
   font-family: 'VT323', monospace;
@@ -76,7 +80,7 @@ body { background: #111; padding: 15px; }
   text-shadow: 0 0 10px var(--bureau-green);
   white-space: pre-wrap;
   position: relative;
-  z-index: 2;
+  z-index: 2; 
   animation: flicker 0.1s infinite;
 }
 
