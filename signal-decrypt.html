@@ -513,7 +513,8 @@ function compassLock(){
   showLockPanel(getLore('compassLock',S.anomalyLevel,S.targetHeading),'COMPASS LOCK');
   addLog('HEADING LOCKED: '+Math.round(S.targetHeading)+'°','var(--cyan)');
   S.anomalyLevel=Math.min(9,S.anomalyLevel+1);
-  document.getElementById('hud-level').textContent=String(S.anomalyLevel).padStart(2,'0');
+  document.getElementById('hud-level').textContent=String(S.anomalyLevel).padStart(2,'0'); localStorage.setItem('BUREAU_CLEARANCE', 'LVL_' + String(S.anomalyLevel).padStart(2,'0'));
+
   setTimeout(()=>{S.ringLock=false;setTimeout(setTarget,5000);},3500);
 }
 
@@ -571,7 +572,10 @@ function checkSequence(color){
         triggerGlitch();showAzul();
         showLockPanel("LEVEL 4 CLEARANCE ACHIEVED. You found all Bureau signatures in sequence. Mochkil and Azul acknowledge your compliance. CITIZEN: You are now a simulation variable.",'LEVEL 4 BREACH');
         addLog('LEVEL 4 SEQUENCE COMPLETE','var(--purple)');
-        S.anomalyLevel=4;document.getElementById('hud-level').textContent='04';
+    localStorage.setItem('BUREAU_CLEARANCE', 'LVL_04');
+localStorage.setItem('BUREAU_ANOMALY', S.lastDetectedColor || 'UNKNOWN');
+localStorage.setItem('BUREAU_TIMESTAMP', new Date().toISOString());
+    S.anomalyLevel=4;document.getElementById('hud-level').textContent='04';
         setTimeout(()=>{S.seqDone=0;S.seqGoal=['RED','BLUE','GREEN'].sort(()=>Math.random()-0.5);buildSeqPips();addLog('NEW SEQUENCE INITIATED','var(--orange)');},10000);
       },800);
     }else{
@@ -579,6 +583,9 @@ function checkSequence(color){
     }
   }
 }
+  localStorage.setItem('BUREAU_LAST_SCAN', col);
+localStorage.setItem('BUREAU_SCAN_COUNT', S.scanCount);
+
 
 // ── AZUL SPRITE ──
 function drawAzulSprite(canvas){
