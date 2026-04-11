@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GLITCH TALES</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Space+Mono:ital@0;1&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bureau-green: #39ff14;
+  --bureau-dim: #004422;
+  --terminal-bg: #050505;
+}
+
+#bureau-terminal {
+  background: var(--terminal-bg);
+  border: 1px solid var(--bureau-dim);
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+  max-width: 600px;
+  margin: 20px auto;
+  box-shadow: inset 0 0 50px #000;
+}
+
+/* The Scanline Effect */
+#bureau-terminal::after {
+  content: " ";
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+              linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  z-index: 2;
+  background-size: 100% 4px, 3px 100%;
+  pointer-events: none;
+}
+
+.terminal-header {
+  font-family: 'VT323', monospace;
+  color: var(--bureau-green);
+  font-size: 0.8rem;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--bureau-dim);
+  display: flex;
+  justify-content: space-between;
+}
+
+#terminal-output {
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--bureau-green);
+  font-size: 1rem;
+  line-height: 1.6;
+  min-height: 150px;
+  margin-bottom: 30px;
+  text-shadow: 0 0 10px var(--bureau-green);
+}
+
+.terminal-btn {
+  background: transparent;
+  border: 1px solid var(--bureau-green);
+  color: var(--bureau-green);
+  padding: 10px 20px;
+  font-family: 'VT323', monospace;
+  cursor: pointer;
+  transition: all 0.3s;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.terminal-btn:hover {
+  background: var(--bureau-green);
+  color: #000;
+  box-shadow: 0 0 20px var(--bureau-green);
+}
+
+</style>
+</head>
+<body>
+
+<div id="bureau-terminal">
+  <div class="terminal-header">
+    <span>SECURE FEED // ID: MAXIMUM_REALITY</span>
+    <span>STATUS: ENCRYPTED</span>
+  </div>
+
+  <div id="terminal-output">
+    [ SYSTEM READY. AWAITING SIGNAL DECRYPTION... ]
+  </div>
+
+  <div style="text-align: center;">
+    <button class="terminal-btn" onclick="decryptNext()">Request Transmission</button>
+  </div>
+</div>
+
+<script>
+// ———————————————————————————————————————————————————————————————————————————
+//  ENGINE DATA
+// ———————————————————————————————————————————————————————————————————————————
+const INGREDIENTS = {
+  CHARACTER: { tags: ['tired wizard', 'sentient toaster', 'retired mime', 'anxious librarian', 'confused robot', 'ghost accountant', 'time-traveling barista', 'quantum cat', 'discount oracle', 'sad detective', 'immortal plumber', 'overqualified snail'] },
+  SETTING: { tags: ['floating mall', 'abandoned moon café', 'inside a dream', 'the last bookstore', 'cursed elevator', 'underwater suburb', 'parallel post office', 'digital forest', 'neon monastery', 'forgotten theme park', 'fog-filled library', 'the edge of a map'] },
+  MOOD: { tags: ['melancholy but funny', 'existential panic', 'quietly hopeful', 'suspicious calm', 'nostalgic for things that never happened', 'cozy but wrong', 'aggressively neutral', 'tender chaos'] },
+  TWIST: { tags: ['time loop', 'identity swap', 'wrong universe', 'everyone already knew', 'it was a test', 'gravity optional', 'the narrator lied', 'it ends where it began', 'someone disappears slowly'] },
+  STYLE: { tags: ['poetic', 'chaotic', 'deadpan', 'extremely formal', 'breathless run-on', 'haiku energy', 'documentary', 'reluctant confession'] }
+};
+
+const templates = {
+  short: ['{character} woke up in {setting} with no explanation. The {mood} feeling had been there for weeks. Eventually, {twist}.'],
+  absurd: ['According to regulations, {character} was not allowed in {setting}. The rules said nothing about the {mood} atmosphere. {twist}. The ceiling applauded.'],
+  emotional: ['Some places hold grief like water holds light. {character} knew this. {setting} knew this too. {mood}, and then {twist}.'],
+  chaotic: ['REPORT: {character} entered {setting}. {mood} levels: CRITICAL. {twist}. Investigation ongoing.']
+};
+
+let state = { mode: 'short', chaos: false, modifiers: { weirdness: 50, drama: 30, absurdity: 60 } };
+let typewriterTimer = null;
+
+// ———————————————————————————————————————————————————————————————————————————
+//  CORE ENGINE
+// ———————————————————————————————————————————————————————————————————————————
+function getRandomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function buildStory() {
+  const char = getRandomItem(INGREDIENTS.CHARACTER.tags);
+  const setting = getRandomItem(INGREDIENTS.SETTING.tags);
+  const mood = getRandomItem(INGREDIENTS.MOOD.tags);
+  const twist = getRandomItem(INGREDIENTS.TWIST.tags);
+  
+  let template = getRandomItem(templates[state.mode] || templates.short);
+  let story = template.replace(/{character}/g, char).replace(/{setting}/g, setting).replace(/{mood}/g, mood).replace(/{twist}/g, twist);
+
+  if (state.modifiers.weirdness > 75) story += " Also, the floor was a different floor.";
+  if (state.chaos) {
+    const glitch = ['̶', '̴', '̵'];
+    story = story.split('').map(c => Math.random() < 0.05 ? c + getRandomItem(glitch) : c).join('');
+  }
+  return story;
+}
+
+// ———————————————————————————————————————————————————————————————————————————
+//  TERMINAL LOGIC
+// ———————————————————————————————————————————————————————————————————————————
+function typewriteStory(text) {
+  if (typewriterTimer) clearTimeout(typewriterTimer);
+  const el = document.getElementById('terminal-output');
+  el.textContent = '';
+  let i = 0;
+  function type() {
+    if (i < text.length) {
+      el.textContent += text[i];
+      i++;
+      typewriterTimer = setTimeout(type, 25);
+    }
+  }
+  type();
+}
+
+function decryptNext() {
+  const output = document.getElementById('terminal-output');
+  output.textContent = ">>> DECRYPTING INCOMING SIGNAL...";
+  
+  // Silent "Chaos" Logic
+  state.mode = getRandomItem(['short', 'absurd', 'emotional', 'chaotic']);
+  state.modifiers.weirdness = Math.floor(Math.random() * 100);
+  state.chaos = Math.random() > 0.85; // 15% chance of glitched text
+
+  setTimeout(() => {
+    const story = buildStory();
+    typewriteStory(story);
+  }, 1000);
+}
+
+</script>
+</body>
+</html>
