@@ -11,14 +11,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Orbitron:wght@400;700;900&display=swap');
 :root{
   --green:#00ff88;--green-dim:#00ff8855;--green-faint:#00ff8818;
-  --red:#ff2244;--cyan:#00ffff;--orange:#ff8800;--purple:#cc00ff;--bg:#000a04;
+  --red:#ff2244;--cyan:#00ffff;--orange:#ff8800;--purple:#cc00ff;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Share Tech Mono',monospace;color:var(--green);user-select:none}
 
 /* ── BOOT ── */
-#boot{position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:36px}
-.boot-logo{font-family:‘VT323’,monospace;font-size:clamp(26px,7vw,44px);color:var(–green);text-align:center;line-height:1.2;text-shadow:0 0 20px var(–green),0 0 40px var(–green-dim);letter-spacing:4px}
+#boot{position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:36px}
+.boot-logo{font-family:‘VT323’,monospace;font-size:clamp(24px,7vw,42px);color:var(–green);text-align:center;line-height:1.2;text-shadow:0 0 20px var(–green),0 0 40px var(–green-dim);letter-spacing:4px}
 .boot-divider{width:80%;height:1px;background:linear-gradient(90deg,transparent,var(–green),transparent)}
 .boot-warnings{font-size:10px;color:#004422;text-align:left;width:100%;line-height:1.9}
 .boot-warnings span{color:var(–green)}
@@ -29,68 +29,85 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Sh
 #portal-return:active{color:var(–green)}
 
 /* ── APP ── */
-#app{display:none;position:fixed;inset:0}
+#app{display:none;position:fixed;inset:0;width:100%;height:100%}
 
-/* VIDEO — no filter, full brightness so circle stays visible */
-#video-bg{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+/* VIDEO — explicit absolute sizing, no filter, no transform */
+#video-bg{
+position:absolute;
+top:0;left:0;
+width:100%;height:100%;
+object-fit:cover;
+z-index:1;
+display:block;
+/* iOS Safari sometimes needs this */
+-webkit-transform:translateZ(0);
+transform:translateZ(0);
+}
 
-/* FX OVERLAY — scanlines + tint combined, multiply only affects outside-ring area visually
-but we keep it very light so video stays visible */
-#fx-overlay{position:fixed;inset:0;z-index:2;pointer-events:none;
-background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.1) 2px,rgba(0,0,0,0.1) 4px),rgba(0,15,8,0.25);
-mix-blend-mode:normal}
+/* ALL canvas layers — must be transparent background */
+#terminal-canvas,#ring-canvas{
+position:absolute;
+top:0;left:0;
+width:100%;height:100%;
+z-index:2;
+pointer-events:none;
+background:transparent;
+}
+#ring-canvas{z-index:3;}
 
-/* TERMINAL CANVAS — rain drawn here, circle area left transparent in JS */
-#terminal-canvas{position:fixed;inset:0;z-index:3;pointer-events:none}
+/* Scanline overlay — very subtle, normal blend so it doesn’t darken video */
+#scanlines{
+position:absolute;top:0;left:0;width:100%;height:100%;
+z-index:4;pointer-events:none;
+background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.08) 3px,rgba(0,0,0,0.08) 4px);
+}
 
-/* RING CANVAS — draws the viewfinder ring/brackets on top */
-#ring-canvas{position:fixed;inset:0;z-index:5;pointer-events:none}
-
-/* HUD layers */
+/* HUD layers all z-index 5+ */
 #hud-top{position:fixed;top:0;left:0;right:0;z-index:6;padding:18px 18px 10px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none}
 .hud-block{display:flex;flex-direction:column;gap:3px}
 .hud-label{font-size:8px;color:#006633;letter-spacing:3px}
 .hud-value{font-family:‘VT323’,monospace;font-size:22px;color:var(–green);text-shadow:0 0 8px var(–green-dim);line-height:1}
 .hud-right{text-align:right}
-
 #compass-wrap{position:fixed;z-index:6;left:50%;transform:translateX(-50%);pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:3px}
 #compass-label{font-size:8px;color:#006633;letter-spacing:3px;text-align:center}
-
 #hud-bottom{position:fixed;bottom:0;left:0;right:0;z-index:6;padding:10px 18px 32px;pointer-events:none}
 #status-bar{font-size:9px;color:#006633;letter-spacing:2px;display:flex;justify-content:space-between;margin-bottom:6px}
 #scan-log{height:52px;overflow:hidden;display:flex;flex-direction:column-reverse;gap:2px}
 .log-entry{font-size:9px;letter-spacing:1px;line-height:1.4;opacity:0;transform:translateY(4px);animation:logIn 0.3s forwards;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @keyframes logIn{to{opacity:1;transform:translateY(0)}}
 
-/* tap zone */
+/* tap zone on top of everything visible but below modals */
 #tap-zone{position:fixed;inset:0;z-index:7;cursor:crosshair}
 
 /* lock panel */
-#lock-panel{position:fixed;left:50%;transform:translateX(-50%);z-index:8;width:calc(100% - 36px);max-width:380px;background:rgba(0,6,2,0.97);border:1px solid var(–green);padding:18px;display:none;box-shadow:0 0 40px var(–green-dim)}
+#lock-panel{position:fixed;left:50%;transform:translateX(-50%);z-index:9;width:calc(100% - 36px);max-width:380px;background:rgba(0,6,2,0.97);border:1px solid var(–green);padding:18px;display:none;box-shadow:0 0 40px var(–green-dim)}
 #lock-panel.active{display:block}
 #lock-header{font-family:‘Orbitron’,sans-serif;font-size:10px;letter-spacing:3px;color:var(–green);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
-#lock-level{font-size:9px;color:var(–orange);letter-spacing:2px}
+#lock-leveltext{font-size:9px;color:var(–orange);letter-spacing:2px}
 #lock-msg{font-family:‘VT323’,monospace;font-size:18px;color:var(–green);line-height:1.4;min-height:56px;text-shadow:0 0 8px var(–green-dim)}
 #lock-dismiss{margin-top:14px;font-size:9px;color:#006633;letter-spacing:3px;text-align:center;cursor:pointer;pointer-events:all;animation:blinkDim 1.5s step-end infinite}
 @keyframes blinkDim{0%,100%{opacity:0.6}50%{opacity:0.2}}
 
 /* azul sprite */
-#azul-sprite{position:fixed;z-index:7;pointer-events:none;display:none;image-rendering:pixelated;filter:drop-shadow(0 0 8px var(–cyan)) drop-shadow(0 0 16px var(–cyan));left:50%}
+#azul-sprite{position:fixed;z-index:8;pointer-events:none;display:none;image-rendering:pixelated;filter:drop-shadow(0 0 8px var(–cyan)) drop-shadow(0 0 16px var(–cyan));left:50%}
 @keyframes spriteFloat{0%,100%{transform:translateY(0) translateX(-50%)}50%{transform:translateY(-10px) translateX(-50%)}}
 @keyframes spriteIn{0%{opacity:0;filter:drop-shadow(0 0 40px var(–cyan)) brightness(3)}100%{opacity:1}}
 
 /* glitch frame */
-#glitch-frame{position:fixed;inset:0;z-index:9;pointer-events:none;display:none}
-@keyframes glitchFlicker{0%{opacity:1;clip-path:inset(8% 0 88% 0);background:rgba(0,255,136,0.07)}33%{opacity:0}66%{opacity:1;clip-path:inset(55% 0 8% 0);background:rgba(255,0,50,0.05)}100%{opacity:0}}
-
-/* seek pulse on ring canvas — handled in JS */
+#glitch-frame{position:fixed;inset:0;z-index:10;pointer-events:none;display:none}
+@keyframes glitchFlicker{
+0%{opacity:1;clip-path:inset(8% 0 88% 0);background:rgba(0,255,136,0.07)}
+33%{opacity:0;clip-path:inset(0 0 0 0);background:transparent}
+66%{opacity:1;clip-path:inset(55% 0 8% 0);background:rgba(255,34,68,0.05)}
+100%{opacity:0}
+}
 
 /* burst */
 .burst{position:fixed;border-radius:50%;pointer-events:none;z-index:6;transform:translate(-50%,-50%);animation:burstOut 0.5s ease-out forwards}
 @keyframes burstOut{0%{width:0;height:0;opacity:0.9}100%{width:100px;height:100px;opacity:0}}
 
 /* sys alert */
-#sys-alert{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:8;font-size:9px;color:var(–orange);letter-spacing:2px;background:rgba(0,0,0,0.85);border:1px solid var(–orange);padding:5px 12px;display:none;white-space:nowrap}
+#sys-alert{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:9;font-size:9px;color:var(–orange);letter-spacing:2px;background:rgba(0,0,0,0.85);border:1px solid var(–orange);padding:5px 12px;display:none;white-space:nowrap}
 @keyframes sysFade{0%,70%{opacity:1}100%{opacity:0}}
 
 /* seq pips */
@@ -104,9 +121,9 @@ mix-blend-mode:normal}
 @keyframes ghostFade{0%{opacity:0}10%{opacity:1}70%{opacity:1}100%{opacity:0}}
 
 /* screenshot btn */
-#screenshot-btn{position:fixed;bottom:100px;right:18px;z-index:8;width:40px;height:40px;background:rgba(0,8,3,0.85);border:1px solid var(–green-dim);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;pointer-events:all}
+#screenshot-btn{position:fixed;bottom:104px;right:16px;z-index:8;width:42px;height:42px;background:rgba(0,8,3,0.85);border:1px solid var(–green-dim);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;pointer-events:all}
 #screenshot-btn:active{background:var(–green-faint);border-color:var(–green)}
-#screenshot-flash{position:fixed;inset:0;z-index:10;background:#fff;opacity:0;pointer-events:none;transition:opacity 0.1s}
+#screenshot-flash{position:fixed;inset:0;z-index:11;background:#fff;opacity:0;pointer-events:none;transition:opacity 0.08s}
 </style>
 
 </head>
@@ -127,17 +144,22 @@ mix-blend-mode:normal}
   <div class="boot-divider"></div>
   <button id="boot-btn" onclick="initLens()">⬡ INITIALIZE BUREAU LENS ⬡</button>
   <div id="portal-return" onclick="window.location.href='Portal.html'">◀ RETURN TO BUREAU PORTAL</div>
-  <div class="boot-sub">MAXIMUM REALITY // BUREAU OF REALITY FIELD DIVISION</div>
+  <div class="boot-sub">MAXIMUM REALITY // BUREAU FIELD DIVISION</div>
 </div>
 
 <!-- APP -->
 
 <div id="app">
+  <!-- z-index 1: raw video, nothing above it in the circle area -->
   <video id="video-bg" autoplay playsinline muted></video>
-  <canvas id="video-canvas" style="display:none"></canvas>
-  <div id="fx-overlay"></div>
+  <!-- z-index 2: terminal rain — circle area cleared each frame -->
   <canvas id="terminal-canvas"></canvas>
+  <!-- z-index 3: ring/HUD drawn on canvas -->
   <canvas id="ring-canvas"></canvas>
+  <!-- z-index 4: very light scanlines only -->
+  <div id="scanlines"></div>
+
+<canvas id="video-canvas" style="display:none"></canvas>
 
   <div id="hud-top">
     <div class="hud-block">
@@ -160,12 +182,12 @@ mix-blend-mode:normal}
     <svg width="200" height="38" viewBox="0 0 200 38">
       <defs><linearGradient id="arcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
         <stop offset="0%" style="stop-color:transparent"/>
-        <stop offset="30%" style="stop-color:#00ff88;stop-opacity:0.5"/>
+        <stop offset="35%" style="stop-color:#00ff88;stop-opacity:0.5"/>
         <stop offset="50%" style="stop-color:#00ff88"/>
-        <stop offset="70%" style="stop-color:#00ff88;stop-opacity:0.5"/>
+        <stop offset="65%" style="stop-color:#00ff88;stop-opacity:0.5"/>
         <stop offset="100%" style="stop-color:transparent"/>
       </linearGradient></defs>
-      <text id="compass-text" x="100" y="14" fill="#00ff88" font-family="Share Tech Mono" font-size="10" text-anchor="middle" letter-spacing="4" opacity="0.7">N    NE    E    SE    S</text>
+      <text id="compass-text" x="100" y="14" fill="#00ff88" font-family="Share Tech Mono" font-size="10" text-anchor="middle" letter-spacing="4" opacity="0.8">N    NE    E    SE    S</text>
       <line x1="100" y1="18" x2="100" y2="30" stroke="#00ff88" stroke-width="2" opacity="0.8"/>
       <line x1="75" y1="22" x2="125" y2="22" stroke="url(#arcGrad)" stroke-width="1"/>
     </svg>
@@ -179,7 +201,10 @@ mix-blend-mode:normal}
   <div id="sys-alert"></div>
 
   <div id="lock-panel">
-    <div id="lock-header"><span id="lock-title">SIGNAL LOCKED</span><span id="lock-level">THREAT: LVL 01</span></div>
+    <div id="lock-header">
+      <span id="lock-title">SIGNAL LOCKED</span>
+      <span id="lock-leveltext">THREAT: LVL 01</span>
+    </div>
     <div id="lock-msg"></div>
     <div id="lock-dismiss" onclick="dismissLock()">[ TAP TO ACKNOWLEDGE ]</div>
   </div>
@@ -195,41 +220,52 @@ mix-blend-mode:normal}
 </div>
 
 <script>
-// ── STATE ──────────────────────────────────────────────────
+// ── STATE ──
 const S={
-  heading:0, targetHeading:null, signalStrength:0,
-  anomalyLevel:1, locked:false,
-  seqGoal:['RED','BLUE','GREEN'], seqDone:0,
-  scanCount:0, vfCx:0, vfCy:0, vfR:140,
-  ringAlertColor:null, ringLockColor:null, seekActive:false
+  heading:0,targetHeading:null,signalStrength:0,
+  anomalyLevel:1,locked:false,
+  seqGoal:['RED','BLUE','GREEN'],seqDone:0,
+  scanCount:0,vfCx:0,vfCy:0,vfR:140,
+  ringAlert:false,ringLock:false,seekActive:false,
+  ringPhase:0
 };
 
-// ── LORE ───────────────────────────────────────────────────
+// ── LORE ──
 const LORE={
-  RED:["DANGER: RED-SHIFT ANOMALY DETECTED. The object is a Level {L} simulation error. Do not touch. Proceed to the nearest shredder.","ALERT: CRIMSON BREACH. Bureau analysts confirm this object should not exist in Sector 7G. Report immediately.","WARNING: RED SIGNATURE. This is a remnant from Timeline 3. It bleeds entropy into your local reality matrix."],
-  BLUE:["AZUL QUANTUM SIGNATURE FOUND. Entity trace detected. Azul was here. The hairless one watches from the void.","CYAN RESONANCE: Bureau frequency match 99.7%. This object vibrates at the same frequency as the quantum field. Do not look directly.","BLUE-PHASE LOCK. You have found a Bureau-issued reality anchor. It prevents local simulation collapse. Step away slowly."],
-  GREEN:["SIGNAL ECHO: Green-spectrum Bureau transmission encoded in this surface. The Maximum Reality bleeds through.","ORGANIC BANDWIDTH DETECTED. This object is routing consciousness data. The Bureau says thank you for your compliance.","VOID-BLOOM RESIDUE. Green phosphorescence indicates recent entity passage. Azul or Mochkil. Possibly both."],
-  YELLOW:["CAUTION: AMBER PROTOCOL. This object is under Bureau surveillance. You are being watched watching it.","SIGNAL NOISE: Yellow-band interference. Someone in a parallel timeline is looking at the same object right now."],
-  NEUTRAL:["BACKGROUND RADIATION: No anomaly detected. Or the anomaly is hiding. It knows you are looking.","SCAN COMPLETE: Object appears nominal. Bureau records show 3,847 identical objects in this zip code. Suspicious.","LOW SIGNAL: Reality index within acceptable parameters. For now."],
-  compass:["DIRECTIVE: Turn to {H} degrees to intercept a Bureau transmission in the local magnetic field.","SIGNAL TRIANGULATED at bearing {H} degrees. Physical orientation required. Turn, citizen.","VOID-BEACON active at {H} degrees. Face the signal to decrypt entity message."],
-  compassLock:["TRANSMISSION DECRYPTED. You faced the void and it blinked first. Azul acknowledges your compliance.","HEADING CONFIRMED. The simulation logged this moment.","SIGNAL INTERCEPTED. The message: There is only the Bureau. There is only Maximum Reality."],
+  RED:["DANGER: RED-SHIFT ANOMALY DETECTED. This object is a Level {L} simulation error. Do not touch. Proceed to the nearest shredder.","ALERT: CRIMSON BREACH. Bureau analysts confirm this object should not exist in Sector 7G. Report immediately.","WARNING: RED SIGNATURE. A remnant from Timeline 3. It bleeds entropy into your local reality matrix."],
+  BLUE:["AZUL QUANTUM SIGNATURE FOUND. Entity trace detected. Azul was here. The hairless one watches from the void.","CYAN RESONANCE: Bureau frequency match 99.7%. This object vibrates at quantum field frequency. Do not look directly.","BLUE-PHASE LOCK. A Bureau-issued reality anchor detected. It prevents local simulation collapse. Step away slowly."],
+  GREEN:["SIGNAL ECHO: Green-spectrum Bureau transmission encoded in this surface. The Maximum Reality bleeds through.","ORGANIC BANDWIDTH DETECTED. This object routes consciousness data. The Bureau thanks you for your compliance.","VOID-BLOOM RESIDUE. Green phosphorescence indicates recent entity passage. Azul or Mochkil. Possibly both."],
+  YELLOW:["CAUTION: AMBER PROTOCOL. This object is under Bureau surveillance. You are being watched watching it.","SIGNAL NOISE: Yellow-band interference. A parallel-timeline citizen is looking at the same object right now."],
+  NEUTRAL:["BACKGROUND RADIATION: No anomaly detected. Or the anomaly is hiding. It knows you are looking.","SCAN COMPLETE: Object nominal. Bureau records show 3,847 identical objects in this zip code. Suspicious.","LOW SIGNAL: Reality index within acceptable parameters. For now."],
+  compass:["DIRECTIVE: Turn to {H} degrees to intercept a Bureau transmission embedded in the local magnetic field.","SIGNAL TRIANGULATED at bearing {H} degrees. Physical orientation required to decode. Turn, citizen.","VOID-BEACON active at {H} degrees. Face the signal to decrypt entity message."],
+  compassLock:["TRANSMISSION DECRYPTED. You faced the void and it blinked first. Azul acknowledges your compliance.","HEADING CONFIRMED. The simulation logged this moment. You are now a Bureau variable.","SIGNAL INTERCEPTED. The message: There is only the Bureau. There is only Maximum Reality."],
   ghost:["ANOMALY AT {H} DEG -- RESOLVING...","PHANTOM SIGNAL // TRACE LOST","ENTITY DETECTED // SIGNAL DEGRADED","VOID BREACH AT {H} DEG -- CLOSING...","CLASSIFIED // REDACTED // PROCEED"]
 };
-function getLore(key,lvl,h){const a=LORE[key]||LORE.NEUTRAL;let m=a[Math.floor(Math.random()*a.length)];return m.replace('{L}',lvl||1).replace('{H}',Math.round(h||S.heading));}
+function getLore(k,lvl,h){
+  const a=LORE[k]||LORE.NEUTRAL;
+  return a[Math.floor(Math.random()*a.length)].replace('{L}',lvl||1).replace('{H}',Math.round(h!=null?h:S.heading));
+}
 
-// ── BOOT / INIT ────────────────────────────────────────────
+// ── BOOT ──
 async function initLens(){
   const btn=document.getElementById('boot-btn');
   btn.textContent='INITIALIZING...';btn.disabled=true;
   try{
-    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}});
-    document.getElementById('video-bg').srcObject=stream;
+    const stream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}
+    });
+    const vid=document.getElementById('video-bg');
+    vid.srcObject=stream;
+    // iOS needs play() called explicitly after srcObject
+    vid.onloadedmetadata=()=>vid.play().catch(()=>{});
+
     await requestOrientation();
     document.getElementById('boot').style.display='none';
     document.getElementById('app').style.display='block';
+
     setupLayout();
     startTerminalRain();
-    startRingDraw();
+    startRingLoop();
     startCompassTick();
     startGhostSignals();
     startStatusTick();
@@ -246,157 +282,183 @@ async function initLens(){
 }
 
 async function requestOrientation(){
-  return new Promise(resolve=>{
+  return new Promise(res=>{
     if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
       DeviceOrientationEvent.requestPermission().then(r=>{
         if(r==='granted'){
           window.addEventListener('deviceorientationabsolute',handleOrientation,true);
           window.addEventListener('deviceorientation',handleOrientation,true);
         }
-        resolve();
-      }).catch(()=>resolve());
+        res();
+      }).catch(()=>res());
     }else{
       window.addEventListener('deviceorientationabsolute',handleOrientation,true);
       window.addEventListener('deviceorientation',handleOrientation,true);
-      resolve();
+      res();
     }
   });
 }
 
-// ── LAYOUT ────────────────────────────────────────────────
+// ── LAYOUT ──
 function setupLayout(){
   const W=window.innerWidth,H=window.innerHeight;
   const r=Math.min(W,H)*0.36;
   const cy=H*0.42;
-  S.vfCx=W/2; S.vfCy=cy; S.vfR=r;
+  S.vfCx=W/2;S.vfCy=cy;S.vfR=r;
 
-  // Size canvases
   ['terminal-canvas','ring-canvas'].forEach(id=>{
     const c=document.getElementById(id);
-    c.width=W; c.height=H;
+    c.width=W;c.height=H;
+    c.style.width=W+'px';c.style.height=H+'px';
   });
 
-  // Position compass
-  document.getElementById('compass-wrap').style.top=(cy-r-58)+'px';
-  // Seq pips
+  document.getElementById('compass-wrap').style.top=(cy-r-60)+'px';
   document.getElementById('seq-track').style.top=(cy-48)+'px';
-  // Lock panel below circle
-  document.getElementById('lock-panel').style.top=(cy+r+16)+'px';
-  // Ghost signal above circle
-  document.getElementById('ghost-signal').style.top=(cy-r-82)+'px';
-  // Azul sprite centre of circle
+  document.getElementById('lock-panel').style.top=(cy+r+18)+'px';
+  document.getElementById('ghost-signal').style.top=(cy-r-84)+'px';
   const az=document.getElementById('azul-sprite');
-  az.style.left='50%'; az.style.top=(cy-r*0.5)+'px';
+  az.style.left='50%';az.style.top=(cy-r*0.55)+'px';
 }
 
-// ── TERMINAL RAIN ──────────────────────────────────────────
+// ── TERMINAL RAIN ──
+// Key fix: we clearRect the circle each frame so video shows through
 const WORDS=['REDACT','VOID','PROTOCOL','CITIZEN','BUREAU','SIGNAL','ANOMALY','DECRYPT','MAXIMUM','REALITY','CLASSIFIED','AZUL','MOCHKIL','ENTITY','BREACH','SECTOR','DELTA','OMEGA','DIRECTIVE','COMPLY','QUANTUM','SIMULATION','COLLAPSE','TIMELINE','FIELD','OBSERVE'];
-let rainCtx,rainCols,rainDrops;
+let rainCtx,rainCols,rainDrops,rainInited=false;
+
 function startTerminalRain(){
   const c=document.getElementById('terminal-canvas');
   rainCtx=c.getContext('2d');
   rainCols=Math.floor(c.width/14);
   rainDrops=Array.from({length:rainCols},()=>Math.random()*-c.height);
-  setInterval(drawRain,120); // slowed for GPU
+  rainInited=true;
+  setInterval(drawRain,120);
 }
+
 function drawRain(){
+  if(!rainInited)return;
   const c=document.getElementById('terminal-canvas');
-  const W=c.width,H=c.height,cx=S.vfCx,cy=S.vfCy,r=S.vfR;
-  rainCtx.fillStyle='rgba(0,8,3,0.20)';
+  const W=c.width,H=c.height;
+  const cx=S.vfCx,cy=S.vfCy,r=S.vfR;
+
+  // Darken outside only — fill full canvas dark, then punch circle back to transparent
+  rainCtx.fillStyle='rgba(0,8,3,0.22)';
   rainCtx.fillRect(0,0,W,H);
+
+  // *** CRITICAL: clear the circle area so video shows through ***
+  rainCtx.save();
+  rainCtx.globalCompositeOperation='destination-out';
+  rainCtx.beginPath();
+  rainCtx.arc(cx,cy,r,0,Math.PI*2);
+  rainCtx.fillStyle='rgba(0,0,0,1)';
+  rainCtx.fill();
+  rainCtx.restore();
+
+  // Draw rain characters only outside the circle
   rainCtx.font='12px Share Tech Mono';
   for(let i=0;i<rainCols;i++){
     const x=i*14+7,y=rainDrops[i];
-    // skip inside viewfinder circle — keep that area showing raw video
     const dx=x-cx,dy=y-cy;
-    if(dx*dx+dy*dy<(r+10)*(r+10)){rainDrops[i]+=14;continue;}
+    if(dx*dx+dy*dy<(r+14)*(r+14)){rainDrops[i]+=14;continue;}
     const w=WORDS[Math.floor(Math.random()*WORDS.length)];
     rainCtx.fillStyle='#ccffdd';
     rainCtx.fillText(w[Math.floor(Math.random()*w.length)],x,y);
-    rainCtx.fillStyle='rgba(0,255,136,0.22)';
+    rainCtx.fillStyle='rgba(0,255,136,0.2)';
     rainCtx.fillText(WORDS[Math.floor(Math.random()*WORDS.length)][0],x,y-14);
     rainDrops[i]+=14;
     if(rainDrops[i]>H+20)rainDrops[i]=Math.random()*-200;
   }
 }
 
-// ── RING CANVAS DRAW ───────────────────────────────────────
-// Draws the viewfinder ring, tick marks, seek dashes — replaces CSS rings
-let ringPhase=0;
-function startRingDraw(){
+// ── RING CANVAS LOOP ──
+function startRingLoop(){
   const c=document.getElementById('ring-canvas');
   const ctx=c.getContext('2d');
   function frame(){
     ctx.clearRect(0,0,c.width,c.height);
-    const cx=S.vfCx,cy=S.vfCy,r=S.vfR;
-    ringPhase+=0.015;
-
-    // Seek dashed ring (orange, when seeking)
-    if(S.seekActive){
-      ctx.save();
-      ctx.strokeStyle='rgba(255,136,0,0.7)';
-      ctx.lineWidth=2;
-      ctx.setLineDash([8,8]);
-      ctx.lineDashOffset=-ringPhase*30;
-      ctx.beginPath();ctx.arc(cx,cy,r+28,0,Math.PI*2);ctx.stroke();
-      ctx.restore();
-    }
-
-    // Outer ring
-    const outerPulse=0.35+0.15*Math.sin(ringPhase);
-    const ringColor=S.ringAlertColor||S.ringLockColor||`rgba(0,255,136,${outerPulse})`;
-    ctx.strokeStyle=ringColor;
-    ctx.lineWidth=S.ringAlertColor?2:1;
-    ctx.setLineDash([]);
-    ctx.beginPath();ctx.arc(cx,cy,r+8,0,Math.PI*2);ctx.stroke();
-
-    // Inner ring
-    ctx.strokeStyle=`rgba(0,255,136,${outerPulse*0.4})`;
-    ctx.lineWidth=1;
-    ctx.beginPath();ctx.arc(cx,cy,r-10,0,Math.PI*2);ctx.stroke();
-
-    // Tick marks around ring
-    ctx.strokeStyle='rgba(0,255,136,0.4)';
-    for(let a=0;a<360;a+=15){
-      const rad=a*Math.PI/180;
-      const len=a%90===0?12:a%45===0?7:4;
-      const inner=r+8,outer=inner+len;
-      ctx.beginPath();
-      ctx.moveTo(cx+Math.cos(rad)*inner,cy+Math.sin(rad)*inner);
-      ctx.lineTo(cx+Math.cos(rad)*outer,cy+Math.sin(rad)*outer);
-      ctx.stroke();
-    }
-
-    // Corner bracket cuts in ring
-    [[0,Math.PI*0.18],[Math.PI*0.5,Math.PI*0.68],[Math.PI,Math.PI*1.18],[Math.PI*1.5,Math.PI*1.68]].forEach(([s,e])=>{
-      ctx.strokeStyle='rgba(0,255,136,0.9)';ctx.lineWidth=2;
-      ctx.beginPath();ctx.arc(cx,cy,r+8,s,e);ctx.stroke();
-    });
-
-    // Crosshair
-    ctx.strokeStyle='rgba(0,255,136,0.45)';ctx.lineWidth=1;ctx.setLineDash([]);
-    ctx.beginPath();ctx.moveTo(cx,cy-16);ctx.lineTo(cx,cy+16);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(cx-16,cy);ctx.lineTo(cx+16,cy);ctx.stroke();
-
-    // Lock glow
-    if(S.ringLockColor){
-      ctx.strokeStyle=S.ringLockColor;ctx.lineWidth=3;
-      ctx.shadowColor=S.ringLockColor;ctx.shadowBlur=20;
-      ctx.beginPath();ctx.arc(cx,cy,r+8,0,Math.PI*2);ctx.stroke();
-      ctx.shadowBlur=0;
-    }
-
+    drawRing(ctx);
+    S.ringPhase+=0.015;
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
 }
 
-// ── ORIENTATION ────────────────────────────────────────────
+function drawRing(ctx){
+  const cx=S.vfCx,cy=S.vfCy,r=S.vfR;
+  const pulse=0.35+0.15*Math.sin(S.ringPhase);
+
+  // Seek dashes (orange rotating)
+  if(S.seekActive){
+    ctx.save();
+    ctx.strokeStyle='rgba(255,136,0,0.65)';
+    ctx.lineWidth=2;
+    ctx.setLineDash([10,10]);
+    ctx.lineDashOffset=-S.ringPhase*25;
+    ctx.beginPath();ctx.arc(cx,cy,r+26,0,Math.PI*2);ctx.stroke();
+    ctx.restore();
+  }
+
+  // Lock glow
+  if(S.ringLock){
+    ctx.save();
+    ctx.shadowColor='rgba(0,255,255,0.8)';ctx.shadowBlur=24;
+    ctx.strokeStyle='rgba(0,255,255,0.9)';ctx.lineWidth=3;
+    ctx.setLineDash([]);
+    ctx.beginPath();ctx.arc(cx,cy,r+8,0,Math.PI*2);ctx.stroke();
+    ctx.restore();
+  }
+
+  // Alert flash (red)
+  if(S.ringAlert){
+    ctx.strokeStyle='rgba(255,34,68,0.9)';ctx.lineWidth=2;ctx.setLineDash([]);
+    ctx.beginPath();ctx.arc(cx,cy,r+8,0,Math.PI*2);ctx.stroke();
+  }
+
+  // Main outer ring
+  if(!S.ringAlert&&!S.ringLock){
+    ctx.strokeStyle=`rgba(0,255,136,${pulse})`;
+    ctx.lineWidth=1.5;ctx.setLineDash([]);
+    ctx.beginPath();ctx.arc(cx,cy,r+8,0,Math.PI*2);ctx.stroke();
+  }
+
+  // Inner ring
+  ctx.strokeStyle=`rgba(0,255,136,${pulse*0.35})`;
+  ctx.lineWidth=1;ctx.setLineDash([]);
+  ctx.beginPath();ctx.arc(cx,cy,r-10,0,Math.PI*2);ctx.stroke();
+
+  // Tick marks
+  ctx.setLineDash([]);
+  for(let a=0;a<360;a+=15){
+    const rad=a*(Math.PI/180);
+    const len=a%90===0?14:a%45===0?8:4;
+    const ri=r+9,ro=ri+len;
+    ctx.strokeStyle=a%90===0?'rgba(0,255,136,0.7)':'rgba(0,255,136,0.35)';
+    ctx.lineWidth=a%90===0?1.5:1;
+    ctx.beginPath();
+    ctx.moveTo(cx+Math.cos(rad)*ri,cy+Math.sin(rad)*ri);
+    ctx.lineTo(cx+Math.cos(rad)*ro,cy+Math.sin(rad)*ro);
+    ctx.stroke();
+  }
+
+  // Corner bracket arcs
+  const brackets=[[-.1,.3],[Math.PI*.4,Math.PI*.8],[Math.PI*.9,Math.PI*1.3],[Math.PI*1.4,Math.PI*1.8]];
+  ctx.strokeStyle='rgba(0,255,136,0.85)';ctx.lineWidth=2.5;
+  brackets.forEach(([s,e])=>{
+    ctx.beginPath();ctx.arc(cx,cy,r+8,s,e);ctx.stroke();
+  });
+
+  // Crosshair
+  ctx.strokeStyle='rgba(0,255,136,0.4)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(cx,cy-18);ctx.lineTo(cx,cy+18);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx-18,cy);ctx.lineTo(cx+18,cy);ctx.stroke();
+  // Center dot
+  ctx.fillStyle='rgba(0,255,136,0.5)';
+  ctx.beginPath();ctx.arc(cx,cy,2,0,Math.PI*2);ctx.fill();
+}
+
+// ── ORIENTATION ──
 function handleOrientation(e){
-  let h=0;
-  if(e.webkitCompassHeading!==undefined)h=e.webkitCompassHeading;
-  else if(e.alpha!==null)h=(360-e.alpha+360)%360;
-  S.heading=h;
+  if(e.webkitCompassHeading!=null)S.heading=e.webkitCompassHeading;
+  else if(e.alpha!=null)S.heading=(360-e.alpha+360)%360;
 }
 const DIRS=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
 function hDir(h){return DIRS[Math.round(h/22.5)%16];}
@@ -407,7 +469,7 @@ function startCompassTick(){
     document.getElementById('hud-heading').textContent=h+'°';
     document.getElementById('hud-dir').textContent=hDir(h);
     updateCompassArc(h);
-    if(S.targetHeading!==null&&!S.locked){
+    if(S.targetHeading!=null&&!S.locked){
       const diff=Math.abs(((h-S.targetHeading)+360)%360);
       const delta=Math.min(diff,360-diff);
       const sig=Math.max(0,100-delta*2);
@@ -435,28 +497,27 @@ function updateCompassArc(h){
 
 function setTarget(){
   S.targetHeading=Math.floor(Math.random()*360);
-  S.locked=false;S.seekActive=false;
-  S.ringAlertColor=null;S.ringLockColor=null;
+  S.locked=false;S.seekActive=false;S.ringAlert=false;S.ringLock=false;
   document.getElementById('hud-signal').style.color='var(--green)';
   document.getElementById('hud-mode').textContent='SCANNING';
   addLog(getLore('compass',S.anomalyLevel,S.targetHeading),'var(--orange)');
 }
 
 function compassLock(){
-  S.locked=true;S.seekActive=false;
-  S.ringLockColor='rgba(0,255,255,0.9)';
+  if(S.locked)return;
+  S.locked=true;S.seekActive=false;S.ringLock=true;
   document.getElementById('hud-signal').textContent='100%';
   document.getElementById('hud-mode').textContent='LOCKED';
   document.getElementById('hud-signal').style.color='var(--cyan)';
   triggerGlitch();showAzul();
   showLockPanel(getLore('compassLock',S.anomalyLevel,S.targetHeading),'COMPASS LOCK');
-  addLog('HEADING LOCKED: '+Math.round(S.targetHeading)+'deg','var(--cyan)');
+  addLog('HEADING LOCKED: '+Math.round(S.targetHeading)+'°','var(--cyan)');
   S.anomalyLevel=Math.min(9,S.anomalyLevel+1);
   document.getElementById('hud-level').textContent=String(S.anomalyLevel).padStart(2,'0');
-  setTimeout(()=>{S.ringLockColor=null;setTimeout(setTarget,5000);},3000);
+  setTimeout(()=>{S.ringLock=false;setTimeout(setTarget,5000);},3500);
 }
 
-// ── COLOR TAP ──────────────────────────────────────────────
+// ── COLOR TAP ──
 function onTap(e){
   if(S.locked)return;
   const x=e.clientX||S.vfCx,y=e.clientY||S.vfCy;
@@ -464,7 +525,8 @@ function onTap(e){
   const video=document.getElementById('video-bg');
   const canvas=document.getElementById('video-canvas');
   canvas.width=video.videoWidth||320;canvas.height=video.videoHeight||240;
-  const ctx=canvas.getContext('2d');ctx.drawImage(video,0,0,canvas.width,canvas.height);
+  const ctx=canvas.getContext('2d');
+  ctx.drawImage(video,0,0,canvas.width,canvas.height);
   const sx=Math.min(Math.floor(x*(canvas.width/window.innerWidth)),canvas.width-1);
   const sy=Math.min(Math.floor(y*(canvas.height/window.innerHeight)),canvas.height-1);
   const px=ctx.getImageData(sx,sy,1,1).data;
@@ -475,7 +537,7 @@ function onTap(e){
   const hex='#'+[px[0],px[1],px[2]].map(v=>v.toString(16).padStart(2,'0')).join('').toUpperCase();
   addLog('SCAN '+String(S.scanCount).padStart(3,'0')+': '+col+' ['+hex+']',colColor(col));
   triggerGlitch();
-  if(col==='RED'){S.ringAlertColor='rgba(255,34,68,0.9)';setTimeout(()=>{S.ringAlertColor=null;},2000);}
+  if(col==='RED'){S.ringAlert=true;setTimeout(()=>{S.ringAlert=false;},2000);}
   if(col==='BLUE')showAzul();
 }
 
@@ -490,7 +552,7 @@ function classifyColor(r,g,b){
 }
 function colColor(n){return{RED:'var(--red)',BLUE:'var(--cyan)',GREEN:'var(--green)',YELLOW:'var(--orange)',NEUTRAL:'#006633'}[n]||'#006633';}
 
-// ── SEQUENCE ───────────────────────────────────────────────
+// ── SEQUENCE ──
 function buildSeqPips(){
   const t=document.getElementById('seq-track');t.innerHTML='';
   S.seqGoal.forEach((_,i)=>{
@@ -518,14 +580,14 @@ function checkSequence(color){
   }
 }
 
-// ── AZUL SPRITE ────────────────────────────────────────────
+// ── AZUL SPRITE ──
 function drawAzulSprite(canvas){
   const Z=6;
   const P=[[0,0,0,3,3,0,0,0,0,0,0,3,3,0,0,0],[0,0,3,1,1,3,0,0,0,0,3,1,1,3,0,0],[0,3,1,1,1,1,3,0,0,3,1,1,1,1,3,0],[0,1,1,1,1,1,1,3,3,1,1,1,1,1,1,0],[0,1,2,1,1,1,2,1,1,2,1,1,1,2,1,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,1,1,4,1,1,1,1,1,1,1,1,4,1,1,0],[0,0,1,1,1,0,1,1,1,1,0,1,1,1,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0],[0,1,0,0,1,1,1,1,1,1,1,1,0,0,1,0],[0,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0],[0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]];
   canvas.width=16*Z;canvas.height=16*Z;
   const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
   const C={1:'#00ccff',2:'#00ffff',3:'#0088aa',4:'#ff88aa'};
-  P.forEach((row,ry)=>row.forEach((v,cx)=>{if(!v)return;ctx.fillStyle=C[v];ctx.fillRect(cx*Z,ry*Z,Z,Z);}));
+  P.forEach((row,ry)=>row.forEach((v,x)=>{if(!v)return;ctx.fillStyle=C[v];ctx.fillRect(x*Z,ry*Z,Z,Z);}));
 }
 function showAzul(){
   const c=document.getElementById('azul-sprite');
@@ -535,24 +597,22 @@ function showAzul(){
   setTimeout(()=>{c.style.display='none';},5000);
 }
 
-// ── LOCK PANEL ─────────────────────────────────────────────
+// ── LOCK PANEL ──
 let typeTimer=null;
 function showLockPanel(msg,header){
-  const p=document.getElementById('lock-panel');
   document.getElementById('lock-title').textContent=header;
-  document.getElementById('lock-level').textContent='THREAT: LVL '+String(S.anomalyLevel).padStart(2,'0');
+  document.getElementById('lock-leveltext').textContent='THREAT: LVL '+String(S.anomalyLevel).padStart(2,'0');
   const m=document.getElementById('lock-msg');m.textContent='';
-  p.classList.add('active');
+  document.getElementById('lock-panel').classList.add('active');
   if(typeTimer)clearInterval(typeTimer);
   let i=0;typeTimer=setInterval(()=>{m.textContent+=msg[i++];if(i>=msg.length)clearInterval(typeTimer);},26);
 }
 function dismissLock(){
   document.getElementById('lock-panel').classList.remove('active');
   document.getElementById('azul-sprite').style.display='none';
-  if(S.locked&&S.targetHeading===null)setTarget();
 }
 
-// ── SCAN LOG ───────────────────────────────────────────────
+// ── LOG ──
 function addLog(text,color){
   const log=document.getElementById('scan-log');
   const el=document.createElement('div');el.className='log-entry';el.style.color=color||'var(--green)';
@@ -561,16 +621,15 @@ function addLog(text,color){
 }
 function ts(){const d=new Date();return[d.getHours(),d.getMinutes(),d.getSeconds()].map(n=>String(n).padStart(2,'0')).join(':');}
 
-// ── GLITCH ─────────────────────────────────────────────────
+// ── GLITCH ──
 function triggerGlitch(){
   const g=document.getElementById('glitch-frame');
-  g.style.display='block';g.style.background='rgba(0,255,136,0.06)';
-  g.style.animation='none';void g.offsetWidth;
+  g.style.display='block';g.style.animation='none';void g.offsetWidth;
   g.style.animation='glitchFlicker 0.15s step-end 3';
   setTimeout(()=>{g.style.display='none';},600);
 }
 
-// ── BURST ──────────────────────────────────────────────────
+// ── BURST ──
 function spawnBurst(x,y){
   const el=document.createElement('div');el.className='burst';
   el.style.left=x+'px';el.style.top=y+'px';el.style.border='1px solid var(--green)';
@@ -578,32 +637,18 @@ function spawnBurst(x,y){
   setTimeout(()=>el.remove(),600);
 }
 
-// ── SCREENSHOT ─────────────────────────────────────────────
+// ── SCREENSHOT ──
 function takeScreenshot(){
-  // Flash effect
   const flash=document.getElementById('screenshot-flash');
   flash.style.opacity='1';setTimeout(()=>{flash.style.opacity='0';},120);
-
-  // Composite: video + UI onto one canvas
   const W=window.innerWidth,H=window.innerHeight;
   const out=document.createElement('canvas');out.width=W;out.height=H;
   const ctx=out.getContext('2d');
-
-  // Draw video frame
-  const vid=document.getElementById('video-bg');
-  ctx.drawImage(vid,0,0,W,H);
-
-  // Draw terminal rain canvas
+  ctx.drawImage(document.getElementById('video-bg'),0,0,W,H);
   ctx.drawImage(document.getElementById('terminal-canvas'),0,0);
-  // Draw ring canvas
   ctx.drawImage(document.getElementById('ring-canvas'),0,0);
-
-  // Bureau watermark
-  ctx.fillStyle='rgba(0,255,136,0.5)';
-  ctx.font='10px Share Tech Mono';
-  ctx.fillText('BUREAU OF REALITY // FIELD SCAN // '+ts(),12,H-16);
-
-  // Download
+  ctx.fillStyle='rgba(0,255,136,0.55)';ctx.font='bold 10px Share Tech Mono';
+  ctx.fillText('BUREAU OF REALITY // FIELD SCAN // '+ts(),12,H-14);
   const link=document.createElement('a');
   link.download='bureau-scan-'+Date.now()+'.png';
   link.href=out.toDataURL('image/png');
@@ -611,7 +656,7 @@ function takeScreenshot(){
   addLog('SCAN CAPTURED // EVIDENCE LOGGED','var(--cyan)');
 }
 
-// ── GHOST SIGNALS ──────────────────────────────────────────
+// ── GHOST SIGNALS ──
 function startGhostSignals(){
   function fire(){
     const h=Math.floor(Math.random()*360);
@@ -620,13 +665,13 @@ function startGhostSignals(){
     el.textContent=msg;el.style.display='block';el.style.animation='none';
     void el.offsetWidth;el.style.animation='ghostFade 3s forwards';
     addLog('GHOST: '+msg,'var(--purple)');
-    setTimeout(()=>{el.style.display='none';},3100);
+    setTimeout(()=>{el.style.display='none';},3200);
     setTimeout(fire,28000+Math.random()*28000);
   }
   setTimeout(fire,18000+Math.random()*15000);
 }
 
-// ── STATUS TICK ────────────────────────────────────────────
+// ── STATUS TICK ──
 function startStatusTick(){
   setInterval(()=>{
     const d=new Date();
@@ -657,8 +702,8 @@ function showSysAlert(msg){
   setTimeout(()=>{el.style.display='none';},4200);
 }
 
-// ── RESIZE ─────────────────────────────────────────────────
-window.addEventListener('resize',()=>{setupLayout();});
+// ── RESIZE ──
+window.addEventListener('resize',setupLayout);
 document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 </script>
 
