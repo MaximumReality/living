@@ -20,9 +20,41 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 #boot-btn{margin-top:8px;padding:16px 28px;background:transparent;border:1px solid var(--green);color:var(--green);font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:4px;cursor:pointer;box-shadow:0 0 20px var(--green-dim),inset 0 0 20px var(--green-faint)}
 #boot-btn:active{background:var(--green);color:#000}
 #app{display:none;position:fixed;inset:0;flex-direction:column}
-#video-bg{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:saturate(0.7) brightness(0.5)}
+/* Base video style (Now bright by default) */
+#video-bg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  transition: filter 0.3s ease; /* Makes the toggle look smooth */
+}
+
+/* The two modes the JS will trigger */
+.mode-clear { filter: saturate(1.1) brightness(1.1) contrast(1.1); }
+.mode-stealth { filter: saturate(0.3) brightness(0.6) sepia(1) hue-rotate(100deg); }
+
+
 #glitch-overlay{position:fixed;inset:0;z-index:1;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px);mix-blend-mode:multiply;pointer-events:none}
-#color-overlay{position:fixed;inset:0;z-index:2;background:rgba(0,20,10,0.45);mix-blend-mode:multiply;pointer-events:none}
+#color-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  background: rgba(0, 255, 136, 0.15); /* Lighter, more vibrant green */
+  mix-blend-mode: screen; /* Changed from multiply to screen to 'lighten' the view */
+  pointer-events: none;
+}
+/* High visibility for scanning */
+.mode-clear {
+  filter: saturate(1.1) brightness(1.2) contrast(1.1) !important;
+}
+
+/* Gritty Bureau aesthetic */
+.mode-stealth {
+  filter: saturate(0.5) brightness(0.6) sepia(1) hue-rotate(100deg) !important;
+}
+
 #terminal-canvas{position:fixed;inset:0;z-index:3;pointer-events:none}
 #vf-mask{position:fixed;inset:0;background:radial-gradient(circle var(--vf-r) at 50% var(--vf-cy),transparent 0%,transparent calc(var(--vf-r) - 2px),rgba(0,255,136,0.5) calc(var(--vf-r) - 2px),rgba(0,255,136,0.5) calc(var(--vf-r) + 1px),rgba(0,12,5,0.92) calc(var(--vf-r) + 1px));z-index:4;pointer-events:none}
 .vf-ring{position:fixed;border-radius:50%;z-index:5;pointer-events:none;transform:translate(-50%,-50%);left:50%}
@@ -148,6 +180,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
     <div id="lock-dismiss" onclick="dismissLock()">[ TAP TO ACKNOWLEDGE ]</div>
   </div>
   <div id="hud-bottom">
+    <button id="vision-toggle" onclick="toggleVision()" 
+        style="pointer-events:all; background:transparent; border:1px solid var(--green); 
+               color:var(--green); font-size:9px; padding:4px 10px; margin-bottom:10px; 
+               letter-spacing:2px; font-family:'Orbitron', sans-serif;">
+  MODE: OPTICAL
+</button>
+
     <div id="status-bar"><span id="stat-left">BUREAU LENS ACTIVE</span><span id="stat-right"></span></div>
     <div id="scan-log"></div>
   </div>
@@ -446,6 +485,32 @@ function showSysAlert(msg){
 }
 window.addEventListener('resize',()=>{setupViewfinder();const c=document.getElementById('terminal-canvas');c.width=window.innerWidth;c.height=window.innerHeight;});
 document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+  let isStealth = false;
+
+function toggleVision() {
+  const video = document.getElementById('video-bg');
+  const btn = document.getElementById('vision-toggle');
+  
+  isStealth = !isStealth;
+  
+  // Trigger a glitch during the transition
+  triggerGlitch();
+  
+  if (isStealth) {
+    video.className = 'mode-stealth';
+    btn.textContent = 'MODE: NVG-CYBER';
+    btn.style.color = 'var(--cyan)';
+    btn.style.borderColor = 'var(--cyan)';
+    addLog('NVG FILTERS ENGAGED', 'var(--cyan)');
+  } else {
+    video.className = 'mode-clear';
+    btn.textContent = 'MODE: OPTICAL';
+    btn.style.color = 'var(--green)';
+    btn.style.borderColor = 'var(--green)';
+    addLog('OPTICAL SENSORS RECALIBRATED', 'var(--green)');
+  }
+}
+
 </script>
 </body>
 </html>
