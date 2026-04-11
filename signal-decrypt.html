@@ -20,7 +20,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 #boot-btn{margin-top:8px;padding:16px 28px;background:transparent;border:1px solid var(--green);color:var(--green);font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:4px;cursor:pointer;box-shadow:0 0 20px var(--green-dim),inset 0 0 20px var(--green-faint)}
 #boot-btn:active{background:var(--green);color:#000}
 #app{display:none;position:fixed;inset:0;flex-direction:column}
-/* Base video style (Now bright by default) */
+/* Base video style */
 #video-bg {
   position: fixed;
   inset: 0;
@@ -28,32 +28,31 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   height: 100%;
   object-fit: cover;
   z-index: 0;
-  transition: filter 0.3s ease; /* Makes the toggle look smooth */
+  transition: filter 0.3s ease;
+  /* Default filter if no class is present */
+  filter: saturate(1.1) brightness(1.2) contrast(1.1); 
 }
 
-/* The two modes the JS will trigger */
-.mode-clear { filter: saturate(1.1) brightness(1.1) contrast(1.1); }
-.mode-stealth { filter: saturate(0.3) brightness(0.6) sepia(1) hue-rotate(100deg); }
+/* High visibility mode */
+.mode-clear {
+  filter: saturate(1.1) brightness(1.2) contrast(1.1) !important;
+}
 
+/* Bureau aesthetic mode */
+.mode-stealth {
+  filter: saturate(0.5) brightness(0.7) sepia(1) hue-rotate(100deg) !important;
+}
 
 #glitch-overlay{position:fixed;inset:0;z-index:1;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px);mix-blend-mode:multiply;pointer-events:none}
 #color-overlay {
   position: fixed;
   inset: 0;
   z-index: 2;
-  background: rgba(0, 255, 136, 0.15); /* Lighter, more vibrant green */
-  mix-blend-mode: screen; /* Changed from multiply to screen to 'lighten' the view */
+  background: rgba(0, 255, 136, 0.1); /* Keep this very light */
+  mix-blend-mode: screen; 
   pointer-events: none;
 }
-/* High visibility for scanning */
-.mode-clear {
-  filter: saturate(1.1) brightness(1.2) contrast(1.1) !important;
-}
 
-/* Gritty Bureau aesthetic */
-.mode-stealth {
-  filter: saturate(0.5) brightness(0.6) sepia(1) hue-rotate(100deg) !important;
-}
 
 #terminal-canvas{position:fixed;inset:0;z-index:3;pointer-events:none}
 #vf-mask{position:fixed;inset:0;background:radial-gradient(circle var(--vf-r) at 50% var(--vf-cy),transparent 0%,transparent calc(var(--vf-r) - 2px),rgba(0,255,136,0.5) calc(var(--vf-r) - 2px),rgba(0,255,136,0.5) calc(var(--vf-r) + 1px),rgba(0,12,5,0.92) calc(var(--vf-r) + 1px));z-index:4;pointer-events:none}
@@ -200,13 +199,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
     </div>
 </div>
 
-
-    <div id="status-bar"><span id="stat-left">BUREAU LENS ACTIVE</span><span id="stat-right"></span></div>
-    <div id="scan-log"></div>
-  </div>
-  <div id="tap-zone" onclick="onTap(event)"></div>
-</div>
-
 <script>
 const state={heading:0,targetHeading:null,signalStrength:0,anomalyLevel:1,locked:false,seqGoal:['RED','BLUE','GREEN'],seqDone:0,compassGranted:false,lastColor:null,scanCount:0,vfCx:0,vfCy:0,vfR:140};
 const lore={
@@ -222,12 +214,18 @@ const lore={
 function getLore(key,lvl,heading){const arr=lore[key]||lore.NEUTRAL;let msg=arr[Math.floor(Math.random()*arr.length)];return msg.replace('{L}',lvl||1).replace('{H}',Math.round(heading||state.heading));}
 
 async function initLens(){
-  const btn=document.getElementById('boot-btn');
-  btn.textContent='INITIALIZING...';btn.disabled=true;
+  const btn = document.getElementById('boot-btn');
+  const video = document.getElementById('video-bg'); 
+  btn.textContent = 'INITIALIZING...'; 
+  btn.disabled = true;
+
   try{
     const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}});
-    document.getElementById('video-bg').srcObject=stream;
+    video.srcObject=stream;
+    video.className = 'mode-clear'; // FORCE LIGHT MODE ON START
+    
     await requestOrientation();
+
     checkSystemStatus();
     document.getElementById('boot').style.display='none';
     document.getElementById('app').style.display='flex';
