@@ -17,8 +17,44 @@
 html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Share Tech Mono',monospace;color:var(--green);user-select:none}
 
 /* BOOT */
-#boot{position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:36px}
-.boot-logo{font-family:'VT323',monospace;font-size:clamp(24px,7vw,42px);color:var(--green);text-align:center;line-height:1.2;text-shadow:0 0 20px var(--green),0 0 40px var(--green-dim);letter-spacing:4px}
+/* BOOT CONTAINER: Centers everything and keeps it tight */
+#boot {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px; /* Even spacing between logo, warnings, and button */
+  padding: 20px;
+}
+
+/* LOGO: The "No-Split" Enforcer */
+.boot-logo {
+  font-family: 'VT323', monospace;
+  /* Scales between 20px and 38px based on screen size */
+  font-size: clamp(20px, 7vw, 38px); 
+  color: var(--green);
+  text-align: center;
+  line-height: 1.1;
+  text-shadow: 0 0 20px var(--green), 0 0 40px var(--green-dim);
+  letter-spacing: 2px; /* Tightened slightly so DECRYPTOR stays on the line */
+  white-space: nowrap; /* Forces SIGNAL DECRYPTOR to stay on one line */
+  width: 100%;
+}
+
+/* SUBTITLE / VERSION INFO */
+.boot-logo span {
+  display: block;
+  font-size: 0.45em;
+  color: #006633;
+  letter-spacing: 2px;
+  margin-top: 8px;
+  white-space: normal; /* Allows the small text to wrap if it ever needs to */
+}
+
 .boot-divider{width:80%;height:1px;background:linear-gradient(90deg,transparent,var(–green),transparent)}
 .boot-warnings{font-size:10px;color:#004422;text-align:left;width:100%;line-height:1.9}
 .boot-warnings span{color:var(–green)}
@@ -26,12 +62,22 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:'Sh
 
 /* TWO BOOT BUTTONS */
 .boot-btn-wrap{display:flex;flex-direction:column;gap:10px;width:100%}
-.boot-btn{
-width:100%;padding:14px 20px;background:transparent;
-font-family:‘Orbitron’,sans-serif;font-size:11px;font-weight:700;
-letter-spacing:3px;cursor:pointer;text-align:center;
-transition:all 0.2s;
+/* BUTTON: Scaled for a clean Bureau look */
+#boot-btn {
+  width: 100%;
+  max-width: 280px; /* Prevents the button from being too wide on the Pro Max */
+  padding: 16px 0;
+  background: transparent;
+  border: 1px solid var(--green);
+  color: var(--green);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px; /* Slightly smaller text for a more professional HUD look */
+  font-weight: 700;
+  letter-spacing: 3px;
+  cursor: pointer;
+  box-shadow: 0 0 20px var(--green-dim), inset 0 0 20px var(--green-faint);
 }
+
 #btn-sensors{
 border:1px solid var(–orange);color:var(–orange);
 box-shadow:0 0 16px rgba(255,136,0,0.2),inset 0 0 16px rgba(255,136,0,0.05);
@@ -126,8 +172,13 @@ font-family:‘Share Tech Mono’,monospace;
 <!-- BOOT: two-step permission sequence -->
 
 <div id="boot">
-  <div class="boot-logo">BUREAU OF REALITY<br>░░SIGNAL DECRYPTOR░░<br><span style="font-size:0.48em;color:#006633">FIELD UNIT v3.7 // CLASSIFIED</span></div>
-  <div class="boot-divider"></div>
+  <div class="boot-logo">
+  BUREAU OF REALITY<br>
+  ░░ SIGNAL DECRYPTOR ░░<br>
+  <span style="font-size:0.45em; color:#006633; letter-spacing: 1px;">FIELD UNIT v3.7 // CLASSIFIED</span>
+</div>
+<div class="boot-divider"></div>
+
   <div class="boot-warnings">
     <span>SYS:</span> Loading perception filters...<br>
     <span>SYS:</span> Calibrating reality index...<br>
