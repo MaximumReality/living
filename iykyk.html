@@ -14,24 +14,38 @@
   --terminal-bg: #050505;
 }
 
-body { background: #111; padding: 10px; font-family: 'Share Tech Mono', monospace; }
+body { background: #111; padding: 15px; }
 
 #bureau-terminal {
   background: var(--terminal-bg);
   border: 1px solid var(--bureau-dim);
-  padding: 30px;
+  padding: 40px;
   position: relative;
   overflow: hidden;
   max-width: 600px;
-  margin: 10px auto;
-  box-shadow: 0 0 25px rgba(57,255,20,0.12), inset 0 0 50px #000;
+  margin: 20px auto;
+  box-shadow: 0 0 25px rgba(57,255,20,0.1), inset 0 0 80px #000;
 }
 
+/* THE SCANLINES (Restored and Boosted) */
+#bureau-terminal::after {
+  content: " ";
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  /* Horizontal scanlines + RGB grain mask */
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.4) 50%), 
+              linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05));
+  z-index: 10; /* Put it on top of everything */
+  background-size: 100% 3px, 3px 100%;
+  pointer-events: none;
+  opacity: 0.6; /* Made them punchier */
+}
+
+/* CLASSIFIED Watermark */
 #bureau-terminal::before {
   content: "CLASSIFIED";
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 50%; left: 50%;
   transform: translate(-50%, -50%) rotate(-12deg);
   font-family: 'VT323', monospace;
   font-size: 4.5rem;
@@ -40,44 +54,37 @@ body { background: #111; padding: 10px; font-family: 'Share Tech Mono', monospac
   z-index: 1;
 }
 
-#bureau-terminal::after {
-  content: " ";
-  position: absolute;
-  top: 0; left: 0; bottom: 0; right: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
-              linear-gradient(90deg, rgba(255, 0, 0, 0.04), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.04));
-  z-index: 5;
-  background-size: 100% 4px, 3px 100%;
-  pointer-events: none;
-}
-
 .terminal-header {
   font-family: 'VT323', monospace;
   color: var(--bureau-green);
   font-size: 0.9rem;
   margin-bottom: 20px;
-  padding-bottom: 6px;
   border-bottom: 1px solid var(--bureau-dim);
   display: flex;
   justify-content: space-between;
   position: relative;
-  z-index: 6;
+  z-index: 2;
 }
 
 #terminal-output {
+  font-family: 'Share Tech Mono', monospace;
   color: var(--bureau-green);
   font-size: 1.1rem;
-  line-height: 1.5;
+  line-height: 1.6;
   min-height: 200px;
   margin-bottom: 30px;
-  text-shadow: 0 0 8px var(--bureau-green);
+  text-shadow: 0 0 10px var(--bureau-green);
   white-space: pre-wrap;
   position: relative;
-  z-index: 6;
-  animation: flicker 0.2s infinite alternate;
+  z-index: 2;
+  animation: flicker 0.1s infinite;
 }
 
-@keyframes flicker { from { opacity: 0.97; } to { opacity: 1; } }
+@keyframes flicker {
+  0% { opacity: 0.98; }
+  50% { opacity: 1; }
+  100% { opacity: 0.99; }
+}
 
 #terminal-output::after {
   content: "_";
@@ -86,7 +93,7 @@ body { background: #111; padding: 10px; font-family: 'Share Tech Mono', monospac
 
 @keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
 
-.btn-container { text-align: center; position: relative; z-index: 10; }
+.btn-container { text-align: center; position: relative; z-index: 20; }
 
 .terminal-btn {
   background: transparent;
@@ -98,13 +105,13 @@ body { background: #111; padding: 10px; font-family: 'Share Tech Mono', monospac
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 2px;
-  transition: all 0.2s;
+  transition: all 0.3s;
 }
 
 .terminal-btn:hover {
   background: var(--bureau-green);
   color: #000;
-  box-shadow: 0 0 15px var(--bureau-green);
+  box-shadow: 0 0 20px var(--bureau-green);
 }
 </style>
 </head>
@@ -124,6 +131,7 @@ body { background: #111; padding: 10px; font-family: 'Share Tech Mono', monospac
 </div>
 
 <script>
+// Data and Functions keep the same logic but integrated correctly
 const INGREDIENTS = {
   CHARACTER: { tags: ['tired wizard', 'sentient toaster', 'retired mime', 'anxious librarian', 'confused robot', 'ghost accountant', 'time-traveling barista', 'quantum cat', 'discount oracle', 'sad detective', 'immortal plumber', 'overqualified snail'] },
   SETTING: { tags: ['floating mall', 'abandoned moon café', 'inside a dream', 'the last bookstore', 'cursed elevator', 'underwater suburb', 'parallel post office', 'digital forest', 'neon monastery', 'forgotten theme park', 'fog-filled library', 'the edge of a map'] },
@@ -166,13 +174,13 @@ function scrambleText(el, callback) {
   const chars = "!@#$%^&*()_+=-{}[]<>?/\\|";
   let i = 0;
   const interval = setInterval(() => {
-    el.textContent = Array.from({length: 35}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+    el.textContent = Array.from({length: 40}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
     i++;
-    if (i > 8) {
+    if (i > 10) {
       clearInterval(interval);
       callback();
     }
-  }, 50);
+  }, 40);
 }
 
 function typewriteStory(text) {
