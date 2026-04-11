@@ -21,9 +21,26 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 #boot-btn{margin-top:8px;padding:16px 28px;background:transparent;border:1px solid var(--green);color:var(--green);font-family:'Orbitron',sans-serif;font-size:12px;font-weight:700;letter-spacing:4px;cursor:pointer;box-shadow:0 0 20px var(--green-dim),inset 0 0 20px var(--green-faint)}
 #boot-btn:active{background:var(--green);color:#000}
 #app{display:none;position:fixed;inset:0;flex-direction:column}
-#video-bg{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;f)}
-#glitch-overlay{position:fixed;inset:0;z-index:1;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px);mix-blend-mode:multiply;pointer-events:none}
-#color-overlay{position:fixed;inset:0;z-index:2;background:rgba(0,20,10,0.45);mix-blend-mode:multiply;pointer-events:none}
+#video-bg{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;)}
+#fx-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+
+  /* combine both effects */
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.15) 2px,
+      rgba(0,0,0,0.15) 4px
+    ),
+    rgba(0,20,10,0.45);
+
+  mix-blend-mode: multiply;
+}
 #terminal-canvas{position:fixed;inset:0;z-index:3;pointer-events:none}
 #vf-mask{position:fixed;inset:0;background:radial-gradient(circle var(--vf-r) at 50% var(--vf-cy),transparent 0%,transparent calc(var(--vf-r) - 2px),rgba(0,255,136,0.5) calc(var(--vf-r) - 2px),rgba(0,255,136,0.5) calc(var(--vf-r) + 1px),rgba(0,12,5,0.92) calc(var(--vf-r) + 1px));z-index:4;pointer-events:none}
 .vf-ring{position:fixed;border-radius:50%;z-index:5;pointer-events:none;transform:translate(-50%,-50%);left:50%}
@@ -158,6 +175,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   </div>
   <div id="tap-zone" onclick="onTap(event)"></div>
 </div>
+<div id="fx-overlay"></div>
 
 <script>
 const state={heading:0,targetHeading:null,signalStrength:0,anomalyLevel:1,locked:false,seqGoal:['RED','BLUE','GREEN'],seqDone:0,compassGranted:false,lastColor:null,scanCount:0,vfCx:0,vfCy:0,vfR:140};
