@@ -14,14 +14,29 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 #boot{position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:36px}
 .boot-logo {
   font-family: 'VT323', monospace;
-  font-size: clamp(20px, 7.5vw, 36px); /* Scaled down slightly */
   color: var(--green);
   text-align: center;
   line-height: 1.1;
   text-shadow: 0 0 15px var(--green);
-  letter-spacing: 1px; /* Tighter letter spacing to fit screen width */
-  padding: 0 20px;
+  padding: 0 10px;
+  width: 100%;
+  
+  /* This part forces everything to stay in one row */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap; 
 }
+
+/* Specifically target the signal decryptor line to keep dots beside it */
+.boot-logo span.title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: clamp(18px, 6.5vw, 32px);
+}
+
 
 
 .boot-sub{font-size:10px;color:#006633;letter-spacing:3px;text-align:center}
@@ -39,7 +54,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   flex-direction: column;
 }
 
-/* Permanent High Visibility Base */
+/* We increased brightness to 1.6 and lowered contrast to prevent black-crush */
 #video-bg {
   position: fixed;
   inset: 0;
@@ -47,25 +62,23 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   height: 100%;
   object-fit: cover;
   z-index: 0;
-  /* Boosted brightness and saturation for clarity */
-  filter: saturate(1.3) brightness(1.3) contrast(1.1); 
+  filter: saturate(1.2) brightness(1.6) contrast(0.9); 
   background: #000;
 }
 
-/* High visibility mode - Forced */
 .mode-clear {
-  filter: saturate(1.3) brightness(1.3) contrast(1.1) !important;
+  filter: saturate(1.2) brightness(1.6) contrast(0.9) !important;
 }
 
-/* Adjusted Stealth - Still readable, but keeps the vibe */
-.mode-stealth {
-  filter: saturate(1.1) brightness(1.1) sepia(0.3) hue-rotate(100deg) !important;
+/* We also make the scanlines more transparent so they don't darken the image */
+#glitch-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.05) 2px, rgba(0,0,0,0.05) 4px);
+  mix-blend-mode: multiply;
+  pointer-events: none;
 }
-
-
-
-
-#glitch-overlay{position:fixed;inset:0;z-index:1;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px);mix-blend-mode:multiply;pointer-events:none}
 
   /* Lighten the green tint so it doesn't wash out the camera */
 #color-overlay {
@@ -136,8 +149,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 </style>
 </head>
 <body>
-<div id="boot">
-  <div class="boot-logo">BUREAU OF REALITY<br>░░ SIGNAL DECRYPTOR ░░<br><span style="font-size:0.5em;color:#006633">FIELD UNIT v3.7 // CLASSIFIED</span></div>
+  <div id="boot">
+  <div class="boot-logo">
+  BUREAU OF REALITY<br>
+  <span style="white-space: nowrap; display: inline-block;">░░ SIGNAL DECRYPTOR ░░</span><br>
+  <span style="font-size:0.5em;color:#006633">FIELD UNIT v3.7 // CLASSIFIED</span>
+</div>
+
   <div class="boot-divider"></div>
   <div class="boot-warnings">
     <span>SYS:</span> Loading perception filters...<br>
@@ -253,6 +271,10 @@ async function initLens(){
     });
     
     video.srcObject = stream;
+    video.onplay = () => {
+  video.style.filter = "brightness(1.6)"; // Hard-coded light boost on start
+};
+
     
     // Force mode-clear immediately
     video.classList.remove('mode-stealth');
