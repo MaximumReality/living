@@ -516,18 +516,47 @@ function checkSequence(color){
 }
 
 function drawAzulSprite(canvas){
-  const Z=6;
-  const P=[[0,0,0,3,3,0,0,0,0,0,0,3,3,0,0,0],[0,0,3,1,1,3,0,0,0,0,3,1,1,3,0,0],[0,3,1,1,1,1,3,0,0,3,1,1,1,1,3,0],[0,1,1,1,1,1,1,3,3,1,1,1,1,1,1,0],[0,1,2,1,1,1,2,1,1,2,1,1,1,2,1,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,1,1,4,1,1,1,1,1,1,1,1,4,1,1,0],[0,0,1,1,1,0,1,1,1,1,0,1,1,1,0,0],[0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0],[0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],[0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0],[0,1,0,0,1,1,1,1,1,1,1,1,0,0,1,0],[0,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0],[0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0],[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]];
-  canvas.width=16*Z;canvas.height=16*Z;
-  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
-  const C={1:'#00ccff',2:'#00ffff',3:'#0088aa',4:'#ff88aa'};
-  // Add these 3 lines before the P.forEach loops
-ctx.translate(0, canvas.height); // Move down to the bottom
-ctx.scale(1, -1);               // Flip everything vertically
-ctx.translate(0, 0);             // Reset origin for drawing
+  const Z = 6;
+  // Keep your P array exactly as it is (ears at the bottom/reversed)
+  const P = [
+    [0,0,0,3,3,0,0,0,0,0,0,3,3,0,0,0],
+    [0,0,3,1,1,3,0,0,0,0,3,1,1,3,0,0],
+    [0,3,1,1,1,1,3,0,0,3,1,1,1,1,3,0],
+    [0,1,1,1,1,1,1,3,3,1,1,1,1,1,1,0],
+    [0,1,2,1,1,1,2,1,1,2,1,1,1,2,1,0],
+    [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+    [0,1,1,4,1,1,1,1,1,1,1,1,4,1,1,0],
+    [0,0,1,1,1,0,1,1,1,1,0,1,1,1,0,0],
+    [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0],
+    [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
+    [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+    [0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,0],
+    [0,1,0,0,1,1,1,1,1,1,1,1,0,0,1,0],
+    [0,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0],
+    [0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0],
+    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+  ];
 
-  P.forEach((row,ry)=>row.forEach((v,x)=>{if(!v)return;ctx.fillStyle=C[v];ctx.fillRect(x*Z,ry*Z,Z,Z);}));
+  canvas.width = 16 * Z;
+  canvas.height = 16 * Z;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  const C = { 1: '#00ccff', 2: '#00ffff', 3: '#0088aa', 4: '#ff88aa' };
+
+  // This is the manual reverse loop
+  for (let ry = 0; ry < P.length; ry++) {
+    const row = P[ry];
+    for (let x = 0; x < row.length; x++) {
+      const v = row[x];
+      if (!v) continue;
+      ctx.fillStyle = C[v];
+      // The magic is here: (P.length - 1 - ry) flips the row position
+      ctx.fillRect(x * Z, (P.length - 1 - ry) * Z, Z, Z);
+    }
+  }
 }
+
 function showAzul(){
   const c=document.getElementById('azul-sprite');
   drawAzulSprite(c);c.style.display='block';
