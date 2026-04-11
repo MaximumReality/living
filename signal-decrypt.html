@@ -83,11 +83,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 </head>
 <body>
 <div id="boot">
-  <div class="boot-logo">
-    <span style="font-size: 6vw;">BUREAU OF REALITY</span>
-    <div class="title-row">░░ SIGNAL DECRYPTOR ░░</div>
-    <span style="font-size: 3vw; color: #006633; letter-spacing: 2px;">FIELD UNIT v3.7 // CLASSIFIED</span>
-  </div>
+  <div class="boot-logo">BUREAU OF REALITY<br>░░ SIGNAL DECRYPTOR ░░<br><span style="font-size:0.5em;color:#006633">FIELD UNIT v3.7 // CLASSIFIED</span></div>
   <div class="boot-divider"></div>
   <div class="boot-warnings">
     <span>SYS:</span> Loading perception filters...<br>
@@ -154,14 +150,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   </div>
   <div id="hud-bottom">
     <div id="status-bar"><span id="stat-left">BUREAU LENS ACTIVE</span><span id="stat-right"></span></div>
+    <div id="portal-return" onclick="window.location.href='Portal.html'" 
+     style="cursor:pointer; color:var(--green-dim); font-size:9px; margin-top:10px;">
+  ◀ RETURN TO BUREAU PORTAL
+</div>
     <div id="scan-log"></div>
   </div>
-     <div id="portal-return" onclick="window.location.href='https://maximumreality.github.io/living/Portal.html'" 
-         style="pointer-events:all; cursor:pointer; color:var(--green-dim); font-size:9px; margin-top:14px; letter-spacing:2px;">
-      ◀ RETURN TO BUREAU PORTAL
-    </div>
-</div>
-
   <div id="tap-zone" onclick="onTap(event)"></div>
 </div>
 
@@ -461,8 +455,3 @@ document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 
 </body>
 </html>
-
-
-
-   
-
