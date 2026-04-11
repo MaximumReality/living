@@ -231,7 +231,7 @@ function startTerminalRain(){
   rainCtx=canvas.getContext('2d');
   const cw=14;rainCols=Math.floor(canvas.width/cw);
   rainDrops=Array.from({length:rainCols},()=>Math.random()*-canvas.height);
-  setInterval(drawRain,80);
+  setInterval(drawRain, 140);
 }
 function drawRain(){
   const canvas=document.getElementById('terminal-canvas');
