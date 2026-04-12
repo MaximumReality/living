@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>BUREAU ARCHIVE // MAXIMUM REALITY</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#04080f;--panel:#080f1c;--border:#0d2035;--border2:#0a2840;
+  --cyan:#00ffe5;--cyan2:#00c8ff;--green:#00ff88;--amber:#ffb300;
+  --red:#ff3355;--purple:#bf00ff;--text:#a8d4e8;--muted:#2a4a60;--dim:#1a3040;
+  --gc:0 0 12px #00ffe5,0 0 30px #00ffe530;
+  --gg:0 0 10px #00ff88,0 0 24px #00ff8830;
+  --ga:0 0 10px #ffb300,0 0 22px #ffb30030;
+  --gr:0 0 10px #ff3355,0 0 22px #ff335530;
+  --gp:0 0 10px #bf00ff,0 0 22px #bf00ff30;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--void);color:var(--text);font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent 0,transparent 3px,rgba(0,0,0,0.13) 3px,rgba(0,0,0,0.13) 4px);pointer-events:none;z-index:9999}
+
+/* ── MASTHEAD ── */
+.masthead{
+  background:linear-gradient(180deg,#020810 0%,var(--void) 100%);
+  border-bottom:1px solid var(--border2);
+  padding:14px 16px 10px;
+  text-align:center;
+  position:sticky;top:0;z-index:100;
+  box-shadow:0 4px 40px #000a;
+}
+.masthead-eyebrow{font-size:7px;letter-spacing:4px;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.masthead-title{
+  font-family:'VT323',monospace;font-size:clamp(28px,8vw,52px);
+  color:var(--cyan);text-shadow:var(--gc);
+  letter-spacing:6px;line-height:1;
+}
+.masthead-sub{font-size:8px;letter-spacing:3px;color:var(--muted);margin-top:4px;text-transform:uppercase}
+.masthead-rule{height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);margin:8px 0 4px}
+.masthead-meta{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:7px;letter-spacing:2px;color:var(--muted);
+  flex-wrap:wrap;gap:4px;
+}
+.masthead-meta span{color:var(--cyan)}
+
+/* ── TICKER ── */
+.ticker-wrap{background:#020810;border-bottom:1px solid var(--border);padding:4px 0;overflow:hidden;position:relative}
+.ticker-wrap::before,.ticker-wrap::after{content:'';position:absolute;top:0;width:30px;height:100%;z-index:2;pointer-events:none}
+.ticker-wrap::before{left:0;background:linear-gradient(90deg,#020810,transparent)}
+.ticker-wrap::after{right:0;background:linear-gradient(-90deg,#020810,transparent)}
+.ticker{display:flex;animation:ticker-scroll 35s linear infinite;white-space:nowrap}
+.ticker-item{font-size:8px;letter-spacing:2px;color:var(--muted);padding:0 20px;text-transform:uppercase}
+.ticker-item span{color:var(--amber)}
+@keyframes ticker-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── NAV TABS ── */
+.nav-tabs{
+  display:flex;border-bottom:1px solid var(--border2);
+  background:#020810;overflow-x:auto;
+  scrollbar-width:none;
+}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{
+  flex-shrink:0;padding:10px 16px;font-size:8px;letter-spacing:3px;
+  color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;
+  text-transform:uppercase;white-space:nowrap;transition:all 0.2s;
+  background:none;border-top:none;border-left:none;border-right:none;
+  font-family:'Share Tech Mono',monospace;
+}
+.nav-tab.active{color:var(--cyan);border-bottom-color:var(--cyan);text-shadow:var(--gc)}
+.nav-tab:hover:not(.active){color:var(--text)}
+
+/* ── GRID ── */
+.grid{display:grid;grid-template-columns:1fr;gap:12px;padding:12px;max-width:900px;margin:0 auto}
+@media(min-width:640px){.grid{grid-template-columns:1fr 1fr}.span2{grid-column:span 2}}
+
+/* ── CARD ── */
+.card{background:var(--panel);border:1px solid var(--border2);border-radius:4px;overflow:hidden;position:relative}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan2),transparent);opacity:0.3}
+.card-head{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-bottom:1px solid var(--border);background:#040b14}
+.card-title{font-size:8px;letter-spacing:3px;color:var(--cyan);text-shadow:var(--gc);text-transform:uppercase}
+.card-src{font-size:7px;letter-spacing:1px;color:var(--muted)}
+.card-body{padding:12px}
+
+/* ── SECTION PAGES ── */
+.section{display:none}
+.section.active{display:block}
+
+/* ── ENCRYPTED TRANSMISSION ── */
+.transmission-box {
+  background: #02060d;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--green);
+  padding: 16px;
+  font-family: 'VT323', monospace;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--green);
+  min-height: 140px;
+  position: relative;
+  overflow: hidden; /* Keeps the watermark inside the edges */
+  text-shadow: 0 0 8px var(--green);
+  white-space: pre-wrap;
+  z-index: 1;
+}
+
+/* CLASSIFIED WATERMARK */
+.transmission-box::before {
+  content: "CLASSIFIED";
+  position: absolute;
+  top: 50%; 
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-12deg);
+  font-family: 'VT323', monospace;
+  font-size: clamp(3.5rem, 12vw, 5rem);
+  -webkit-text-stroke: 1px rgba(57, 255, 20, 0.15);
+  color: rgba(57, 255, 20, 0.08);
+  pointer-events: none;
+  z-index: -1; /* Sits behind the code text */
+  text-transform: uppercase;
+  letter-spacing: 12px;
+  white-space: nowrap;
+}
+
+/* TYPING CURSOR */
+.transmission-box::after {
+  content: '_';
+  animation: cur 0.8s step-end infinite;
+}
+
+@keyframes cur {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.transmission-header {
+  font-size: 7px;
+  letter-spacing: 3px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.transmission-header span { color: var(--amber); }
+
+.btn-transmit {
+  width: 100%;
+  padding: 12px;
+  background: #06030d;
+  border: 1px solid var(--green);
+  border-radius: 2px;
+  color: var(--green);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  box-shadow: 0 0 12px #00ff8820;
+  margin-top: 10px;
+}
+
+.btn-transmit:hover { background: #0a1a0a; box-shadow: var(--gg); }
+.btn-transmit:active { transform: scale(0.98); }
+
+
+/* ── BULLETIN BOARD (shared findings) ── */
+.finding-card{
+  border:1px solid var(--border2);border-left:3px solid var(--amber);
+  padding:10px 12px;background:#060a04;margin-bottom:8px;
+  position:relative;
+}
+.finding-card .f-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;flex-wrap:wrap;gap:4px}
+.finding-card .f-agent{font-size:8px;letter-spacing:2px;color:var(--amber);text-shadow:var(--ga)}
+.finding-card .f-time{font-size:7px;color:var(--muted);letter-spacing:1px}
+.finding-card .f-color{font-size:8px;letter-spacing:2px}
+.finding-card .f-note{font-size:10px;color:var(--text);line-height:1.5;margin-top:4px}
+.finding-card .f-clearance{font-size:7px;color:var(--muted);margin-top:6px;letter-spacing:1px}
+.col-red{color:var(--red);text-shadow:var(--gr)}
+.col-blue{color:var(--cyan);text-shadow:var(--gc)}
+.col-green{color:var(--green);text-shadow:var(--gg)}
+.col-yellow{color:var(--amber);text-shadow:var(--ga)}
+.col-neutral{color:var(--muted)}
+
+.post-form{background:#02060d;border:1px solid var(--border);padding:12px;margin-bottom:12px}
+.post-form input,.post-form textarea,.post-form select{
+  width:100%;background:#040b14;border:1px solid var(--border2);
+  color:var(--text);font-family:'Share Tech Mono',monospace;
+  font-size:10px;padding:8px;margin-bottom:8px;
+  border-radius:2px;outline:none;
+}
+.post-form input:focus,.post-form textarea:focus{border-color:var(--cyan)}
+.post-form textarea{height:60px;resize:none}
+.post-form label{font-size:8px;letter-spacing:2px;color:var(--muted);display:block;margin-bottom:4px;text-transform:uppercase}
+.btn-post{
+  padding:10px 20px;background:transparent;border:1px solid var(--amber);
+  color:var(--amber);font-family:'Share Tech Mono',monospace;
+  font-size:9px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;
+  transition:all 0.2s;
+}
+.btn-post:hover{background:var(--amber);color:#000}
+.btn-post:active{transform:scale(0.98)}
+
+/* ── FIELD LOG ── */
+.log-entry-card{
+  border:1px solid var(--border);border-left:3px solid var(--cyan);
+  padding:10px 12px;background:#020810;margin-bottom:8px;
+}
+.log-entry-card .le-head{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.log-entry-card .le-type{font-size:8px;letter-spacing:2px;color:var(--cyan);text-shadow:var(--gc)}
+.log-entry-card .le-time{font-size:7px;color:var(--muted)}
+.log-entry-card .le-body{font-family:'VT323',monospace;font-size:16px;color:var(--green);line-height:1.4}
+.log-entry-card .le-meta{font-size:7px;color:var(--muted);margin-top:4px;letter-spacing:1px}
+.btn-clear-log{
+  padding:8px 16px;background:transparent;border:1px solid var(--red);
+  color:var(--red);font-family:'Share Tech Mono',monospace;
+  font-size:8px;letter-spacing:3px;cursor:pointer;text-transform:uppercase;
+  transition:all 0.2s;
+}
+.btn-clear-log:hover{background:var(--red);color:#000}
+
+/* ── FUNNY PAGES / LINKS ── */
+.funny-link{
+  display:flex;align-items:center;justify-content:space-between;
+  text-decoration:none;padding:14px 16px;margin-bottom:8px;
+  border:1px solid var(--border2);background:#040b14;
+  transition:all 0.3s;position:relative;overflow:hidden;
+}
+.funny-link::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.funny-link.lnk-c::before{background:var(--cyan)}
+.funny-link.lnk-g::before{background:var(--green)}
+.funny-link.lnk-p::before{background:var(--purple)}
+.funny-link.lnk-a::before{background:var(--amber)}
+.funny-link:hover{background:#060d18;transform:translateX(4px)}
+.funny-link .fl-icon{font-size:20px;margin-right:12px;flex-shrink:0}
+.funny-link .fl-text{}
+.funny-link .fl-title{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:3px;color:var(--text);display:block;margin-bottom:3px}
+.funny-link .fl-sub{font-size:8px;letter-spacing:1px;color:var(--muted)}
+.funny-link .fl-tag{font-size:7px;letter-spacing:2px;color:var(--muted);opacity:0.6;flex-shrink:0}
+
+/* ── STATUS DOTS ── */
+.sig{display:inline-flex;align-items:center;gap:4px;font-size:7px;letter-spacing:1px;color:var(--muted)}
+.sig-dot{width:5px;height:5px;border-radius:50%;animation:blink 1.4s ease-in-out infinite}
+.sig-dot.green{background:var(--green);box-shadow:var(--gg)}
+.sig-dot.cyan{background:var(--cyan);box-shadow:var(--gc)}
+.sig-dot.amber{background:var(--amber);box-shadow:var(--ga)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* ── EMPTY STATE ── */
+.empty-state{text-align:center;padding:32px 16px;color:var(--muted);font-size:9px;letter-spacing:2px;text-transform:uppercase}
+.empty-state .e-icon{font-size:28px;margin-bottom:8px;opacity:0.4}
+
+/* ── LOADING ── */
+.loading{font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+.loading::after{content:'...';animation:dots 1.5s steps(4) infinite}
+@keyframes dots{0%{content:'.'}33%{content:'..'}66%{content:'...'}100%{content:'.'}}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:10px 14px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-top:8px}
+.footer-text{font-size:7px;letter-spacing:2px;color:var(--muted)}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── CASE FILE DOSSIER ── */
+.dossier{background:#02060d;border:1px solid var(--border2);border-top:2px solid var(--cyan);padding:16px;margin-bottom:12px}
+.dossier-title{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:4px;color:var(--cyan);text-shadow:var(--gc);margin-bottom:12px;text-transform:uppercase}
+.dossier-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:9px;flex-wrap:wrap;gap:4px}
+.dossier-row:last-child{border-bottom:none}
+.dr-label{color:var(--muted);letter-spacing:2px;text-transform:uppercase;font-size:7px;flex-shrink:0}
+.dr-val{color:var(--text);text-align:right}
+.dr-val.hi{color:var(--cyan);text-shadow:var(--gc)}
+.dr-val.warn{color:var(--amber);text-shadow:var(--ga)}
+.dr-val.danger{color:var(--red);text-shadow:var(--gr)}
+.clearance-badge{
+  display:inline-block;padding:3px 10px;
+  font-size:8px;letter-spacing:3px;
+  border-radius:2px;margin-top:8px;
+}
+.clr-none{border:1px solid var(--muted);color:var(--muted)}
+.clr-lv1,.clr-lv2,.clr-lv3{border:1px solid var(--green);color:var(--green);text-shadow:var(--gg)}
+.clr-lv4,.clr-lv5,.clr-lv6{border:1px solid var(--amber);color:var(--amber);text-shadow:var(--ga)}
+.clr-lv7,.clr-lv8,.clr-lv9{border:1px solid var(--red);color:var(--red);text-shadow:var(--gr)}
+</style>
+
+</head>
+<body>
+
+<!-- MASTHEAD -->
+
+<header class="masthead">
+  <div class="masthead-eyebrow">BUREAU OF REALITY MANAGEMENT // DEPT:Ω // ENCRYPTED CHANNEL</div>
+  <div class="masthead-title">THE MAXIMUM REALITY GAZETTE</div>
+  <div class="masthead-sub">ALL NEWS IS CLASSIFIED // ALL SIGNALS ARE MONITORED // COMPLIANCE IS MANDATORY</div>
+  <div class="masthead-rule"></div>
+  <div class="masthead-meta">
+    <span>VOL. ∞ &nbsp;|&nbsp; ISSUE: <span id="issueNum">---</span></span>
+    <span>DATE: <span id="mastDate">---</span></span>
+    <span>CLEARANCE: <span id="mastClearance">NONE</span></span>
+    <span>REALITY INDEX: <span>7.3</span></span>
+  </div>
+</header>
+
+<!-- TICKER -->
+
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span class="ticker-item">BUREAU ARCHIVE ONLINE // ALL TRANSMISSIONS LOGGED</span>
+    <span class="ticker-item">REALITY DRIFT: <span>NOMINAL</span></span>
+    <span class="ticker-item">AZUL SIGHTING: <span>UNCONFIRMED</span></span>
+    <span class="ticker-item">MOCHKIL: <span>WHEREABOUTS UNKNOWN</span></span>
+    <span class="ticker-item">ENCRYPTION: <span>ACTIVE</span></span>
+    <span class="ticker-item">CITIZEN COMPLIANCE: <span>100%</span></span>
+    <span class="ticker-item">VOID BLOOM STATUS: <span>CONTAINED</span></span>
+    <span class="ticker-item">SIMULATION INTEGRITY: <span>7.3/10</span></span>
+    <span class="ticker-item">BUREAU ARCHIVE ONLINE // ALL TRANSMISSIONS LOGGED</span>
+    <span class="ticker-item">REALITY DRIFT: <span>NOMINAL</span></span>
+    <span class="ticker-item">AZUL SIGHTING: <span>UNCONFIRMED</span></span>
+    <span class="ticker-item">MOCHKIL: <span>WHEREABOUTS UNKNOWN</span></span>
+    <span class="ticker-item">ENCRYPTION: <span>ACTIVE</span></span>
+    <span class="ticker-item">CITIZEN COMPLIANCE: <span>100%</span></span>
+    <span class="ticker-item">VOID BLOOM STATUS: <span>CONTAINED</span></span>
+    <span class="ticker-item">SIMULATION INTEGRITY: <span>7.3/10</span></span>
+  </div>
+</div>
+
+<!-- NAV TABS -->
+
+<nav class="nav-tabs">
+  <button class="nav-tab active" onclick="showSection('transmissions')">⬡ TRANSMISSIONS</button>
+  <button class="nav-tab" onclick="showSection('fieldlog')">◈ FIELD LOG</button>
+  <button class="nav-tab" onclick="showSection('bulletin')">▶ BULLETIN BOARD</button>
+  <button class="nav-tab" onclick="showSection('funnypages')">░ FUNNY PAGES</button>
+</nav>
+
+<!-- ══ TRANSMISSIONS ══ -->
+
+<div class="section active" id="sec-transmissions">
+  <div class="grid">
+    <div class="card span2">
+      <div class="card-head">
+        <div class="card-title">ENCRYPTED FEED <span class="sig"><span class="sig-dot green"></span></span></div>
+        <div class="card-src">SRC: BUREAU_LORE_ENGINE // LIVE</div>
+      </div>
+      <div class="card-body">
+        <div class="transmission-header">
+          <span>CHANNEL: <span id="tx-channel">VOID-7</span></span>
+          <span>ORIGIN: <span id="tx-origin">SECTOR UNKNOWN</span></span>
+          <span>CLEARANCE: <span id="tx-clearance">OPEN</span></span>
+        </div>
+        <div class="transmission-box" id="transmission-output">[ SIGNAL DETECTED. TAP TO DECRYPT. ]</div>
+        <button class="btn-transmit" onclick="decryptTransmission()">⬡ REQUEST ENCRYPTED UPDATE</button>
+      </div>
+    </div>
+
+
+<div class="card span2">
+  <div class="card-head">
+    <div class="card-title">BUREAU BULLETIN <span class="sig"><span class="sig-dot amber"></span></span></div>
+    <div class="card-src">SRC: BUREAU_HEADLINES // AUTO-GENERATED</div>
+  </div>
+  <div class="card-body">
+    <div id="headlines-output"><div class="loading">GENERATING HEADLINES</div></div>
+    <button class="btn-transmit" style="border-color:var(--amber);color:var(--amber);margin-top:8px" onclick="generateHeadlines()">⬡ REFRESH HEADLINES</button>
+  </div>
+</div>
+
+
+  </div>
+</div>
+
+<!-- ══ FIELD LOG ══ -->
+
+<div class="section" id="sec-fieldlog">
+  <div class="grid">
+    <div class="card span2">
+      <div class="card-head">
+        <div class="card-title">AGENT DOSSIER <span class="sig"><span class="sig-dot cyan"></span></span></div>
+        <div class="card-src">SRC: BUREAU_LENS // LOCALSTORAGE</div>
+      </div>
+      <div class="card-body" id="dossier-body">
+        <div class="loading">RETRIEVING FIELD DATA</div>
+      </div>
+    </div>
+
+
+<div class="card span2">
+  <div class="card-head">
+    <div class="card-title">SCAN HISTORY <span class="sig"><span class="sig-dot green"></span></span></div>
+    <div class="card-src">SRC: BUREAU_LENS // SESSION_LOG</div>
+  </div>
+  <div class="card-body">
+    <div id="scan-history-body"><div class="loading">LOADING SCAN HISTORY</div></div>
+    <div style="margin-top:10px">
+      <button class="btn-clear-log" onclick="clearFieldLog()">⬡ PURGE LOCAL RECORDS</button>
+    </div>
+  </div>
+</div>
+
+
+  </div>
+</div>
+
+<!-- ══ BULLETIN BOARD ══ -->
+
+<div class="section" id="sec-bulletin">
+  <div class="grid">
+    <div class="card span2">
+      <div class="card-head">
+        <div class="card-title">POST FINDING <span class="sig"><span class="sig-dot amber"></span></span></div>
+        <div class="card-src">SRC: FIREBASE // bureau_findings</div>
+      </div>
+      <div class="card-body">
+        <div class="post-form">
+          <label>AGENT DESIGNATION</label>
+          <input type="text" id="post-agent" placeholder="AGENT_[REDACTED]" maxlength="30">
+          
+          <label>ANOMALY TYPE DETECTED</label>
+          <select id="post-color">
+            <option value="NEUTRAL">NEUTRAL — Background radiation</option>
+            <option value="RED">RED — Red-shift anomaly</option>
+            <option value="BLUE">BLUE — Azul quantum signature</option>
+            <option value="GREEN">GREEN — Void bloom residue</option>
+            <option value="YELLOW">YELLOW — Amber protocol object</option>
+          </select>
+
+          <label>VISUAL EVIDENCE UPLINK (URL)</label>
+          <input type="text" id="post-img-url" placeholder="https://i.discordapp.com/evidence.jpg">
+
+          <div style="margin: 5px 0 15px; padding: 10px; border: 1px dashed var(--purple); background: rgba(191, 0, 255, 0.05); text-align: center; border-radius: 4px;">
+            <div style="font-size: 7px; color: var(--purple); letter-spacing: 2px; margin-bottom: 6px; text-transform: uppercase;">External Storage // Comms Link</div>
+            <a href="https://discord.gg/aJhkqCuX" target="_blank" style="text-decoration: none;">
+              <button type="button" class="btn-transmit" style="border-color: var(--purple); color: var(--purple); box-shadow: var(--gp); margin: 0; width: auto; padding: 6px 18px; font-size: 8px;">
+                ⬡ JOIN THE HUB (GET PHOTO LINKS)
+              </button>
+            </a>
+            <div style="font-size: 6px; color: var(--muted); margin-top: 6px; letter-spacing: 1px; line-height: 1.4;">
+              1. UPLOAD PHOTO TO #PUBLIC-UPLINK<br>
+              2. LONG-PRESS PHOTO > "COPY LINK"
+            </div>
+          </div>
+
+          <label>FIELD NOTES (OPTIONAL)</label>
+          <textarea id="post-note" placeholder="Describe the anomaly. Be specific. The Bureau is watching."></textarea>
+          
+          <button class="btn-post" onclick="postFinding()">⬡ SUBMIT TO BUREAU ARCHIVE</button>
+          <span id="post-status" style="font-size:8px;color:var(--muted);margin-left:10px;letter-spacing:2px"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card span2">
+      <div class="card-head">
+        <div class="card-title">AGENT FINDINGS — LIVE FEED <span class="sig"><span class="sig-dot cyan"></span></span></div>
+        <div class="card-src">SRC: FIREBASE // REALTIME</div>
+      </div>
+      <div class="card-body">
+        <div id="findings-feed"><div class="loading">CONNECTING TO BUREAU NETWORK</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ FUNNY PAGES ══ -->
+
+<div class="section" id="sec-funnypages">
+  <div class="grid">
+    <div class="card span2">
+      <div class="card-head">
+        <div class="card-title">THE FUNNY PAGES <span class="sig"><span class="sig-dot green"></span></span></div>
+        <div class="card-src">SRC: MAXIMUM_REALITY // CLASSIFIED: ABSURD</div>
+      </div>
+      <div class="card-body">
+        <div style="font-size:9px;color:var(--muted);letter-spacing:2px;margin-bottom:14px;line-height:1.8">
+          THE FOLLOWING CONTENT HAS BEEN APPROVED BY THE BUREAU OF REALITY MANAGEMENT
+          FOR RECREATIONAL CONSUMPTION. SIDE EFFECTS MAY INCLUDE: EXISTENTIAL CLARITY,
+          MILD SIMULATION AWARENESS, AND INAPPROPRIATE FONDNESS FOR HAIRLESS CATS.
+        </div>
+
+
+    <a href="https://maximumreality.github.io/comics/debut.html" class="funny-link lnk-p" target="_blank">
+  <span class="fl-icon">🍗</span>
+  <span class="fl-text">
+    <span class="fl-title">CRAZY CHICKEN TAGINE // COMIC #01</span>
+    <span class="fl-sub">Mochkil’s culinary chaos. Reality is 15% Chicken, 85% magic.</span>
+  </span>
+  <span class="fl-tag">ARCHIVE // ONLINE</span>
+</a>
+        <a href="https://maximumreality.github.io/comics/cauliflower-pizza.html" class="funny-link lnk-a" target="_blank">
+  <span class="fl-icon">🥦</span>
+  <span class="fl-text">
+    <span class="fl-title">CAULIFLOWER CRISIS // COMIC #02</span>
+    <span class="fl-sub">The healthy alternative anomaly. Is it pizza? The Bureau says: NO.</span>
+  </span>
+  <span class="fl-tag">SECTOR 9 // RECENT</span>
+</a>
+    <a href="https://maximumreality.xyz" class="funny-link lnk-g" target="_blank">
+      <span class="fl-icon">░</span>
+      <span class="fl-text">
+        <span class="fl-title">MAXIMUM REALITY HQ</span>
+        <span class="fl-sub">Central hub. Contains Azul, Mochkil, and approximately 40 active anomalies.</span>
+      </span>
+      <span class="fl-tag">CLASSIFIED</span>
+    </a>
+
+    <a href="https://maximumreality.github.io/art/index.html" class="funny-link lnk-p" target="_blank">
+      <span class="fl-icon">◈</span>
+      <span class="fl-text">
+        <span class="fl-title">VOID BLOOM // ART TERMINAL</span>
+        <span class="fl-sub">Bureau-issued creative lens. Paint within approved reality parameters.</span>
+      </span>
+      <span class="fl-tag">VOID-7</span>
+    </a>
+        
+        <a href="https://maximumreality.github.io/crossword/index.html" class="funny-link lnk-c" target="_blank">
+  <span class="fl-icon">⬡</span>
+  <span class="fl-text">
+    <span class="fl-title">GRID BREACH // PUZZLE INTERCEPT</span>
+    <span class="fl-sub">33 levels of logic. Solving may alter your clearance level.</span>
+  </span>
+  <span class="fl-tag">ACTIVE</span>
+</a>
+
+    <a href="Portal.html" class="funny-link lnk-a">
+      <span class="fl-icon">▶</span>
+      <span class="fl-text">
+        <span class="fl-title">BUREAU PORTAL</span>
+        <span class="fl-sub">Return to the main dashboard. Your session is being logged.</span>
+      </span>
+      <span class="fl-tag">INTERNAL</span>
+    </a>
+
+    <a href="signal-decryptor.html" class="funny-link lnk-g">
+      <span class="fl-icon">⬡</span>
+      <span class="fl-text">
+        <span class="fl-title">SIGNAL DECRYPTOR // FIELD LENS</span>
+        <span class="fl-sub">Deploy the Bureau lens. Anomaly detection. Compass lock. Azul sightings.</span>
+      </span>
+      <span class="fl-tag">FIELD UNIT v3.7</span>
+    </a>
+
+    <!-- PLACEHOLDER for web comics — update href when ready -->
+    <a href="#" class="funny-link lnk-p" onclick="alert('TRANSMISSION PENDING // MORE REALITY LEAKS DEPLOYING SOON')">
+      <span class="fl-icon">📰</span>
+      <span class="fl-text">
+        <span class="fl-title">THE LEAKS // MAXIMUM REALITY STYLE</span>
+        <span class="fl-sub">Bureau-approved sequential Reality drift.</span>
+      </span>
+      <span class="fl-tag">DEPLOYING</span>
+    </a>
+  </div>
+</div>
+
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-text">THE MAXIMUM REALITY GAZETTE // BUREAU OF REALITY MANAGEMENT // ALL RIGHTS RESERVED, CITIZEN</div>
+  <div class="footer-text">SESSION: <span id="sessionTime" style="color:var(--cyan)">0:00</span></div>
+</footer>
+
+<!-- Firebase CDN (compat mode — no bundler needed) -->
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<script>
+// ── FIREBASE INIT ──
+const firebaseConfig={
+  apiKey:"AIzaSyCCmQ6W_2BTnddhmXelUgIoaQM8YIA9VaY",
+  authDomain:"whispering-woods-c8e38.firebaseapp.com",
+  projectId:"whispering-woods-c8e38",
+  storageBucket:"whispering-woods-c8e38.firebasestorage.app",
+  messagingSenderId:"28867230155",
+  appId:"1:28867230155:web:e2440a73fdb3e7a1cf1e4e"
+};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
+const FINDINGS_COL='bureau_findings'; // separate collection from Whispering Woods
+
+// ── MASTHEAD INIT ──
+function initMasthead(){
+  const d=new Date();
+  document.getElementById('issueNum').textContent=
+    String(d.getFullYear())+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0');
+  document.getElementById('mastDate').textContent=
+    d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');
+  const clr=localStorage.getItem('BUREAU_CLEARANCE')||'NONE';
+  document.getElementById('mastClearance').textContent=clr;
+}
+
+// ── SESSION TIMER ──
+const sessionStart=Date.now();
+setInterval(()=>{
+  const s=Math.floor((Date.now()-sessionStart)/1000);
+  const m=Math.floor(s/60),sc=String(s%60).padStart(2,'0');
+  document.getElementById('sessionTime').textContent=m+':'+sc;
+},1000);
+
+// ── NAV TABS ──
+function showSection(name){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+  event.target.classList.add('active');
+  if(name==='fieldlog') renderFieldLog();
+  if(name==='bulletin') loadFindings();
+}
+
+// ══════════════════════════════════════════════
+// TRANSMISSIONS — Glitch Tales engine reskinned
+// ══════════════════════════════════════════════
+const INGREDIENTS={
+  CHARACTER:{tags:['tired wizard','sentient toaster','retired mime','anxious librarian','confused robot','ghost accountant','time-traveling barista','quantum cat','discount oracle','sad detective','immortal plumber','overqualified snail','Bureau field agent','rogue simulation','Azul the Sphynx','Mochkil the tuxedo cat','void-touched archivist','reality index auditor']},
+  SETTING:{tags:['floating mall','abandoned moon café','inside a dream','the last bookstore','cursed elevator','underwater suburb','parallel post office','digital forest','neon monastery','forgotten theme park','fog-filled library','the edge of a map','Bureau Sector 7G','a collapsing simulation','the Maximum Reality','the space between signals','a redacted location','an unscheduled dimension']},
+  MOOD:{tags:['melancholy but funny','existential panic','quietly hopeful','suspicious calm','nostalgic for things that never happened','cozy but wrong','aggressively neutral','tender chaos','bureaucratically doomed','encrypted with grief','classified as fine']},
+  TWIST:{tags:['time loop','identity swap','wrong universe','everyone already knew','it was a test','gravity optional','the narrator lied','it ends where it began','someone disappears slowly','the Bureau filed a report','Azul was there the whole time','the signal was never lost','compliance was achieved','the simulation rebooted']}
+};
+
+const TX_TEMPLATES={
+  memo:['MEMO // TO: ALL FIELD AGENTS\nRE: {character}\n\nEffective immediately, {character} has been observed in {setting}.\nAtmospheric mood: {mood}.\nContainment status: {twist}.\n\nDo not make eye contact. Do not file a complaint. Comply.'],
+  intercept:['// INTERCEPTED TRANSMISSION // ORIGIN: {setting}\n\n"{character} was here. The {mood} feeling persists.\nWe have attempted to resolve. Result: {twist}."\n\n// END TRANSMISSION // SIGNAL LOST'],
+  report:['ANOMALY REPORT: CLASS 3\nLOCATION: {setting}\nSUBJECT: {character}\n\nInitial assessment: {mood}.\nFinal determination: {twist}.\n\nFiled by: [REDACTED]\nApproved by: The Bureau'],
+  headline:['BREAKING: {character} FOUND IN {setting}\nSources describe atmosphere as "{mood}."\nOfficial statement: {twist}. Citizens advised to comply.']
+};
+
+const TX_PREFIXES=['// LIVE TRANSMISSION //','OFFICIAL RECORD (INTERNAL)','ANOMALY REPORT: CLASS 3','DECRYPTION COMPLETE','LOG FILE: [REDACTED]','BUREAU MEMO: EYES ONLY','SIGNAL RECOVERED: PARTIAL','CLASSIFIED // DO NOT DISTRIBUTE'];
+const TX_CHANNELS=['VOID-7','SECTOR-Ω','CHANNEL-NULL','FREQ-∞','STATIC-3','REDACTED','DARK-CHANNEL-9'];
+const TX_ORIGINS=['SECTOR UNKNOWN','TIMELINE 3','SIMULATION LAYER 4','REDACTED COORDINATES','THE VOID','AZUL\'S LAST KNOWN POSITION','BUREAU DEEP STORAGE'];
+const TX_CLEARANCES=['OPEN','LVL-01','LVL-02','LVL-03','RESTRICTED','EYES ONLY','[REDACTED]'];
+
+let txTypeTimer=null;
+
+function getRandom(arr){return arr[Math.floor(Math.random()*arr.length)];}
+
+function buildTransmission(){
+  const char=getRandom(INGREDIENTS.CHARACTER.tags);
+  const setting=getRandom(INGREDIENTS.SETTING.tags);
+  const mood=getRandom(INGREDIENTS.MOOD.tags);
+  const twist=getRandom(INGREDIENTS.TWIST.tags);
+  const tplKey=getRandom(Object.keys(TX_TEMPLATES));
+  let txt=getRandom(TX_TEMPLATES[tplKey]);
+  txt=txt.replace(/{character}/g,char).replace(/{setting}/g,setting).replace(/{mood}/g,mood).replace(/{twist}/g,twist);
+  // Occasional glitch
+  if(Math.random()>0.75){
+    const glitch=['̶','̴','̵'];
+    txt=txt.split('').map(c=>Math.random()<0.04?c+getRandom(glitch):c).join('');
+  }
+  return txt;
+}
+
+const SCRAMBLE_CHARS='!@#$%^&*()_+={}[]<>?/\\|ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+function scramble(el,cb){
+  let i=0;
+  const iv=setInterval(()=>{
+    el.textContent=Array.from({length:50},()=>SCRAMBLE_CHARS[Math.floor(Math.random()*SCRAMBLE_CHARS.length)]).join('');
+    if(++i>8){clearInterval(iv);cb();}
+  },45);
+}
+
+function typewrite(el,text,speed=22){
+  if(txTypeTimer)clearTimeout(txTypeTimer);
+  el.textContent='';
+  let i=0;
+  function t(){
+    if(i<text.length){el.textContent+=text[i++];txTypeTimer=setTimeout(t,speed);}
+  }
+  t();
+}
+
+function decryptTransmission(){
+  const out=document.getElementById('transmission-output');
+  const statusLines=['DECRYPTING SIGNAL...','BYPASSING FIREWALL...','ESTABLISHING HANDSHAKE...','TRIANGULATING ORIGIN...','PARSING LORE ENGINE...','RECOVERING FRAGMENTS...'];
+  out.textContent='>>> '+getRandom(statusLines);
+  document.getElementById('tx-channel').textContent=getRandom(TX_CHANNELS);
+  document.getElementById('tx-origin').textContent=getRandom(TX_ORIGINS);
+  document.getElementById('tx-clearance').textContent=getRandom(TX_CLEARANCES);
+  setTimeout(()=>{
+    scramble(out,()=>{
+      const prefix=getRandom(TX_PREFIXES);
+      const story=buildTransmission();
+      typewrite(out,prefix+'\n\n'+story);
+    });
+  },700);
+}
+
+// ── HEADLINES ──
+const HEADLINE_SUBJECTS=['AZUL','MOCHKIL','A REALITY AUDITOR','AN UNREGISTERED ENTITY','LOCAL SIMULATION','BUREAU DIVISION Ω','CITIZEN #4471','THE VOID','A ROGUE TIMELINE','SECTOR 7G'];
+const HEADLINE_VERBS=['DETECTED IN','ESCAPED FROM','FILED A COMPLAINT ABOUT','ACHIEVED COMPLIANCE IN','VANISHED NEAR','ISSUED A WARNING ABOUT','CLAIMED JURISDICTION OVER','DENIED INVOLVEMENT IN'];
+const HEADLINE_OBJECTS=['THE LAST KNOWN BOOKSTORE','AN UNSCHEDULED DIMENSION','THE SPACE BETWEEN SIGNALS','REALITY INDEX ZONE 3','THE ENCRYPTED ARCHIVE','A PARALLEL POST OFFICE','THE BUREAU\'S FILING SYSTEM','SIMULATION LAYER 4','A REDACTED LOCATION'];
+const HEADLINE_TAGS=['DEVELOPING','CLASSIFIED','UNCONFIRMED','BUREAU APPROVED','ENCRYPTED','UNDER REVIEW','ONGOING','DENIED'];
+
+function generateHeadlines(){
+  const el=document.getElementById('headlines-output');
+  el.innerHTML='';
+  const count=4+Math.floor(Math.random()*3);
+  for(let i=0;i<count;i++){
+    const subj=getRandom(HEADLINE_SUBJECTS);
+    const verb=getRandom(HEADLINE_VERBS);
+    const obj=getRandom(HEADLINE_OBJECTS);
+    const tag=getRandom(HEADLINE_TAGS);
+    const div=document.createElement('div');
+    div.style.cssText='border-bottom:1px solid var(--border);padding:8px 0;';
+    div.innerHTML=`
+      <div style="font-size:8px;color:var(--muted);letter-spacing:2px;margin-bottom:3px">${tag} // ${new Date().toLocaleTimeString()}</div>
+      <div style="font-size:11px;color:var(--text);letter-spacing:1px;line-height:1.4">${subj} ${verb} ${obj}</div>
+    `;
+    el.appendChild(div);
+  }
+}
+
+// ══════════════════════════════════════════════
+// FIELD LOG — reads from localStorage (Lens data)
+// ══════════════════════════════════════════════
+function renderFieldLog(){
+  renderDossier();
+  renderScanHistory();
+}
+
+function renderDossier(){
+  const el=document.getElementById('dossier-body');
+  const clearance=localStorage.getItem('BUREAU_CLEARANCE')||'NONE';
+  const lastScan=localStorage.getItem('BUREAU_LAST_SCAN')||'---';
+  const scanCount=localStorage.getItem('BUREAU_SCAN_COUNT')||'0';
+  const anomaly=localStorage.getItem('BUREAU_ANOMALY')||'---';
+  const timestamp=localStorage.getItem('BUREAU_TIMESTAMP');
+  const lastOp=timestamp?new Date(timestamp).toLocaleString():'NO FIELD OPS RECORDED';
+
+  const lvlNum=clearance.replace('LVL_','').replace('NONE','0');
+  const lvlInt=parseInt(lvlNum)||0;
+  const clrClass=lvlInt===0?'clr-none':lvlInt<=3?'clr-lv'+lvlInt:lvlInt<=6?'clr-lv'+lvlInt:'clr-lv'+lvlInt;
+
+  const threatColor=lvlInt===0?'color:var(--muted)':lvlInt<=3?'color:var(--green)':lvlInt<=6?'color:var(--amber)':'color:var(--red)';
+  const scanCol={RED:'danger',BLUE:'hi',GREEN:'hi',YELLOW:'warn',NEUTRAL:'',  '---':''}[lastScan]||'';
+
+  el.innerHTML=`
+    <div class="dossier">
+      <div class="dossier-title">▶ AGENT STATUS REPORT</div>
+      <div class="dossier-row">
+        <span class="dr-label">CLEARANCE LEVEL</span>
+        <span class="dr-val ${lvlInt>=7?'danger':lvlInt>=4?'warn':'hi'}">${clearance}</span>
+      </div>
+      <div class="dossier-row">
+        <span class="dr-label">TOTAL SCANS</span>
+        <span class="dr-val">${scanCount}</span>
+      </div>
+      <div class="dossier-row">
+        <span class="dr-label">LAST SCAN TYPE</span>
+        <span class="dr-val ${scanCol}">${lastScan}</span>
+      </div>
+      <div class="dossier-row">
+        <span class="dr-label">LAST ANOMALY</span>
+        <span class="dr-val warn">${anomaly}</span>
+      </div>
+      <div class="dossier-row">
+        <span class="dr-label">LAST FIELD OP</span>
+        <span class="dr-val">${lastOp}</span>
+      </div>
+      <div style="margin-top:10px">
+        <span class="clearance-badge ${clrClass}">${clearance === 'NONE' ? 'NO CLEARANCE' : '⬡ '+clearance+' AGENT'}</span>
+      </div>
+    </div>
+    ${lvlInt===0?'<div class="empty-state"><div class="e-icon">⬡</div>NO FIELD DATA FOUND<br><br>DEPLOY THE LENS TO BEGIN LOGGING ANOMALIES</div>':''}
+  `;
+}
+
+function renderScanHistory(){
+  const el=document.getElementById('scan-history-body');
+  // Read all bureau keys from localStorage
+  const entries=[];
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(k&&k.startsWith('BUREAU_')){
+      entries.push({key:k,val:localStorage.getItem(k)});
+    }
+  }
+  if(entries.length===0){
+    el.innerHTML='<div class="empty-state"><div class="e-icon">◈</div>NO SCAN RECORDS IN LOCAL STORAGE</div>';
+    return;
+  }
+  const colMap={BUREAU_LAST_SCAN:'col-'+localStorage.getItem('BUREAU_LAST_SCAN')?.toLowerCase()};
+  el.innerHTML=entries.map(e=>{
+    const friendly={
+      BUREAU_CLEARANCE:'CLEARANCE LEVEL',BUREAU_LAST_SCAN:'LAST SCAN TYPE',
+      BUREAU_SCAN_COUNT:'TOTAL SCANS',BUREAU_ANOMALY:'LAST ANOMALY',
+      BUREAU_TIMESTAMP:'LAST FIELD OP'
+    }[e.key]||e.key;
+    const val=e.key==='BUREAU_TIMESTAMP'?new Date(e.val).toLocaleString():e.val;
+    return `<div class="log-entry-card">
+      <div class="le-head">
+        <span class="le-type">${friendly}</span>
+      </div>
+      <div class="le-body">${val}</div>
+    </div>`;
+  }).join('');
+}
+
+function clearFieldLog(){
+  if(!confirm('PURGE ALL LOCAL BUREAU RECORDS? THIS CANNOT BE UNDONE.'))return;
+  ['BUREAU_CLEARANCE','BUREAU_LAST_SCAN','BUREAU_SCAN_COUNT','BUREAU_ANOMALY','BUREAU_TIMESTAMP'].forEach(k=>localStorage.removeItem(k));
+  renderFieldLog();
+}
+
+// ══════════════════════════════════════════════
+// BULLETIN BOARD — Firebase Firestore
+// ══════════════════════════════════════════════
+function postFinding(){
+  const agent=(document.getElementById('post-agent').value.trim()||'AGENT_UNKNOWN').toUpperCase();
+  const color=document.getElementById('post-color').value;
+  const note=document.getElementById('post-note').value.trim();
+  const imgUrl=document.getElementById('post-img-url').value.trim(); // NEW
+  const status=document.getElementById('post-status');
+
+  status.textContent='TRANSMITTING...';
+  status.style.color='var(--amber)';
+
+  db.collection(FINDINGS_COL).add({
+    agent,color,note,imgUrl, // SAVING THE URL
+    clearance:localStorage.getItem('BUREAU_CLEARANCE')||'NONE',
+    scanCount:parseInt(localStorage.getItem('BUREAU_SCAN_COUNT')||'0'),
+    timestamp:firebase.firestore.FieldValue.serverTimestamp()
+  }).then(()=>{
+    status.textContent='FILED // BUREAU ACKNOWLEDGED';
+    status.style.color='var(--green)';
+    document.getElementById('post-note').value='';
+    document.getElementById('post-img-url').value=''; // CLEAR INPUT
+    setTimeout(()=>{status.textContent='';},4000);
+  }).catch(err=>{
+    status.textContent='TRANSMISSION FAILED: '+err.message;
+    status.style.color='var(--red)';
+  });
+}
+
+
+function loadFindings(){
+  const el=document.getElementById('findings-feed');
+  el.innerHTML='<div class="loading">CONNECTING TO BUREAU NETWORK</div>';
+
+  db.collection(FINDINGS_COL)
+    .orderBy('timestamp','desc')
+    .limit(20)
+    .onSnapshot(snap=>{
+      if(snap.empty){
+        el.innerHTML='<div class="empty-state"><div class="e-icon">▶</div>NO FINDINGS POSTED YET<br><br>BE THE FIRST AGENT TO REPORT AN ANOMALY</div>';
+        return;
+      }
+      const colClass={RED:'col-red',BLUE:'col-blue',GREEN:'col-green',YELLOW:'col-yellow',NEUTRAL:'col-neutral'};
+      const colLabel={RED:'⬡ RED-SHIFT ANOMALY',BLUE:'◈ AZUL QUANTUM SIGNATURE',GREEN:'░ VOID BLOOM RESIDUE',YELLOW:'▶ AMBER PROTOCOL',NEUTRAL:'— BACKGROUND RADIATION'};
+      
+      el.innerHTML=snap.docs.map(doc=>{
+        const d=doc.data();
+        const ts=d.timestamp?.toDate();
+        const timeStr=ts?ts.toLocaleString():'TIMESTAMP REDACTED';
+        const cc=colClass[d.color]||'col-neutral';
+        const cl=colLabel[d.color]||d.color;
+
+        // ── VISUAL EVIDENCE LOGIC ──
+        let photoHtml = '';
+        if(d.imgUrl && d.imgUrl.startsWith('http')) {
+          let originHost = 'EXTERNAL_SOURCE';
+          try { originHost = new URL(d.imgUrl).hostname; } catch(e) {}
+          
+          photoHtml = `
+            <div style="margin:12px 0; border:1px solid var(--border2); background:#000; position:relative; overflow:hidden;">
+              <img src="${d.imgUrl}" style="width:100%; display:block; filter: brightness(0.8) contrast(1.1) sepia(0.3) hue-rotate(-15deg); opacity:0.9;" onerror="this.parentElement.style.display='none'">
+              <div style="font-size:6px; background:rgba(0,0,0,0.8); color:var(--cyan); padding:4px; text-align:center; letter-spacing:2px; border-top:1px solid var(--border2); font-family:monospace;">
+                SCAN_RECOVERED // ORIGIN: ${originHost.toUpperCase()}
+              </div>
+            </div>
+          `;
+        }
+
+        return `<div class="finding-card">
+          <div class="f-header">
+            <span class="f-agent">${d.agent||'AGENT_UNKNOWN'}</span>
+            <span class="f-time">${timeStr}</span>
+          </div>
+          <span class="f-color ${cc}">${cl}</span>
+          ${d.note?`<div class="f-note">${d.note}</div>`:''}
+          
+          ${photoHtml} <div class="f-clearance">CLEARANCE: ${d.clearance||'NONE'} // SCANS: ${d.scanCount||0}</div>
+        </div>`;
+      }).join('');
+    },err=>{
+      el.innerHTML=`<div class="empty-state"><div class="e-icon">📡</div>FIREBASE CONNECTION FAILED<br><br>${err.message}</div>`;
+    });
+}
+
+
+// ── BOOT ──
+initMasthead();
+decryptTransmission();
+generateHeadlines();
+
+// Auto-refresh headlines every 5 minutes
+setInterval(generateHeadlines, 300000);
+</script>
+
+</body>
+</html>
