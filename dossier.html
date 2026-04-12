@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BUREAU OF REALITY MANAGEMENT // AGENT DOSSIER</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --green: #00ff41;
+    --green-dim: #00aa2a;
+    --green-faint: #001a08;
+    --green-glow: rgba(0,255,65,0.12);
+    --amber: #ffb800;
+    --red: #ff2244;
+    --cyan: #00ffe7;
+    --bg: #000000;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; min-height: 100%;
+    background: var(--bg);
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    overflow-x: hidden;
+  }
+
+  /* CRT scanlines */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 2px,
+      rgba(0,255,65,0.025) 2px, rgba(0,255,65,0.025) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.75) 100%);
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  @keyframes flicker {
+    0%,100%{opacity:1} 93%{opacity:0.85} 94%{opacity:1} 97%{opacity:0.9} 98%{opacity:1}
+  }
+  @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes rgbSplit {
+    0%,100%{text-shadow:-2px 0 var(--red),2px 0 var(--cyan)}
+    50%{text-shadow:2px 0 var(--red),-2px 0 var(--cyan)}
+  }
+  @keyframes glitchShift {
+    0%,88%{opacity:0}
+    89%{opacity:1;transform:translate(-4px,0)skewX(-4deg)}
+    91%{opacity:1;transform:translate(4px,0)}
+    93%{opacity:0}
+    96%{opacity:1;transform:translate(-2px,0)}
+    100%{opacity:0}
+  }
+  @keyframes pulse {
+    0%,100%{box-shadow:0 0 8px var(--green-dim)}
+    50%{box-shadow:0 0 22px var(--green),0 0 40px var(--green-dim)}
+  }
+  @keyframes scanBar {
+    0%{top:-10%} 100%{top:110%}
+  }
+  @keyframes typing {
+    from{width:0} to{width:100%}
+  }
+  @keyfunction redactReveal {
+    from{letter-spacing:-2px;opacity:0.3} to{letter-spacing:0;opacity:1}
+  }
+  @keyframes redactReveal {
+    from{letter-spacing:-2px;opacity:0.3} to{letter-spacing:0;opacity:1}
+  }
+  @keyframes glitchBlock {
+    0%{clip-path:inset(0 0 98% 0);transform:translate(-3px,0)}
+    20%{clip-path:inset(40% 0 40% 0);transform:translate(3px,0)}
+    40%{clip-path:inset(70% 0 10% 0);transform:translate(-2px,0)}
+    60%{clip-path:inset(20% 0 60% 0);transform:translate(2px,0)}
+    80%{clip-path:inset(85% 0 5% 0);transform:translate(-1px,0)}
+    100%{clip-path:inset(0 0 98% 0);transform:translate(0,0)}
+  }
+
+  #app {
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding-bottom: 60px;
+    animation: flicker 7s infinite;
+  }
+
+  /* HEADER */
+  .header {
+    padding: 16px 16px 10px;
+    border-bottom: 1px solid var(--green-dim);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: attr(data-glitch);
+    position: absolute; top:16px; left:16px;
+    color: var(--green);
+    animation: glitchShift 5s infinite;
+    pointer-events: none;
+  }
+  .header-eyebrow { font-size:8px; letter-spacing:4px; color:var(--green-dim); margin-bottom:3px; }
+  .header-title { font-size:14px; letter-spacing:2px; color:var(--green); text-shadow:0 0 10px var(--green); }
+  .header-sub { font-size:8px; letter-spacing:3px; color:var(--green-dim); margin-top:2px; }
+
+  /* SCREENS */
+  .screen { display:none; padding:20px 16px; animation:fadeIn 0.35s ease; }
+  .screen.active { display:block; }
+
+  /* FORM */
+  .form-section { margin-bottom:22px; }
+  .form-label {
+    font-size:9px; letter-spacing:3px; color:var(--green-dim);
+    text-transform:uppercase; margin-bottom:8px; display:block;
+  }
+  .form-label span { color:var(--amber); }
+
+  input[type="text"] {
+    width:100%; padding:12px 14px;
+    background:var(--green-faint);
+    border:1px solid var(--green-dim);
+    color:var(--green);
+    font-family:'Share Tech Mono',monospace;
+    font-size:14px;
+    letter-spacing:2px;
+    outline:none;
+    -webkit-appearance:none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input[type="text"]:focus {
+    border-color:var(--green);
+    box-shadow:0 0 12px var(--green-glow);
+  }
+  input[type="text"]::placeholder { color:var(--green-dim); opacity:0.5; }
+
+  .option-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+
+  .opt-card {
+    padding:10px 10px;
+    border:1px solid var(--green-dim);
+    background:transparent;
+    color:var(--green-dim);
+    font-family:'Share Tech Mono',monospace;
+    font-size:10px;
+    letter-spacing:1px;
+    cursor:pointer;
+    text-align:left;
+    line-height:1.5;
+    transition:all 0.15s;
+    -webkit-tap-highlight-color:transparent;
+    position:relative;
+    overflow:hidden;
+  }
+  .opt-card .opt-tag {
+    display:block;
+    font-size:7px;
+    letter-spacing:3px;
+    margin-bottom:4px;
+    opacity:0.7;
+  }
+  .opt-card:active, .opt-card.selected {
+    border-color:var(--green);
+    color:var(--green);
+    background:var(--green-glow);
+    box-shadow:0 0 12px var(--green-glow);
+  }
+  .opt-card.selected::after {
+    content:'✓';
+    position:absolute; top:6px; right:8px;
+    color:var(--green);
+    font-size:10px;
+  }
+
+  /* archetype colors */
+  .opt-card[data-type="VOID-WALKER"]:active,
+  .opt-card[data-type="VOID-WALKER"].selected {
+    border-color:var(--red); color:var(--red);
+    background:rgba(255,34,68,0.07);
+  }
+  .opt-card[data-type="PROTOCOL-ENFORCER"]:active,
+  .opt-card[data-type="PROTOCOL-ENFORCER"].selected {
+    border-color:var(--cyan); color:var(--cyan);
+    background:rgba(0,255,231,0.07);
+  }
+  .opt-card[data-type="AESTHETIC-ANALYST"]:active,
+  .opt-card[data-type="AESTHETIC-ANALYST"].selected {
+    border-color:var(--amber); color:var(--amber);
+    background:rgba(255,184,0,0.07);
+  }
+  .opt-card[data-type="SECTOR-LEAD"]:active,
+  .opt-card[data-type="SECTOR-LEAD"].selected {
+    border-color:var(--green); color:var(--green);
+    background:var(--green-glow);
+  }
+
+  .btn {
+    display:block; width:100%;
+    padding:14px 16px;
+    background:transparent;
+    border:1px solid var(--green);
+    color:var(--green);
+    font-family:'Share Tech Mono',monospace;
+    font-size:12px; letter-spacing:3px;
+    text-transform:uppercase;
+    cursor:pointer; margin-top:12px;
+    text-align:center;
+    animation:pulse 3s infinite;
+    -webkit-tap-highlight-color:transparent;
+    position:relative; overflow:hidden;
+    transition:all 0.15s;
+  }
+  .btn::before {
+    content:'';
+    position:absolute; top:-100%; left:0; right:0; height:100%;
+    background:linear-gradient(transparent,var(--green-glow),transparent);
+    animation:scanBar 2.5s linear infinite;
+  }
+  .btn:active { background:var(--green-glow); transform:scale(0.98); }
+  .btn.dim { border-color:var(--green-dim); color:var(--green-dim); animation:none; font-size:10px; }
+
+  .terminal-prompt {
+    font-size:10px; color:var(--green-dim);
+    margin-bottom:14px; line-height:1.8;
+  }
+  .terminal-prompt::before { content:'> '; color:var(--green); }
+
+  .cursor { animation:blink 1s infinite; }
+
+  .sep {
+    height:1px; background:var(--green-faint);
+    margin:18px 0; position:relative;
+  }
+  .sep::after {
+    content:'//';
+    position:absolute; right:0; top:-7px;
+    font-size:8px; color:var(--green-dim);
+    background:var(--bg); padding-left:4px;
+  }
+
+  /* ===== PROCESSING SCREEN ===== */
+  #processing-screen { text-align:center; padding-top:40px; }
+  .proc-title { font-size:13px; letter-spacing:3px; color:var(--green); margin-bottom:20px; }
+  .proc-log { text-align:left; font-size:10px; color:var(--green-dim); line-height:2.2; }
+  .proc-log span { display:block; opacity:0; animation:fadeIn 0.4s ease forwards; }
+
+  /* ===== DOSSIER ===== */
+  #dossier {
+    width:340px; margin:0 auto;
+    background:#000;
+    border:2px solid var(--green);
+    box-shadow:0 0 40px rgba(0,255,65,0.15), inset 0 0 30px rgba(0,255,65,0.02);
+    padding:18px;
+    position:relative;
+    overflow:hidden;
+    font-family:'Share Tech Mono',monospace;
+  }
+
+  #dossier::before {
+    content:'';
+    position:absolute; inset:0;
+    background:repeating-linear-gradient(
+      0deg,transparent,transparent 3px,
+      rgba(0,255,65,0.015) 3px,rgba(0,255,65,0.015) 4px
+    );
+    pointer-events:none;
+  }
+
+  .dos-header {
+    display:flex; justify-content:space-between; align-items:flex-start;
+    margin-bottom:12px;
+  }
+  .dos-bureau { font-size:7px; letter-spacing:2px; color:var(--green-dim); line-height:1.8; }
+  .dos-classification {
+    font-size:7px; letter-spacing:1px; text-align:right; line-height:1.8;
+  }
+  .dos-classification .level { color:var(--red); font-size:8px; }
+
+  .dos-title-bar {
+    background:var(--green);
+    color:#000;
+    padding:5px 10px;
+    font-size:10px; letter-spacing:3px;
+    text-align:center;
+    margin-bottom:12px;
+  }
+
+  .dos-photo-row {
+    display:flex; gap:12px; margin-bottom:14px; align-items:flex-start;
+  }
+
+  .dos-photo {
+    width:64px; height:76px; flex-shrink:0;
+    border:1px solid var(--green-dim);
+    background:var(--green-faint);
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    font-size:26px; position:relative; overflow:hidden;
+  }
+  .dos-photo::after {
+    content:'';
+    position:absolute; inset:0;
+    background:repeating-linear-gradient(
+      0deg,transparent,transparent 5px,
+      rgba(0,255,65,0.04) 5px,rgba(0,255,65,0.04) 6px
+    );
+  }
+  .dos-photo-label {
+    font-size:6px; letter-spacing:1px; color:var(--green-dim);
+    margin-top:3px; position:relative; z-index:1;
+  }
+
+  .dos-meta { flex:1; }
+  .dos-field { margin-bottom:7px; }
+  .dos-field-label { font-size:6px; letter-spacing:2px; color:var(--green-dim); margin-bottom:1px; }
+  .dos-field-value { font-size:10px; letter-spacing:1px; color:var(--green); line-height:1.3; }
+
+  .dos-divider {
+    height:1px;
+    background:linear-gradient(to right,transparent,var(--green-dim),transparent);
+    margin:10px 0;
+  }
+
+  .dos-section-title {
+    font-size:7px; letter-spacing:3px; color:var(--amber);
+    text-transform:uppercase; margin-bottom:7px;
+    padding-bottom:3px; border-bottom:1px solid rgba(255,184,0,0.2);
+  }
+
+  .dos-body-text {
+    font-size:8.5px; color:var(--green-dim); line-height:1.7;
+    margin-bottom:10px;
+  }
+  .dos-body-text .highlight { color:var(--green); }
+  .dos-body-text .warn-txt { color:var(--amber); }
+  .dos-body-text .danger-txt { color:var(--red); }
+
+  .dos-redacted {
+    display:inline-block;
+    background:var(--green-dim);
+    color:transparent;
+    user-select:none;
+    letter-spacing:0;
+    border-radius:1px;
+  }
+
+  .dos-incident {
+    border-left:2px solid var(--red);
+    padding:6px 8px;
+    margin-bottom:7px;
+    background:rgba(255,34,68,0.04);
+  }
+  .dos-incident-id { font-size:7px; color:var(--red); letter-spacing:2px; margin-bottom:3px; }
+  .dos-incident-text { font-size:8px; color:var(--green-dim); line-height:1.6; }
+
+  .dos-threat-row {
+    display:flex; align-items:center; gap:8px; margin-bottom:6px;
+  }
+  .dos-threat-label { font-size:7px; color:var(--green-dim); width:80px; letter-spacing:1px; }
+  .dos-threat-track { flex:1; height:5px; background:rgba(0,255,65,0.08); border:1px solid rgba(0,255,65,0.15); }
+  .dos-threat-fill { height:100%; }
+  .dos-threat-val { font-size:7px; color:var(--green-dim); width:24px; text-align:right; }
+
+  .dos-handler-note {
+    border:1px dashed rgba(0,255,65,0.25);
+    padding:8px 10px; margin-top:10px;
+    background:rgba(0,255,65,0.02);
+  }
+  .dos-handler-label { font-size:6px; letter-spacing:3px; color:var(--green-dim); margin-bottom:5px; }
+  .dos-handler-text { font-size:8px; color:var(--green); line-height:1.7; font-style:italic; }
+
+  .dos-footer {
+    margin-top:12px; padding-top:8px;
+    border-top:1px solid var(--green-faint);
+    display:flex; justify-content:space-between; align-items:flex-end;
+  }
+  .dos-footer-left { font-size:6px; color:var(--green-dim); letter-spacing:1px; line-height:1.8; }
+  .dos-stamp {
+    font-size:11px; color:rgba(0,255,65,0.2);
+    border:2px solid rgba(0,255,65,0.15);
+    padding:3px 6px; letter-spacing:2px;
+    transform:rotate(-8deg);
+    display:inline-block;
+  }
+  .dos-watermark {
+    position:absolute; bottom:16px; right:14px;
+    font-size:52px; color:rgba(0,255,65,0.03);
+    transform:rotate(-15deg); letter-spacing:-2px;
+    pointer-events:none;
+  }
+
+  /* download btn */
+  #download-btn { margin-top:16px; }
+  .cta-box {
+    border:1px solid var(--green-dim); padding:14px;
+    margin:16px 0; font-size:11px; line-height:1.7;
+    color:var(--green); background:var(--green-faint);
+    animation:pulse 3s infinite;
+  }
+  .cta-box .cta-hdr { font-size:8px; letter-spacing:3px; color:var(--amber); margin-bottom:6px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <div class="header" data-glitch="BUREAU OF REALITY MANAGEMENT">
+    <div class="header-eyebrow">// MAXIMUM REALITY NETWORKS //</div>
+    <div class="header-title">BUREAU OF REALITY MANAGEMENT</div>
+    <div class="header-sub">AGENT DOSSIER GENERATION SYSTEM v2.1.9 <span class="cursor">█</span></div>
+  </div>
+
+  <!-- INTAKE FORM -->
+  <div id="form-screen" class="screen active">
+    <div class="terminal-prompt">AGENT INTAKE FORM // ALL FIELDS MANDATORY</div>
+
+    <div class="form-section">
+      <label class="form-label">AGENT DESIGNATION <span>// YOUR NAME OR CODENAME</span></label>
+      <input type="text" id="agentName" placeholder="ENTER DESIGNATION..." maxlength="24" autocomplete="off" spellcheck="false">
+    </div>
+
+    <div class="form-section">
+      <label class="form-label">CLASSIFICATION RANK <span>// FROM YOUR ID CARD</span></label>
+      <div class="option-grid">
+        <button class="opt-card" data-type="VOID-WALKER" onclick="selectOpt(this,'rank')">
+          <span class="opt-tag">HIGH CHAOS</span>⚡ VOID-WALKER
+        </button>
+        <button class="opt-card" data-type="PROTOCOL-ENFORCER" onclick="selectOpt(this,'rank')">
+          <span class="opt-tag">HIGH COMPLY</span>⚙ PROTOCOL ENFORCER
+        </button>
+        <button class="opt-card" data-type="AESTHETIC-ANALYST" onclick="selectOpt(this,'rank')">
+          <span class="opt-tag">HIGH BEAUTY</span>◈ AESTHETIC ANALYST
+        </button>
+        <button class="opt-card" data-type="SECTOR-LEAD" onclick="selectOpt(this,'rank')">
+          <span class="opt-tag">BALANCED</span>◉ SECTOR LEAD
+        </button>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <label class="form-label">PRIMARY FIELD SPECIALTY <span>// SELECT ONE</span></label>
+      <div class="option-grid">
+        <button class="opt-card" data-type="ANOMALY DETECTION" onclick="selectOpt(this,'specialty')">
+          <span class="opt-tag">SPECIALTY</span>Anomaly Detection
+        </button>
+        <button class="opt-card" data-type="REALITY PATCHING" onclick="selectOpt(this,'specialty')">
+          <span class="opt-tag">SPECIALTY</span>Reality Patching
+        </button>
+        <button class="opt-card" data-type="SIGNAL INTERCEPTION" onclick="selectOpt(this,'specialty')">
+          <span class="opt-tag">SPECIALTY</span>Signal Interception
+        </button>
+        <button class="opt-card" data-type="MEMORY EXTRACTION" onclick="selectOpt(this,'specialty')">
+          <span class="opt-tag">SPECIALTY</span>Memory Extraction
+        </button>
+        <button class="opt-card" data-type="SECTOR NAVIGATION" onclick="selectOpt(this,'specialty')">
+          <span class="opt-tag">SPECIALTY</span>Sector Navigation
+        </button>
+        <button class="opt-card" data-type="TEMPORAL ANALYSIS" onclick="selectOpt(this,'specialty')">
+          <span class="opt-tag">SPECIALTY</span>Temporal Analysis
+        </button>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <label class="form-label">KNOWN ANOMALOUS BEHAVIOR <span>// SELECT ONE</span></label>
+      <div class="option-grid">
+        <button class="opt-card" data-type="talks to machines" onclick="selectOpt(this,'anomaly')">
+          <span class="opt-tag">OBSERVED</span>Talks to machines
+        </button>
+        <button class="opt-card" data-type="never fully asleep" onclick="selectOpt(this,'anomaly')">
+          <span class="opt-tag">OBSERVED</span>Never fully asleep
+        </button>
+        <button class="opt-card" data-type="sees patterns in static" onclick="selectOpt(this,'anomaly')">
+          <span class="opt-tag">OBSERVED</span>Sees patterns in static
+        </button>
+        <button class="opt-card" data-type="remembers things that haven't happened" onclick="selectOpt(this,'anomaly')">
+          <span class="opt-tag">OBSERVED</span>Remembers future events
+        </button>
+        <button class="opt-card" data-type="causes glitches near electronics" onclick="selectOpt(this,'anomaly')">
+          <span class="opt-tag">OBSERVED</span>Causes glitches nearby
+        </button>
+        <button class="opt-card" data-type="speaks to cats as if they understand" onclick="selectOpt(this,'anomaly')">
+          <span class="opt-tag">OBSERVED</span>Speaks to cats fluently
+        </button>
+      </div>
+    </div>
+
+    <button class="btn" onclick="generateDossier()">[ COMPILE DOSSIER ]</button>
+  </div>
+
+  <!-- PROCESSING -->
+  <div id="processing-screen" class="screen">
+    <div class="proc-title">COMPILING DOSSIER <span class="cursor">█</span></div>
+    <div class="proc-log" id="procLog"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result-screen" class="screen">
+    <div class="terminal-prompt">DOSSIER COMPILATION COMPLETE. HANDLE WITH CLEARANCE.</div>
+
+    <div id="dossier">
+      <!-- populated by JS -->
+      <div class="dos-watermark">⬡BRM</div>
+    </div>
+
+    <div class="cta-box">
+      <div class="cta-hdr">// UPLINK TRANSMISSION //</div>
+      DOSSIER GENERATED. Download your file and post it to <strong>#public-uplink</strong> in the Maximum Reality Discord Hub. The Bureau is watching.
+    </div>
+
+    <button class="btn" id="download-btn" onclick="downloadDossier()">[ DOWNLOAD DOSSIER .PNG ]</button>
+    <button class="btn dim" onclick="restart()" style="margin-top:8px">[ COMPILE NEW DOSSIER ]</button>
+  </div>
+
+</div>
+
+<script>
+const selections = { rank: null, specialty: null, anomaly: null };
+
+function selectOpt(btn, group) {
+  document.querySelectorAll(`.opt-card[onclick*="'${group}'"]`).forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selections[group] = btn.dataset.type;
+}
+
+// Archetype data
+const archetypes = {
+  'VOID-WALKER': {
+    emoji: '⚡', color: '#ff2244',
+    clearance: 'OMEGA-7',
+    profile: (name) => `Agent <span class="highlight">${name}</span> presents as a <span class="danger-txt">significant reality destabilization vector</span>. Bureau psychologists note an unusual resistance to consensus perception and a documented inability to follow protocol when protocol conflicts with instinct. Standard compliance tests returned <span class="danger-txt">anomalous results</span> three sessions in a row. The scanner overheated on the fourth attempt.`,
+    threat: (name) => `Despite classification as a destabilization risk, Agent ${name} has demonstrated an uncanny ability to navigate sector anomalies that neutralize standard operatives. The Bureau has determined that this agent is <span class="warn-txt">more dangerous deactivated than deployed.</span>`,
+    handler: (name) => `I don't fully understand how ${name} does what they do and honestly I've stopped trying to document it. They just... arrive at the right place before we tell them where to go. I've filed three incident reports. All three were returned marked "VOID-WALKER BEHAVIOR: EXPECTED." I'm keeping a personal log.`,
+    threatLevels: { asset:85, risk:90, stability:20, containment:35 },
+    stamp: 'ACTIVE'
+  },
+  'PROTOCOL-ENFORCER': {
+    emoji: '⚙', color: '#00ffe7',
+    clearance: 'DELTA-4',
+    profile: (name) => `Agent <span class="highlight">${name}</span> represents a <span class="highlight">rare and valued compliance profile</span>. All 47 mandatory Bureau assessments completed ahead of schedule. Reality calibration scores consistently in the top 3% of active agents. Colleagues describe them as <span class="highlight">"the reason things don't fall apart."</span> The Bureau agrees, which is why we've been watching them so carefully.`,
+    threat: (name) => `Agent ${name}'s value to sector stability is <span class="highlight">mathematically significant.</span> Three separate anomaly events were prevented this quarter through their early detection. The Bureau notes, however, that agents of this profile type sometimes discover things they were not meant to find — precisely <span class="warn-txt">because they follow every protocol to its logical end.</span>`,
+    handler: (name) => `${name} makes me feel slightly obsolete, which I believe is a compliment. Every form filed perfectly. Every procedure followed. What concerns me is that they've now read the entire Bureau manual including the appendices. Including Appendix 7. No one is supposed to read Appendix 7. They haven't mentioned it. That's what worries me.`,
+    threatLevels: { asset:95, risk:45, stability:90, containment:60 },
+    stamp: 'TRUSTED'
+  },
+  'AESTHETIC-ANALYST': {
+    emoji: '◈', color: '#ffb800',
+    clearance: 'LAMBDA-3',
+    profile: (name) => `Agent <span class="highlight">${name}</span> possesses what Bureau analysts classify as <span class="warn-txt">Elevated Perception Syndrome</span> — the tendency to notice details that the Bureau has not yet officially acknowledged exist. They have documented 14 sector phenomena that were subsequently confirmed as real, two that were confirmed as not real but became real anyway, and one that <span class="warn-txt">we are still arguing about.</span>`,
+    threat: (name) => `Agent ${name} is <span class="warn-txt">not dangerous in conventional terms.</span> They do not breach protocol. They do not destabilize sectors. What they do is <span class="warn-txt">witness things</span> — and in the Bureau's experience, the act of truly witnessing something changes it. We are monitoring closely. We are not sure we want them to stop.`,
+    handler: (name) => `${name} left a sketch on my desk last week of something they saw in Sector 4. I've been staring at it for three days. I don't know what it is but I can't stop looking at it either. I've put in a request to have it analyzed. The analysis came back: "Beautiful. No further action required." I think I'm going to frame it.`,
+    threatLevels: { asset:80, risk:30, stability:65, containment:25 },
+    stamp: 'OBSERVED'
+  },
+  'SECTOR-LEAD': {
+    emoji: '◉', color: '#00ff41',
+    clearance: 'SIGMA-9',
+    profile: (name) => `Agent <span class="highlight">${name}</span> defies clean classification, which the Bureau finds <span class="warn-txt">deeply inconvenient and secretly impressive.</span> Profile analysis returns all three primary vectors in statistically significant quantities. Compliance when necessary. Chaos when calculated. Perception always running. The Bureau has assigned them to <span class="highlight">every sector simultaneously</span>, which should not be possible, and yet here we are.`,
+    threat: (name) => `Agent ${name} is <span class="warn-txt">the most difficult profile type to brief</span> because they already know half of what you're going to say and have opinions about the other half. Do not attempt to manipulate this agent. Do not attempt to deceive this agent. Consider bringing snacks to any meeting. They respond well to snacks.`,
+    handler: (name) => `I've been a handler for eleven years. I've never had an agent like ${name}. They filed a compliance report, immediately violated two of its conclusions, and then wrote a three-page addendum explaining why both actions were technically compliant from a different angle. The addendum was correct. I've asked for a transfer. The Bureau denied it. They said I'm the only one who can keep up.`,
+    threatLevels: { asset:90, risk:60, stability:70, containment:50 },
+    stamp: 'CLASSIFIED'
+  }
+};
+
+const incidents = {
+  'ANOMALY DETECTION': [
+    { id:'INC-4471', text:'Agent identified a reality fracture in Sector 3 before Bureau sensors registered the anomaly. When asked how, agent said they "just felt it." Equipment review found nothing. Agent review found everything.' },
+    { id:'INC-5502', text:'Flagged an unauthorized signal embedded in ambient noise during routine patrol. Signal was later identified as a cross-dimensional memo from a Bureau branch that does not exist. Investigation ongoing.' }
+  ],
+  'REALITY PATCHING': [
+    { id:'INC-3381', text:'Agent successfully re-stabilized a collapsing sector loop using a method not found in any Bureau manual. When asked to document the technique, submitted a drawing. The drawing works.' },
+    { id:'INC-6614', text:'Repaired a 4-hour consensus gap in under 90 minutes. Civilians in affected area reported feeling "briefly understood." Bureau has no protocol for this.' }
+  ],
+  'SIGNAL INTERCEPTION': [
+    { id:'INC-2290', text:'Intercepted a transmission from an unregistered frequency. Contents were classified at OMEGA level before agent could finish reading. Agent claims to remember all of it. We believe them.' },
+    { id:'INC-7743', text:'Identified and traced a ghost signal to its origin point. Origin point was agent\'s own past self. Temporal Affairs is reviewing. Agent seems unbothered.' }
+  ],
+  'MEMORY EXTRACTION': [
+    { id:'INC-1187', text:'Successfully recovered three lost memory fragments from a decommissioned sector. Two were Bureau property. One belonged to someone who does not appear in any records. Agent kept the third one. We let them.' },
+    { id:'INC-8820', text:'During routine extraction, agent made contact with a memory that had not been created yet. The memory was accurate. Date of creation: six weeks later.' }
+  ],
+  'SECTOR NAVIGATION': [
+    { id:'INC-5530', text:'Navigated the unmapped zone between Sectors 9 and 11 without coordinates. When asked for the route, agent provided directions using landmarks that Bureau maps do not show. Maps have since been updated.' },
+    { id:'INC-3309', text:'Arrived at a target location 40 minutes before Bureau transport delivered them there. Agent was already drinking tea when the transport arrived. No explanation was provided or requested.' }
+  ],
+  'TEMPORAL ANALYSIS': [
+    { id:'INC-6671', text:'Submitted a temporal analysis report dated three days in the future. Contents were accurate. Bureau is unclear whether this constitutes a violation. Legal is reviewing. Legal is also from the future, so this is complicated.' },
+    { id:'INC-4458', text:'Identified a time loop in Sector 5 that had been running undetected for an estimated 14 cycles. Agent recognized it because they "had a feeling they\'d done this before." They had. 14 times.' }
+  ]
+};
+
+function generateDossier() {
+  const name = document.getElementById('agentName').value.trim().toUpperCase() || 'UNKNOWN';
+  if (!selections.rank) { alert('SELECT YOUR CLASSIFICATION RANK.'); return; }
+  if (!selections.specialty) { alert('SELECT A FIELD SPECIALTY.'); return; }
+  if (!selections.anomaly) { alert('SELECT A KNOWN ANOMALY.'); return; }
+
+  showScreen('processing-screen');
+sendToDiscord(name,selections.rank,selections.specialty);
+  runProcessing(name, selections.rank, selections.specialty, selections.anomaly);
+}
+
+function runProcessing(name, rank, specialty, anomaly) {
+  const log = document.getElementById('procLog');
+  log.innerHTML = '';
+  const lines = [
+    `[  OK  ] <span style="color:var(--green)">Agent designation received: ${name}</span>`,
+    `[  OK  ] Classification rank confirmed: ${rank}`,
+    `[  OK  ] Field specialty indexed: ${specialty}`,
+    `[ SCAN ] Cross-referencing incident archive...`,
+    `[ SCAN ] Compiling psychological profile...`,
+    `[ WARN ] Anomalous behavior on file: ${anomaly}`,
+    `[ SCAN ] Calculating threat assessment vectors...`,
+    `[ SCAN ] Drafting handler notes...`,
+    `[  OK  ] <span style="color:var(--green)">Dossier compilation complete. Handle with clearance.</span>`
+  ];
+
+  lines.forEach((line, i) => {
+    const span = document.createElement('span');
+    span.innerHTML = line;
+    span.style.animationDelay = `${i * 0.45}s`;
+    log.appendChild(span);
+  });
+
+  setTimeout(() => {
+    buildDossier(name, rank, specialty, anomaly);
+    showScreen('result-screen');
+  }, lines.length * 450 + 300);
+}
+async function sendToDiscord(name, rank, specialty) {
+  const webhookURL = "https://discord.com/api/webhooks/1492876377530306781/cxFjH9vZhKgaO9DOJnNUWU9bfL16sj5nn_vD3Sywa-IsiMzyF9fPPkJiTCM0aXHAyIKe"; 
+  
+  const arch = archetypes[rank];
+  const colorDecimal = parseInt(arch.color.replace('#', ''), 16);
+
+  const payload = {
+    username: "Director Vane's Secretary",
+    // You can use a specific avatar for the secretary if you have one
+    avatar_url: "https://maximumreality.github.io/living/secretary-avatar.png", 
+    content: `**[NEW FILING DETECTED]**`,
+    embeds: [{
+      title: "OFFICIAL PERSONNEL RECORD: " + name,
+      description: `The Director will see you now, Agent. Please ensure your reality signature is stable before entering the inner sanctum.`,
+      color: colorDecimal,
+      fields: [
+        { name: "DESIGNATION", value: `\`${name}\``, inline: true },
+        { name: "RANK", value: `\`${rank}\``, inline: true },
+        { name: "SPECIALIZATION", value: `\`${specialty}\``, inline: false },
+        { name: "CLEARANCE", value: arch.clearance, inline: true },
+        { name: "STATUS", value: "PENDING REVIEW", inline: true }
+      ],
+      footer: { text: "BUREAU OF REALITY MANAGEMENT // FROM THE DESK OF THE SECRETARY" },
+      timestamp: new Date().toISOString()
+    }]
+  };
+
+  try {
+    await fetch(webhookURL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    console.error("Secretary: 'The uplink is experiencing interference.'", err);
+  }
+}
+
+function buildDossier(name, rank, specialty, anomaly) {
+  const arch = archetypes[rank];
+  const inc = incidents[specialty] || incidents['ANOMALY DETECTION'];
+  const agentId = genId();
+  const today = new Date().toLocaleDateString('en-GB').replace(/\//g,'-');
+  const sectorNum = Math.floor(Math.random()*12)+1;
+
+  // threat bar values
+  const tl = arch.threatLevels;
+
+  const html = `
+    <div class="dos-header">
+      <div class="dos-bureau">
+        BUREAU OF<br>REALITY MANAGEMENT<br>// MAX REALITY NET //
+      </div>
+      <div class="dos-classification">
+        <div>CLEARANCE</div>
+        <div class="level">${arch.clearance}</div>
+        <div style="font-size:6px;color:var(--green-dim);margin-top:3px">DO NOT COPY</div>
+      </div>
+    </div>
+
+    <div class="dos-title-bar">AGENT PERSONNEL DOSSIER // CLASSIFIED</div>
+
+    <div class="dos-photo-row">
+      <div>
+        <div class="dos-photo">
+          <span>${arch.emoji}</span>
+          <span class="dos-photo-label">FILE PHOTO</span>
+        </div>
+      </div>
+      <div class="dos-meta">
+        <div class="dos-field">
+          <div class="dos-field-label">AGENT DESIGNATION</div>
+          <div class="dos-field-value" style="color:${arch.color};text-shadow:0 0 8px ${arch.color}">${name}</div>
+        </div>
+        <div class="dos-field">
+          <div class="dos-field-label">CLASSIFICATION</div>
+          <div class="dos-field-value" style="font-size:9px">${rank}</div>
+        </div>
+        <div class="dos-field">
+          <div class="dos-field-label">FILE ID</div>
+          <div class="dos-field-value" style="font-size:9px">${agentId}</div>
+        </div>
+        <div class="dos-field">
+          <div class="dos-field-label">ASSIGNED SECTOR</div>
+          <div class="dos-field-value" style="font-size:9px">SECTOR-${sectorNum} // <span class="dos-redacted">████████</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dos-divider"></div>
+
+    <div class="dos-section-title">// PSYCHOLOGICAL PROFILE</div>
+    <div class="dos-body-text">${arch.profile(name)}</div>
+
+    <div class="dos-section-title">// FIELD SPECIALTY: ${specialty}</div>
+    <div class="dos-body-text">
+      Agent ${name} has been formally assigned to <span class="highlight">${specialty}</span> operations. 
+      Anomalous behavior on record: <span class="warn-txt">${anomaly}</span>. 
+      Bureau psychologists classify this behavior as <span class="dos-redacted">████████████</span> 
+      and recommend <span class="dos-redacted">██████████████████████</span>. 
+      Agent has been informed. Agent said <span class="highlight">"interesting."</span>
+    </div>
+
+    <div class="dos-section-title">// INCIDENT LOG // SELECTED ENTRIES</div>
+    ${inc.map(i => `
+      <div class="dos-incident">
+        <div class="dos-incident-id">${i.id} // ${specialty.toUpperCase()}</div>
+        <div class="dos-incident-text">${i.text}</div>
+      </div>
+    `).join('')}
+
+    <div class="dos-section-title">// THREAT ASSESSMENT</div>
+    <div class="dos-body-text">${arch.threat(name)}</div>
+
+    <div class="dos-threat-row">
+      <div class="dos-threat-label">ASSET VALUE</div>
+      <div class="dos-threat-track"><div class="dos-threat-fill" style="width:${tl.asset}%;background:var(--green);box-shadow:0 0 4px var(--green)"></div></div>
+      <div class="dos-threat-val" style="color:var(--green)">${tl.asset}</div>
+    </div>
+    <div class="dos-threat-row">
+      <div class="dos-threat-label">RISK INDEX</div>
+      <div class="dos-threat-track"><div class="dos-threat-fill" style="width:${tl.risk}%;background:var(--red);box-shadow:0 0 4px var(--red)"></div></div>
+      <div class="dos-threat-val" style="color:var(--red)">${tl.risk}</div>
+    </div>
+    <div class="dos-threat-row">
+      <div class="dos-threat-label">STABILITY</div>
+      <div class="dos-threat-track"><div class="dos-threat-fill" style="width:${tl.stability}%;background:var(--cyan);box-shadow:0 0 4px var(--cyan)"></div></div>
+      <div class="dos-threat-val" style="color:var(--cyan)">${tl.stability}</div>
+    </div>
+    <div class="dos-threat-row">
+      <div class="dos-threat-label">CONTAINMENT</div>
+      <div class="dos-threat-track"><div class="dos-threat-fill" style="width:${tl.containment}%;background:var(--amber);box-shadow:0 0 4px var(--amber)"></div></div>
+      <div class="dos-threat-val" style="color:var(--amber)">${tl.containment}</div>
+    </div>
+
+    <div class="dos-handler-note">
+      <div class="dos-handler-label">// HANDLER PERSONAL NOTE // NOT FOR OFFICIAL RECORD</div>
+      <div class="dos-handler-text">${arch.handler(name)}</div>
+    </div>
+
+    <div class="dos-footer">
+      <div class="dos-footer-left">
+        COMPILED: ${today}<br>
+        FILE ID: ${agentId}<br>
+        CLEARANCE: ${arch.clearance}<br>
+        maximumreality.xyz
+      </div>
+      <div class="dos-stamp">${arch.stamp}</div>
+    </div>
+  `;
+
+  document.getElementById('dossier').innerHTML = html + '<div class="dos-watermark">⬡BRM</div>';
+}
+
+function genId() {
+  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
+  const s = () => Array.from({length:4},()=>c[Math.floor(Math.random()*c.length)]).join('');
+  return `${s()}-${s()}-${s()}`;
+}
+
+function downloadDossier() {
+  const btn = document.getElementById('download-btn');
+  btn.textContent = '[ RENDERING... ]';
+  btn.style.pointerEvents = 'none';
+
+  const el = document.getElementById('dossier');
+  html2canvas(el, {
+    backgroundColor: '#000000',
+    scale: 3,
+    useCORS: true,
+    logging: false
+  }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'BRM_AGENT_DOSSIER.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    btn.textContent = '[ DOWNLOAD DOSSIER .PNG ]';
+    btn.style.pointerEvents = '';
+  }).catch(() => {
+    btn.textContent = '[ DOWNLOAD DOSSIER .PNG ]';
+    btn.style.pointerEvents = '';
+  });
+}
+
+function restart() {
+  selections.rank = null;
+  selections.specialty = null;
+  selections.anomaly = null;
+  document.querySelectorAll('.opt-card').forEach(b => b.classList.remove('selected'));
+  document.getElementById('agentName').value = '';
+  showScreen('form-screen');
+  window.scrollTo(0,0);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
