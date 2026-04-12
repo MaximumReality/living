@@ -612,10 +612,20 @@ function generateDossier() {
   if (!selections.specialty) { alert('SELECT A FIELD SPECIALTY.'); return; }
   if (!selections.anomaly) { alert('SELECT A KNOWN ANOMALY.'); return; }
 
+  // --- BUREAU SYNC START ---
+  // This saves the data so the Gazette can see it
+  const arch = archetypes[selections.rank];
+  localStorage.setItem('BUREAU_AGENT_NAME', name);
+  localStorage.setItem('BUREAU_CLEARANCE', arch.clearance);
+  localStorage.setItem('BUREAU_LAST_SCAN', new Date().toLocaleDateString());
+  localStorage.setItem('BUREAU_SPECIALTY', selections.specialty);
+  // --- BUREAU SYNC END ---
+
   showScreen('processing-screen');
-sendToDiscord(name,selections.rank,selections.specialty);
+  sendToDiscord(name,selections.rank,selections.specialty);
   runProcessing(name, selections.rank, selections.specialty, selections.anomaly);
 }
+
 
 function runProcessing(name, rank, specialty, anomaly) {
   const log = document.getElementById('procLog');
