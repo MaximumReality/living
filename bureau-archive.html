@@ -420,6 +420,7 @@ footer{border-top:1px solid var(--border);padding:10px 14px;display:flex;justify
         <div class="post-form">
           <label>AGENT DESIGNATION</label>
           <input type="text" id="post-agent" placeholder="AGENT_[REDACTED]" maxlength="30">
+          
           <label>ANOMALY TYPE DETECTED</label>
           <select id="post-color">
             <option value="NEUTRAL">NEUTRAL — Background radiation</option>
@@ -428,28 +429,44 @@ footer{border-top:1px solid var(--border);padding:10px 14px;display:flex;justify
             <option value="GREEN">GREEN — Void bloom residue</option>
             <option value="YELLOW">YELLOW — Amber protocol object</option>
           </select>
+
+          <label>VISUAL EVIDENCE UPLINK (URL)</label>
+          <input type="text" id="post-img-url" placeholder="https://i.discordapp.com/evidence.jpg">
+
+          <div style="margin: 5px 0 15px; padding: 10px; border: 1px dashed var(--purple); background: rgba(191, 0, 255, 0.05); text-align: center; border-radius: 4px;">
+            <div style="font-size: 7px; color: var(--purple); letter-spacing: 2px; margin-bottom: 6px; text-transform: uppercase;">External Storage // Comms Link</div>
+            <a href="https://discord.gg/aJhkqCuX" target="_blank" style="text-decoration: none;">
+              <button type="button" class="btn-transmit" style="border-color: var(--purple); color: var(--purple); box-shadow: var(--gp); margin: 0; width: auto; padding: 6px 18px; font-size: 8px;">
+                ⬡ JOIN THE HUB (GET PHOTO LINKS)
+              </button>
+            </a>
+            <div style="font-size: 6px; color: var(--muted); margin-top: 6px; letter-spacing: 1px; line-height: 1.4;">
+              1. UPLOAD PHOTO TO #PUBLIC-UPLINK<br>
+              2. LONG-PRESS PHOTO > "COPY LINK"
+            </div>
+          </div>
+
           <label>FIELD NOTES (OPTIONAL)</label>
           <textarea id="post-note" placeholder="Describe the anomaly. Be specific. The Bureau is watching."></textarea>
+          
           <button class="btn-post" onclick="postFinding()">⬡ SUBMIT TO BUREAU ARCHIVE</button>
           <span id="post-status" style="font-size:8px;color:var(--muted);margin-left:10px;letter-spacing:2px"></span>
         </div>
       </div>
     </div>
 
-
-<div class="card span2">
-  <div class="card-head">
-    <div class="card-title">AGENT FINDINGS — LIVE FEED <span class="sig"><span class="sig-dot cyan"></span></span></div>
-    <div class="card-src">SRC: FIREBASE // REALTIME</div>
-  </div>
-  <div class="card-body">
-    <div id="findings-feed"><div class="loading">CONNECTING TO BUREAU NETWORK</div></div>
-  </div>
-</div>
-
-
+    <div class="card span2">
+      <div class="card-head">
+        <div class="card-title">AGENT FINDINGS — LIVE FEED <span class="sig"><span class="sig-dot cyan"></span></span></div>
+        <div class="card-src">SRC: FIREBASE // REALTIME</div>
+      </div>
+      <div class="card-body">
+        <div id="findings-feed"><div class="loading">CONNECTING TO BUREAU NETWORK</div></div>
+      </div>
+    </div>
   </div>
 </div>
+
 
 <!-- ══ FUNNY PAGES ══ -->
 
@@ -800,13 +817,14 @@ function postFinding(){
   const agent=(document.getElementById('post-agent').value.trim()||'AGENT_UNKNOWN').toUpperCase();
   const color=document.getElementById('post-color').value;
   const note=document.getElementById('post-note').value.trim();
+  const imgUrl=document.getElementById('post-img-url').value.trim(); // NEW
   const status=document.getElementById('post-status');
 
   status.textContent='TRANSMITTING...';
   status.style.color='var(--amber)';
 
   db.collection(FINDINGS_COL).add({
-    agent,color,note,
+    agent,color,note,imgUrl, // SAVING THE URL
     clearance:localStorage.getItem('BUREAU_CLEARANCE')||'NONE',
     scanCount:parseInt(localStorage.getItem('BUREAU_SCAN_COUNT')||'0'),
     timestamp:firebase.firestore.FieldValue.serverTimestamp()
@@ -814,6 +832,7 @@ function postFinding(){
     status.textContent='FILED // BUREAU ACKNOWLEDGED';
     status.style.color='var(--green)';
     document.getElementById('post-note').value='';
+    document.getElementById('post-img-url').value=''; // CLEAR INPUT
     setTimeout(()=>{status.textContent='';},4000);
   }).catch(err=>{
     status.textContent='TRANSMISSION FAILED: '+err.message;
@@ -821,40 +840,62 @@ function postFinding(){
   });
 }
 
+
 function loadFindings(){
-  const el=document.getElementById('findings-feed');
-  el.innerHTML='<div class="loading">CONNECTING TO BUREAU NETWORK</div>';
+  const el = document.getElementById('findings-feed');
+  el.innerHTML = '<div class="loading">CONNECTING TO BUREAU NETWORK</div>';
 
   db.collection(FINDINGS_COL)
     .orderBy('timestamp','desc')
     .limit(20)
-    .onSnapshot(snap=>{
+    .onSnapshot(snap => {
       if(snap.empty){
-        el.innerHTML='<div class="empty-state"><div class="e-icon">▶</div>NO FINDINGS POSTED YET<br><br>BE THE FIRST AGENT TO REPORT AN ANOMALY</div>';
+        el.innerHTML = '<div class="empty-state"><div class="e-icon">▶</div>NO FINDINGS POSTED YET</div>';
         return;
       }
-      const colClass={RED:'col-red',BLUE:'col-blue',GREEN:'col-green',YELLOW:'col-yellow',NEUTRAL:'col-neutral'};
-      const colLabel={RED:'⬡ RED-SHIFT ANOMALY',BLUE:'◈ AZUL QUANTUM SIGNATURE',GREEN:'░ VOID BLOOM RESIDUE',YELLOW:'▶ AMBER PROTOCOL',NEUTRAL:'— BACKGROUND RADIATION'};
-      el.innerHTML=snap.docs.map(doc=>{
-        const d=doc.data();
-        const ts=d.timestamp?.toDate();
-        const timeStr=ts?ts.toLocaleString():'TIMESTAMP REDACTED';
-        const cc=colClass[d.color]||'col-neutral';
-        const cl=colLabel[d.color]||d.color;
-        return `<div class="finding-card">
-          <div class="f-header">
-            <span class="f-agent">${d.agent||'AGENT_UNKNOWN'}</span>
-            <span class="f-time">${timeStr}</span>
-          </div>
-          <span class="f-color ${cc}">${cl}</span>
-          ${d.note?`<div class="f-note">${d.note}</div>`:''}
-          <div class="f-clearance">CLEARANCE: ${d.clearance||'NONE'} // SCANS: ${d.scanCount||0}</div>
-        </div>`;
+      
+      const colClass = {RED:'col-red', BLUE:'col-blue', GREEN:'col-green', YELLOW:'col-yellow', NEUTRAL:'col-neutral'};
+      const colLabel = {RED:'⬡ RED-SHIFT ANOMALY', BLUE:'◈ AZUL QUANTUM SIGNATURE', GREEN:'░ VOID BLOOM RESIDUE', YELLOW:'▶ AMBER PROTOCOL', NEUTRAL:'— BACKGROUND RADIATION'};
+      
+      el.innerHTML = snap.docs.map(doc => {
+        const d = doc.data();
+        const ts = d.timestamp?.toDate();
+        const timeStr = ts ? ts.toLocaleString() : 'TIMESTAMP REDACTED';
+        const cc = colClass[d.color] || 'col-neutral';
+        const cl = colLabel[d.color] || d.color;
+
+        // ── ADVANCED PHOTO DETECTION ──
+        let photoHtml = '';
+        // Check if the URL exists and looks like an image or a Discord CDN link
+        if(d.imgUrl && (d.imgUrl.includes('discordapp') || d.imgUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i))) {
+          photoHtml = `
+            <div style="margin:12px 0; border:1px solid var(--border2); background:#000; position:relative; line-height:0;">
+              <img src="${d.imgUrl}" 
+                   style="width:100%; display:block; filter: brightness(0.8) contrast(1.2) sepia(0.2); opacity:0.9;" 
+                   onerror="this.style.display='none'; console.log('Image failed to load');">
+              <div style="font-size:6px; background:rgba(0,0,0,0.8); color:var(--cyan); padding:4px; text-align:center; letter-spacing:2px; border-top:1px solid var(--border2); font-family:monospace; line-height:1;">
+                VISUAL_EVIDENCE // DECRYPTED
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="finding-card">
+            <div class="f-header">
+              <span class="f-agent">${d.agent || 'AGENT_UNKNOWN'}</span>
+              <span class="f-time">${timeStr}</span>
+            </div>
+            <span class="f-color ${cc}">${cl}</span>
+            ${d.note ? `<div class="f-note">${d.note}</div>` : ''}
+            ${photoHtml}
+            <div class="f-clearance">CLEARANCE: ${d.clearance || 'NONE'} // SCANS: ${d.scanCount || 0}</div>
+          </div>`;
       }).join('');
-    },err=>{
-      el.innerHTML=`<div class="empty-state"><div class="e-icon">📡</div>FIREBASE CONNECTION FAILED<br><br>${err.message}</div>`;
     });
 }
+
+
 
 // ── BOOT ──
 initMasthead();
