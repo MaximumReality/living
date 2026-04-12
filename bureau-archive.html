@@ -719,23 +719,30 @@ function renderFieldLog(){
 }
 
 function renderDossier(){
-  const el=document.getElementById('dossier-body');
-  const clearance=localStorage.getItem('BUREAU_CLEARANCE')||'NONE';
-  const lastScan=localStorage.getItem('BUREAU_LAST_SCAN')||'---';
-  const scanCount=localStorage.getItem('BUREAU_SCAN_COUNT')||'0';
-  const anomaly=localStorage.getItem('BUREAU_ANOMALY')||'---';
-  const timestamp=localStorage.getItem('BUREAU_TIMESTAMP');
-  const lastOp=timestamp?new Date(timestamp).toLocaleString():'NO FIELD OPS RECORDED';
-  const lvlNum=clearance.replace('LVL_','').replace('NONE','0');
-  const lvlInt=parseInt(lvlNum)||0;
-  const clrClass=lvlInt===0?'clr-none':lvlInt<=3?'clr-lv'+lvlInt:lvlInt<=6?'clr-lv'+lvlInt:'clr-lv'+lvlInt;
-  const scanCol={RED:'danger',BLUE:'hi',GREEN:'hi',YELLOW:'warn',NEUTRAL:'','---':''}[lastScan]||'';
-  el.innerHTML=`
+  const el = document.getElementById('dossier-body');
+  if (!el) return; // Safety check for iPhone Safari
+
+  const clearance = localStorage.getItem('BUREAU_CLEARANCE') || 'NONE';
+  const lastScan = localStorage.getItem('BUREAU_LAST_SCAN') || '---';
+  const scanCount = localStorage.getItem('BUREAU_SCAN_COUNT') || '0';
+  const anomaly = localStorage.getItem('BUREAU_ANOMALY') || '---';
+  const timestamp = localStorage.getItem('BUREAU_TIMESTAMP');
+  const lastOp = timestamp ? new Date(timestamp).toLocaleString() : 'NO FIELD OPS RECORDED';
+  
+  // Extract number from ranks like OMEGA-7 or SIGMA-9
+  const lvlNum = clearance.includes('-') ? clearance.split('-')[1] : '0';
+  const lvlInt = parseInt(lvlNum) || 0;
+  
+  // Dynamic classes for styling
+  const clrClass = lvlInt === 0 ? 'clr-none' : 'clr-lv' + lvlInt;
+  const scanCol = {RED:'danger', BLUE:'hi', GREEN:'hi', YELLOW:'warn', NEUTRAL:'','---':''}[lastScan] || '';
+
+  el.innerHTML = `
     <div class="dossier">
       <div class="dossier-title">▶ AGENT STATUS REPORT</div>
       <div class="dossier-row">
         <span class="dr-label">CLEARANCE LEVEL</span>
-        <span class="dr-val ${lvlInt>=7?'danger':lvlInt>=4?'warn':'hi'}">${clearance}</span>
+        <span class="dr-val ${lvlInt >= 7 ? 'danger' : lvlInt >= 4 ? 'warn' : 'hi'}">${clearance}</span>
       </div>
       <div class="dossier-row">
         <span class="dr-label">TOTAL SCANS</span>
@@ -754,31 +761,40 @@ function renderDossier(){
         <span class="dr-val">${lastOp}</span>
       </div>
       <div style="margin-top:10px">
-        <span class="clearance-badge ${clrClass}">${clearance==='NONE'?'NO CLEARANCE':'⬡ '+clearance+' AGENT'}</span>
+        <span class="clearance-badge ${clrClass}">${clearance === 'NONE' ? 'NO CLEARANCE' : '⬡ ' + clearance + ' AGENT'}</span>
       </div>
     </div>
-    ${lvlInt===0?'<div class="empty-state"><div class="e-icon">⬡</div>NO FIELD DATA FOUND<br><br>DEPLOY THE LENS TO BEGIN LOGGING ANOMALIES</div>':''}
+    ${lvlInt === 0 ? '<div class="empty-state"><div class="e-icon">⬡</div>NO FIELD DATA FOUND<br><br>DEPLOY THE LENS TO BEGIN LOGGING ANOMALIES</div>' : ''}
   `;
-}
+} // <--- THIS WAS THE MISSING BRACKET
 
 function renderScanHistory(){
-  const el=document.getElementById('scan-history-body');
-  const entries=[];
-  for(let i=0;i<localStorage.length;i++){
-    const k=localStorage.key(i);
-    if(k&&k.startsWith('BUREAU_')) entries.push({key:k,val:localStorage.getItem(k)});
+  const el = document.getElementById('scan-history-body');
+  if (!el) return;
+
+  const entries = [];
+  for(let i = 0; i < localStorage.length; i++){
+    const k = localStorage.key(i);
+    if(k && k.startsWith('BUREAU_')) entries.push({key: k, val: localStorage.getItem(k)});
   }
-  if(entries.length===0){
-    el.innerHTML='<div class="empty-state"><div class="e-icon">◈</div>NO SCAN RECORDS IN LOCAL STORAGE</div>';
+
+  if(entries.length === 0){
+    el.innerHTML = '<div class="empty-state"><div class="e-icon">◈</div>NO SCAN RECORDS IN LOCAL STORAGE</div>';
     return;
   }
-  el.innerHTML=entries.map(e=>{
-    const friendly={
-      BUREAU_CLEARANCE:'CLEARANCE LEVEL',BUREAU_LAST_SCAN:'LAST SCAN TYPE',
-      BUREAU_SCAN_COUNT:'TOTAL SCANS',BUREAU_ANOMALY:'LAST ANOMALY',
-      BUREAU_TIMESTAMP:'LAST FIELD OP'
-    }[e.key]||e.key;
-    const val=e.key==='BUREAU_TIMESTAMP'?new Date(e.val).toLocaleString():e.val;
+
+  el.innerHTML = entries.map(e => {
+    const friendly = {
+      BUREAU_CLEARANCE: 'CLEARANCE LEVEL', 
+      BUREAU_LAST_SCAN: 'LAST SCAN TYPE',
+      BUREAU_SCAN_COUNT: 'TOTAL SCANS', 
+      BUREAU_ANOMALY: 'LAST ANOMALY',
+      BUREAU_TIMESTAMP: 'LAST FIELD OP',
+      BUREAU_AGENT_NAME: 'AGENT DESIGNATION'
+    }[e.key] || e.key;
+
+    const val = (e.key === 'BUREAU_TIMESTAMP' && e.val !== '---') ? new Date(e.val).toLocaleString() : e.val;
+    
     return `<div class="log-entry-card">
       <div class="le-head"><span class="le-type">${friendly}</span></div>
       <div class="le-body">${val}</div>
@@ -787,10 +803,11 @@ function renderScanHistory(){
 }
 
 function clearFieldLog(){
-  if(!confirm('PURGE ALL LOCAL BUREAU RECORDS? THIS CANNOT BE UNDONE.'))return;
-  ['BUREAU_CLEARANCE','BUREAU_LAST_SCAN','BUREAU_SCAN_COUNT','BUREAU_ANOMALY','BUREAU_TIMESTAMP'].forEach(k=>localStorage.removeItem(k));
+  if(!confirm('PURGE ALL LOCAL BUREAU RECORDS? THIS CANNOT BE UNDONE.')) return;
+  ['BUREAU_CLEARANCE','BUREAU_LAST_SCAN','BUREAU_SCAN_COUNT','BUREAU_ANOMALY','BUREAU_TIMESTAMP', 'BUREAU_AGENT_NAME'].forEach(k => localStorage.removeItem(k));
   renderFieldLog();
 }
+
 
 // ══════════════════════════════════════════════
 // BULLETIN BOARD
