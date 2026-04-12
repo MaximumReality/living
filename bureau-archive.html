@@ -100,41 +100,34 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   color: var(--green);
   min-height: 140px;
   position: relative;
-  overflow: hidden; /* Keeps the watermark inside the edges */
+  overflow: hidden;
   text-shadow: 0 0 8px var(--green);
   white-space: pre-wrap;
   z-index: 1;
 }
-
-/* CLASSIFIED WATERMARK */
 .transmission-box::before {
   content: "CLASSIFIED";
   position: absolute;
-  top: 50%; 
-  left: 50%;
+  top: 50%; left: 50%;
   transform: translate(-50%, -50%) rotate(-12deg);
   font-family: 'VT323', monospace;
   font-size: clamp(3.5rem, 12vw, 5rem);
   -webkit-text-stroke: 1px rgba(57, 255, 20, 0.15);
   color: rgba(57, 255, 20, 0.08);
   pointer-events: none;
-  z-index: -1; /* Sits behind the code text */
+  z-index: -1;
   text-transform: uppercase;
   letter-spacing: 12px;
   white-space: nowrap;
 }
-
-/* TYPING CURSOR */
 .transmission-box::after {
   content: '_';
   animation: cur 0.8s step-end infinite;
 }
-
 @keyframes cur {
   0%, 50% { opacity: 1; }
   51%, 100% { opacity: 0; }
 }
-
 .transmission-header {
   font-size: 7px;
   letter-spacing: 3px;
@@ -145,9 +138,7 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   flex-wrap: wrap;
   gap: 4px;
 }
-
 .transmission-header span { color: var(--amber); }
-
 .btn-transmit {
   width: 100%;
   padding: 12px;
@@ -164,12 +155,10 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
   box-shadow: 0 0 12px #00ff8820;
   margin-top: 10px;
 }
-
 .btn-transmit:hover { background: #0a1a0a; box-shadow: var(--gg); }
 .btn-transmit:active { transform: scale(0.98); }
 
-
-/* ── BULLETIN BOARD (shared findings) ── */
+/* ── BULLETIN BOARD ── */
 .finding-card{
   border:1px solid var(--border2);border-left:3px solid var(--amber);
   padding:10px 12px;background:#060a04;margin-bottom:8px;
@@ -288,12 +277,10 @@ footer{border-top:1px solid var(--border);padding:10px 14px;display:flex;justify
 .clr-lv4,.clr-lv5,.clr-lv6{border:1px solid var(--amber);color:var(--amber);text-shadow:var(--ga)}
 .clr-lv7,.clr-lv8,.clr-lv9{border:1px solid var(--red);color:var(--red);text-shadow:var(--gr)}
 </style>
-
 </head>
 <body>
 
 <!-- MASTHEAD -->
-
 <header class="masthead">
   <div class="masthead-eyebrow">BUREAU OF REALITY MANAGEMENT // DEPT:Ω // ENCRYPTED CHANNEL</div>
   <div class="masthead-title">THE MAXIMUM REALITY GAZETTE</div>
@@ -308,7 +295,6 @@ footer{border-top:1px solid var(--border);padding:10px 14px;display:flex;justify
 </header>
 
 <!-- TICKER -->
-
 <div class="ticker-wrap">
   <div class="ticker">
     <span class="ticker-item">BUREAU ARCHIVE ONLINE // ALL TRANSMISSIONS LOGGED</span>
@@ -331,18 +317,20 @@ footer{border-top:1px solid var(--border);padding:10px 14px;display:flex;justify
 </div>
 
 <!-- NAV TABS -->
-
 <nav class="nav-tabs">
-  <button class="nav-tab active" onclick="showSection('transmissions')">⬡ TRANSMISSIONS</button>
-  <button class="nav-tab" onclick="showSection('fieldlog')">◈ FIELD LOG</button>
-  <button class="nav-tab" onclick="showSection('bulletin')">▶ BULLETIN BOARD</button>
-  <button class="nav-tab" onclick="showSection('funnypages')">░ FUNNY PAGES</button>
+  <button class="nav-tab active" onclick="showSection('transmissions',this)">⬡ TRANSMISSIONS</button>
+  <button class="nav-tab" onclick="showSection('fieldlog',this)">◈ FIELD LOG</button>
+  <button class="nav-tab" onclick="showSection('bulletin',this)">▶ BULLETIN BOARD</button>
+  <button class="nav-tab" onclick="showSection('funnypages',this)">░ FUNNY PAGES</button>
 </nav>
 
-<!-- ══ TRANSMISSIONS ══ -->
-
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION: TRANSMISSIONS                     -->
+<!-- ══════════════════════════════════════════ -->
 <div class="section active" id="sec-transmissions">
   <div class="grid">
+
+    <!-- Encrypted Feed Card -->
     <div class="card span2">
       <div class="card-head">
         <div class="card-title">ENCRYPTED FEED <span class="sig"><span class="sig-dot green"></span></span></div>
@@ -359,31 +347,67 @@ footer{border-top:1px solid var(--border);padding:10px 14px;display:flex;justify
       </div>
     </div>
 
-
-<div class="card span2">
-  <div class="card-head">
-    <div class="card-title">AGENT DOSSIER <span class="sig"><span class="sig-dot cyan"></span></span></div>
-    <div class="card-src">SRC: BUREAU_LENS // IDENTITY_SCAN</div>
-  </div>
-  <div class="card-body" id="dossier-body">
-    <div id="dossier-portal" style="text-align: center; padding: 5px 0;">
-      <div style="font-size: 9px; color: var(--green-dim); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; line-height: 1.4;">
-        IDENTITY SIGNATURE: <span style="color: var(--red);">NOT FOUND</span><br>
-        <span style="color: var(--amber);">[RE-CLASSIFICATION MANDATORY]</span>
+    <!-- Agent Dossier Portal Card -->
+    <div class="card span2">
+      <div class="card-head">
+        <div class="card-title">AGENT DOSSIER <span class="sig"><span class="sig-dot cyan"></span></span></div>
+        <div class="card-src">SRC: BUREAU_LENS // IDENTITY_SCAN</div>
       </div>
-      
-      <a href="https://maximumreality.github.io/living/dossier.html" target="_blank" style="display: block; padding: 12px; border: 1px solid var(--green); color: var(--green); text-decoration: none; font-size: 11px; letter-spacing: 2px; background: rgba(0, 255, 65, 0.05); text-shadow: 0 0 8px var(--green); box-shadow: inset 0 0 10px rgba(0,255,65,0.1);">
-        ⬡ ACCESS UPLINK PORTAL
-      </a>
+      <div class="card-body">
+        <div id="dossier-portal" style="text-align:center;padding:5px 0;">
+          <div style="font-size:9px;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;line-height:1.8;">
+            IDENTITY SIGNATURE: <span style="color:var(--red);">NOT FOUND</span><br>
+            <span style="color:var(--amber);">[RE-CLASSIFICATION MANDATORY]</span>
+          </div>
+          <a href="https://maximumreality.github.io/living/dossier.html" target="_blank"
+             style="display:block;padding:12px;border:1px solid var(--green);color:var(--green);text-decoration:none;font-size:11px;letter-spacing:2px;background:rgba(0,255,65,0.05);text-shadow:0 0 8px var(--green);box-shadow:inset 0 0 10px rgba(0,255,65,0.1);">
+            ⬡ ACCESS UPLINK PORTAL
+          </a>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+
+  </div><!-- /grid -->
+</div><!-- /sec-transmissions -->
 
 
-<!-- ══ BULLETIN BOARD ══ -->
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION: FIELD LOG                         -->
+<!-- ══════════════════════════════════════════ -->
+<div class="section" id="sec-fieldlog">
+  <div class="grid">
 
+    <div class="card span2">
+      <div class="card-head">
+        <div class="card-title">AGENT STATUS REPORT <span class="sig"><span class="sig-dot cyan"></span></span></div>
+        <div class="card-src">SRC: LOCAL_STORAGE // BUREAU_LENS</div>
+      </div>
+      <div class="card-body" id="dossier-body">
+        <div class="loading">READING LOCAL BUREAU RECORDS</div>
+      </div>
+    </div>
+
+    <div class="card span2">
+      <div class="card-head">
+        <div class="card-title">SCAN HISTORY <span class="sig"><span class="sig-dot amber"></span></span></div>
+        <div class="card-src">SRC: LOCAL_STORAGE // RAW</div>
+      </div>
+      <div class="card-body">
+        <div id="scan-history-body"><div class="loading">READING RECORDS</div></div>
+        <button class="btn-clear-log" onclick="clearFieldLog()" style="margin-top:12px;">⬡ PURGE LOCAL RECORDS</button>
+      </div>
+    </div>
+
+  </div><!-- /grid -->
+</div><!-- /sec-fieldlog -->
+
+
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION: BULLETIN BOARD                    -->
+<!-- ══════════════════════════════════════════ -->
 <div class="section" id="sec-bulletin">
   <div class="grid">
+
     <div class="card span2">
       <div class="card-head">
         <div class="card-title">POST FINDING <span class="sig"><span class="sig-dot amber"></span></span></div>
@@ -393,7 +417,7 @@ footer{border-top:1px solid var(--border);padding:10px 14px;display:flex;justify
         <div class="post-form">
           <label>AGENT DESIGNATION</label>
           <input type="text" id="post-agent" placeholder="AGENT_[REDACTED]" maxlength="30">
-          
+
           <label>ANOMALY TYPE DETECTED</label>
           <select id="post-color">
             <option value="NEUTRAL">NEUTRAL — Background radiation</option>
@@ -406,14 +430,14 @@ footer{border-top:1px solid var(--border);padding:10px 14px;display:flex;justify
           <label>VISUAL EVIDENCE UPLINK (URL)</label>
           <input type="text" id="post-img-url" placeholder="https://i.discordapp.com/evidence.jpg">
 
-          <div style="margin: 5px 0 15px; padding: 10px; border: 1px dashed var(--purple); background: rgba(191, 0, 255, 0.05); text-align: center; border-radius: 4px;">
-            <div style="font-size: 7px; color: var(--purple); letter-spacing: 2px; margin-bottom: 6px; text-transform: uppercase;">External Storage // Comms Link</div>
-            <a href="https://discord.gg/aJhkqCuX" target="_blank" style="text-decoration: none;">
-              <button type="button" class="btn-transmit" style="border-color: var(--purple); color: var(--purple); box-shadow: var(--gp); margin: 0; width: auto; padding: 6px 18px; font-size: 8px;">
+          <div style="margin:5px 0 15px;padding:10px;border:1px dashed var(--purple);background:rgba(191,0,255,0.05);text-align:center;border-radius:4px;">
+            <div style="font-size:7px;color:var(--purple);letter-spacing:2px;margin-bottom:6px;text-transform:uppercase;">External Storage // Comms Link</div>
+            <a href="https://discord.gg/aJhkqCuX" target="_blank" style="text-decoration:none;">
+              <button type="button" class="btn-transmit" style="border-color:var(--purple);color:var(--purple);box-shadow:var(--gp);margin:0;width:auto;padding:6px 18px;font-size:8px;">
                 ⬡ JOIN THE HUB (GET PHOTO LINKS)
               </button>
             </a>
-            <div style="font-size: 6px; color: var(--muted); margin-top: 6px; letter-spacing: 1px; line-height: 1.4;">
+            <div style="font-size:6px;color:var(--muted);margin-top:6px;letter-spacing:1px;line-height:1.4;">
               1. UPLOAD PHOTO TO #PUBLIC-UPLINK<br>
               2. LONG-PRESS PHOTO > "COPY LINK"
             </div>
@@ -421,7 +445,7 @@ footer{border-top:1px solid var(--border);padding:10px 14px;display:flex;justify
 
           <label>FIELD NOTES (OPTIONAL)</label>
           <textarea id="post-note" placeholder="Describe the anomaly. Be specific. The Bureau is watching."></textarea>
-          
+
           <button class="btn-post" onclick="postFinding()">⬡ SUBMIT TO BUREAU ARCHIVE</button>
           <span id="post-status" style="font-size:8px;color:var(--muted);margin-left:10px;letter-spacing:2px"></span>
         </div>
@@ -437,14 +461,17 @@ footer{border-top:1px solid var(--border);padding:10px 14px;display:flex;justify
         <div id="findings-feed"><div class="loading">CONNECTING TO BUREAU NETWORK</div></div>
       </div>
     </div>
-  </div>
-</div>
+
+  </div><!-- /grid -->
+</div><!-- /sec-bulletin -->
 
 
-<!-- ══ FUNNY PAGES ══ -->
-
+<!-- ══════════════════════════════════════════ -->
+<!-- SECTION: FUNNY PAGES                       -->
+<!-- ══════════════════════════════════════════ -->
 <div class="section" id="sec-funnypages">
   <div class="grid">
+
     <div class="card span2">
       <div class="card-head">
         <div class="card-title">THE FUNNY PAGES <span class="sig"><span class="sig-dot green"></span></span></div>
@@ -461,7 +488,7 @@ footer{border-top:1px solid var(--border);padding:10px 14px;display:flex;justify
           <span class="fl-icon">🍗</span>
           <span class="fl-text">
             <span class="fl-title">CRAZY CHICKEN TAGINE // COMIC #01</span>
-            <span class="fl-sub">Mochkil’s culinary chaos. Reality is 15% Chicken, 85% magic.</span>
+            <span class="fl-sub">Mochkil's culinary chaos. Reality is 15% Chicken, 85% magic.</span>
           </span>
           <span class="fl-tag">ARCHIVE // ONLINE</span>
         </a>
@@ -492,7 +519,7 @@ footer{border-top:1px solid var(--border);padding:10px 14px;display:flex;justify
           </span>
           <span class="fl-tag">VOID-7</span>
         </a>
-        
+
         <a href="https://maximumreality.github.io/crossword/index.html" class="funny-link lnk-c" target="_blank">
           <span class="fl-icon">⬡</span>
           <span class="fl-text">
@@ -526,21 +553,21 @@ footer{border-top:1px solid var(--border);padding:10px 14px;display:flex;justify
             <span class="fl-title">FLOOR 4 // THE MISSING LEVEL</span>
             <span class="fl-sub">Unauthorized descent. No insurance. No return.</span>
           </span>
-          <span class="fl-tag" style="background: var(--red); color: #000; padding: 2px 4px; border-radius: 2px; opacity: 1;">[ ACTIVE ]</span>
+          <span class="fl-tag" style="background:var(--red);color:#000;padding:2px 4px;border-radius:2px;opacity:1;">[ ACTIVE ]</span>
         </a>
 
-        <div style="margin-top: 20px; border: 1px solid #f0f; padding: 15px; background: rgba(240, 0, 240, 0.1); text-align: center; border-radius: 4px;">
-            <a href="https://maximumreality.github.io/DeclassifyX/index.html" style="text-decoration: none;">
-                <span style="font-family: 'Courier New', monospace; font-weight: bold; color: #f0f; text-shadow: 0 0 5px #f0f; letter-spacing: 2px;">
-                    📂 ACCESS DECLASSIFY-X
-                </span>
-                <div style="font-size: 7px; color: #0ff; margin-top: 5px; opacity: 0.8;">
-                    [ LEVEL 5 FOIA CLEARANCE REQUIRED ]
-                </div>
-            </a>
+        <div style="margin-top:20px;border:1px solid #f0f;padding:15px;background:rgba(240,0,240,0.1);text-align:center;border-radius:4px;">
+          <a href="https://maximumreality.github.io/DeclassifyX/index.html" style="text-decoration:none;">
+            <span style="font-family:'Courier New',monospace;font-weight:bold;color:#f0f;text-shadow:0 0 5px #f0f;letter-spacing:2px;">
+              📂 ACCESS DECLASSIFY-X
+            </span>
+            <div style="font-size:7px;color:#0ff;margin-top:5px;opacity:0.8;">
+              [ LEVEL 5 FOIA CLEARANCE REQUIRED ]
+            </div>
+          </a>
         </div>
 
-        <a href="#" class="funny-link lnk-p" style="margin-top: 10px;" onclick="alert('TRANSMISSION PENDING // MORE REALITY LEAKS DEPLOYING SOON')">
+        <a href="#" class="funny-link lnk-p" style="margin-top:10px;" onclick="alert('TRANSMISSION PENDING // MORE REALITY LEAKS DEPLOYING SOON')">
           <span class="fl-icon">📰</span>
           <span class="fl-text">
             <span class="fl-title">THE LEAKS // MAXIMUM REALITY STYLE</span>
@@ -549,8 +576,11 @@ footer{border-top:1px solid var(--border);padding:10px 14px;display:flex;justify
           <span class="fl-tag">DEPLOYING</span>
         </a>
 
-      </div> </div> </div> </div> 
+      </div><!-- /card-body -->
+    </div><!-- /card -->
 
+  </div><!-- /grid -->
+</div><!-- /sec-funnypages -->
 
 
 <footer>
@@ -558,10 +588,8 @@ footer{border-top:1px solid var(--border);padding:10px 14px;display:flex;justify
   <div class="footer-text">SESSION: <span id="sessionTime" style="color:var(--cyan)">0:00</span></div>
 </footer>
 
-<!-- Firebase CDN (compat mode — no bundler needed) -->
-
+<!-- Firebase CDN -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
 <script>
@@ -576,7 +604,7 @@ const firebaseConfig={
 };
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
-const FINDINGS_COL='bureau_findings'; // separate collection from Whispering Woods
+const FINDINGS_COL='bureau_findings';
 
 // ── MASTHEAD INIT ──
 function initMasthead(){
@@ -597,18 +625,18 @@ setInterval(()=>{
   document.getElementById('sessionTime').textContent=m+':'+sc;
 },1000);
 
-// ── NAV TABS ──
-function showSection(name){
+// ── NAV TABS ── (fixed: passes 'this' so active state works)
+function showSection(name, btn){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('sec-'+name).classList.add('active');
-  event.target.classList.add('active');
+  if(btn) btn.classList.add('active');
   if(name==='fieldlog') renderFieldLog();
   if(name==='bulletin') loadFindings();
 }
 
 // ══════════════════════════════════════════════
-// TRANSMISSIONS — Glitch Tales engine reskinned
+// TRANSMISSIONS
 // ══════════════════════════════════════════════
 const INGREDIENTS={
   CHARACTER:{tags:['tired wizard','sentient toaster','retired mime','anxious librarian','confused robot','ghost accountant','time-traveling barista','quantum cat','discount oracle','sad detective','immortal plumber','overqualified snail','Bureau field agent','rogue simulation','Azul the Sphynx','Mochkil the tuxedo cat','void-touched archivist','reality index auditor']},
@@ -630,7 +658,6 @@ const TX_ORIGINS=['SECTOR UNKNOWN','TIMELINE 3','SIMULATION LAYER 4','REDACTED C
 const TX_CLEARANCES=['OPEN','LVL-01','LVL-02','LVL-03','RESTRICTED','EYES ONLY','[REDACTED]'];
 
 let txTypeTimer=null;
-
 function getRandom(arr){return arr[Math.floor(Math.random()*arr.length)];}
 
 function buildTransmission(){
@@ -641,7 +668,6 @@ function buildTransmission(){
   const tplKey=getRandom(Object.keys(TX_TEMPLATES));
   let txt=getRandom(TX_TEMPLATES[tplKey]);
   txt=txt.replace(/{character}/g,char).replace(/{setting}/g,setting).replace(/{mood}/g,mood).replace(/{twist}/g,twist);
-  // Occasional glitch
   if(Math.random()>0.75){
     const glitch=['̶','̴','̵'];
     txt=txt.split('').map(c=>Math.random()<0.04?c+getRandom(glitch):c).join('');
@@ -684,33 +710,8 @@ function decryptTransmission(){
   },700);
 }
 
-// ── HEADLINES ──
-const HEADLINE_SUBJECTS=['AZUL','MOCHKIL','A REALITY AUDITOR','AN UNREGISTERED ENTITY','LOCAL SIMULATION','BUREAU DIVISION Ω','CITIZEN #4471','THE VOID','A ROGUE TIMELINE','SECTOR 7G'];
-const HEADLINE_VERBS=['DETECTED IN','ESCAPED FROM','FILED A COMPLAINT ABOUT','ACHIEVED COMPLIANCE IN','VANISHED NEAR','ISSUED A WARNING ABOUT','CLAIMED JURISDICTION OVER','DENIED INVOLVEMENT IN'];
-const HEADLINE_OBJECTS=['THE LAST KNOWN BOOKSTORE','AN UNSCHEDULED DIMENSION','THE SPACE BETWEEN SIGNALS','REALITY INDEX ZONE 3','THE ENCRYPTED ARCHIVE','A PARALLEL POST OFFICE','THE BUREAU\'S FILING SYSTEM','SIMULATION LAYER 4','A REDACTED LOCATION'];
-const HEADLINE_TAGS=['DEVELOPING','CLASSIFIED','UNCONFIRMED','BUREAU APPROVED','ENCRYPTED','UNDER REVIEW','ONGOING','DENIED'];
-
-function generateHeadlines(){
-  const el=document.getElementById('headlines-output');
-  el.innerHTML='';
-  const count=4+Math.floor(Math.random()*3);
-  for(let i=0;i<count;i++){
-    const subj=getRandom(HEADLINE_SUBJECTS);
-    const verb=getRandom(HEADLINE_VERBS);
-    const obj=getRandom(HEADLINE_OBJECTS);
-    const tag=getRandom(HEADLINE_TAGS);
-    const div=document.createElement('div');
-    div.style.cssText='border-bottom:1px solid var(--border);padding:8px 0;';
-    div.innerHTML=`
-      <div style="font-size:8px;color:var(--muted);letter-spacing:2px;margin-bottom:3px">${tag} // ${new Date().toLocaleTimeString()}</div>
-      <div style="font-size:11px;color:var(--text);letter-spacing:1px;line-height:1.4">${subj} ${verb} ${obj}</div>
-    `;
-    el.appendChild(div);
-  }
-}
-
 // ══════════════════════════════════════════════
-// FIELD LOG — reads from localStorage (Lens data)
+// FIELD LOG
 // ══════════════════════════════════════════════
 function renderFieldLog(){
   renderDossier();
@@ -725,14 +726,10 @@ function renderDossier(){
   const anomaly=localStorage.getItem('BUREAU_ANOMALY')||'---';
   const timestamp=localStorage.getItem('BUREAU_TIMESTAMP');
   const lastOp=timestamp?new Date(timestamp).toLocaleString():'NO FIELD OPS RECORDED';
-
   const lvlNum=clearance.replace('LVL_','').replace('NONE','0');
   const lvlInt=parseInt(lvlNum)||0;
   const clrClass=lvlInt===0?'clr-none':lvlInt<=3?'clr-lv'+lvlInt:lvlInt<=6?'clr-lv'+lvlInt:'clr-lv'+lvlInt;
-
-  const threatColor=lvlInt===0?'color:var(--muted)':lvlInt<=3?'color:var(--green)':lvlInt<=6?'color:var(--amber)':'color:var(--red)';
-  const scanCol={RED:'danger',BLUE:'hi',GREEN:'hi',YELLOW:'warn',NEUTRAL:'',  '---':''}[lastScan]||'';
-
+  const scanCol={RED:'danger',BLUE:'hi',GREEN:'hi',YELLOW:'warn',NEUTRAL:'','---':''}[lastScan]||'';
   el.innerHTML=`
     <div class="dossier">
       <div class="dossier-title">▶ AGENT STATUS REPORT</div>
@@ -757,7 +754,7 @@ function renderDossier(){
         <span class="dr-val">${lastOp}</span>
       </div>
       <div style="margin-top:10px">
-        <span class="clearance-badge ${clrClass}">${clearance === 'NONE' ? 'NO CLEARANCE' : '⬡ '+clearance+' AGENT'}</span>
+        <span class="clearance-badge ${clrClass}">${clearance==='NONE'?'NO CLEARANCE':'⬡ '+clearance+' AGENT'}</span>
       </div>
     </div>
     ${lvlInt===0?'<div class="empty-state"><div class="e-icon">⬡</div>NO FIELD DATA FOUND<br><br>DEPLOY THE LENS TO BEGIN LOGGING ANOMALIES</div>':''}
@@ -766,19 +763,15 @@ function renderDossier(){
 
 function renderScanHistory(){
   const el=document.getElementById('scan-history-body');
-  // Read all bureau keys from localStorage
   const entries=[];
   for(let i=0;i<localStorage.length;i++){
     const k=localStorage.key(i);
-    if(k&&k.startsWith('BUREAU_')){
-      entries.push({key:k,val:localStorage.getItem(k)});
-    }
+    if(k&&k.startsWith('BUREAU_')) entries.push({key:k,val:localStorage.getItem(k)});
   }
   if(entries.length===0){
     el.innerHTML='<div class="empty-state"><div class="e-icon">◈</div>NO SCAN RECORDS IN LOCAL STORAGE</div>';
     return;
   }
-  const colMap={BUREAU_LAST_SCAN:'col-'+localStorage.getItem('BUREAU_LAST_SCAN')?.toLowerCase()};
   el.innerHTML=entries.map(e=>{
     const friendly={
       BUREAU_CLEARANCE:'CLEARANCE LEVEL',BUREAU_LAST_SCAN:'LAST SCAN TYPE',
@@ -787,9 +780,7 @@ function renderScanHistory(){
     }[e.key]||e.key;
     const val=e.key==='BUREAU_TIMESTAMP'?new Date(e.val).toLocaleString():e.val;
     return `<div class="log-entry-card">
-      <div class="le-head">
-        <span class="le-type">${friendly}</span>
-      </div>
+      <div class="le-head"><span class="le-type">${friendly}</span></div>
       <div class="le-body">${val}</div>
     </div>`;
   }).join('');
@@ -802,20 +793,18 @@ function clearFieldLog(){
 }
 
 // ══════════════════════════════════════════════
-// BULLETIN BOARD — Firebase Firestore
+// BULLETIN BOARD
 // ══════════════════════════════════════════════
 function postFinding(){
   const agent=(document.getElementById('post-agent').value.trim()||'AGENT_UNKNOWN').toUpperCase();
   const color=document.getElementById('post-color').value;
   const note=document.getElementById('post-note').value.trim();
-  const imgUrl=document.getElementById('post-img-url').value.trim(); // NEW
+  const imgUrl=document.getElementById('post-img-url').value.trim();
   const status=document.getElementById('post-status');
-
   status.textContent='TRANSMITTING...';
   status.style.color='var(--amber)';
-
   db.collection(FINDINGS_COL).add({
-    agent,color,note,imgUrl, // SAVING THE URL
+    agent,color,note,imgUrl,
     clearance:localStorage.getItem('BUREAU_CLEARANCE')||'NONE',
     scanCount:parseInt(localStorage.getItem('BUREAU_SCAN_COUNT')||'0'),
     timestamp:firebase.firestore.FieldValue.serverTimestamp()
@@ -823,7 +812,7 @@ function postFinding(){
     status.textContent='FILED // BUREAU ACKNOWLEDGED';
     status.style.color='var(--green)';
     document.getElementById('post-note').value='';
-    document.getElementById('post-img-url').value=''; // CLEAR INPUT
+    document.getElementById('post-img-url').value='';
     setTimeout(()=>{status.textContent='';},4000);
   }).catch(err=>{
     status.textContent='TRANSMISSION FAILED: '+err.message;
@@ -831,71 +820,50 @@ function postFinding(){
   });
 }
 
-
 function loadFindings(){
-  const el = document.getElementById('findings-feed');
-  el.innerHTML = '<div class="loading">CONNECTING TO BUREAU NETWORK</div>';
-
-  db.collection(FINDINGS_COL)
-    .orderBy('timestamp','desc')
-    .limit(20)
-    .onSnapshot(snap => {
-      if(snap.empty){
-        el.innerHTML = '<div class="empty-state"><div class="e-icon">▶</div>NO FINDINGS POSTED YET</div>';
-        return;
-      }
-      
-      const colClass = {RED:'col-red', BLUE:'col-blue', GREEN:'col-green', YELLOW:'col-yellow', NEUTRAL:'col-neutral'};
-      const colLabel = {RED:'⬡ RED-SHIFT ANOMALY', BLUE:'◈ AZUL QUANTUM SIGNATURE', GREEN:'░ VOID BLOOM RESIDUE', YELLOW:'▶ AMBER PROTOCOL', NEUTRAL:'— BACKGROUND RADIATION'};
-      
-      el.innerHTML = snap.docs.map(doc => {
-        const d = doc.data();
-        const ts = d.timestamp?.toDate();
-        const timeStr = ts ? ts.toLocaleString() : 'TIMESTAMP REDACTED';
-        const cc = colClass[d.color] || 'col-neutral';
-        const cl = colLabel[d.color] || d.color;
-
-        // ── ADVANCED PHOTO DETECTION ──
-        let photoHtml = '';
-        // Check if the URL exists and looks like an image or a Discord CDN link
-        if(d.imgUrl && (d.imgUrl.includes('discordapp') || d.imgUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i))) {
-          photoHtml = `
-            <div style="margin:12px 0; border:1px solid var(--border2); background:#000; position:relative; line-height:0;">
-              <img src="${d.imgUrl}" 
-                   style="width:100%; display:block; filter: brightness(0.8) contrast(1.2) sepia(0.2); opacity:0.9;" 
-                   onerror="this.style.display='none'; console.log('Image failed to load');">
-              <div style="font-size:6px; background:rgba(0,0,0,0.8); color:var(--cyan); padding:4px; text-align:center; letter-spacing:2px; border-top:1px solid var(--border2); font-family:monospace; line-height:1;">
-                VISUAL_EVIDENCE // DECRYPTED
-              </div>
+  const el=document.getElementById('findings-feed');
+  el.innerHTML='<div class="loading">CONNECTING TO BUREAU NETWORK</div>';
+  db.collection(FINDINGS_COL).orderBy('timestamp','desc').limit(20).onSnapshot(snap=>{
+    if(snap.empty){
+      el.innerHTML='<div class="empty-state"><div class="e-icon">▶</div>NO FINDINGS POSTED YET</div>';
+      return;
+    }
+    const colClass={RED:'col-red',BLUE:'col-blue',GREEN:'col-green',YELLOW:'col-yellow',NEUTRAL:'col-neutral'};
+    const colLabel={RED:'⬡ RED-SHIFT ANOMALY',BLUE:'◈ AZUL QUANTUM SIGNATURE',GREEN:'░ VOID BLOOM RESIDUE',YELLOW:'▶ AMBER PROTOCOL',NEUTRAL:'— BACKGROUND RADIATION'};
+    el.innerHTML=snap.docs.map(doc=>{
+      const d=doc.data();
+      const ts=d.timestamp?.toDate();
+      const timeStr=ts?ts.toLocaleString():'TIMESTAMP REDACTED';
+      const cc=colClass[d.color]||'col-neutral';
+      const cl=colLabel[d.color]||d.color;
+      let photoHtml='';
+      if(d.imgUrl&&(d.imgUrl.includes('discordapp')||d.imgUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i))){
+        photoHtml=`
+          <div style="margin:12px 0;border:1px solid var(--border2);background:#000;position:relative;line-height:0;">
+            <img src="${d.imgUrl}" style="width:100%;display:block;filter:brightness(0.8) contrast(1.2) sepia(0.2);opacity:0.9;"
+                 onerror="this.style.display='none'">
+            <div style="font-size:6px;background:rgba(0,0,0,0.8);color:var(--cyan);padding:4px;text-align:center;letter-spacing:2px;border-top:1px solid var(--border2);font-family:monospace;line-height:1;">
+              VISUAL_EVIDENCE // DECRYPTED
             </div>
-          `;
-        }
-
-        return `
-          <div class="finding-card">
-            <div class="f-header">
-              <span class="f-agent">${d.agent || 'AGENT_UNKNOWN'}</span>
-              <span class="f-time">${timeStr}</span>
-            </div>
-            <span class="f-color ${cc}">${cl}</span>
-            ${d.note ? `<div class="f-note">${d.note}</div>` : ''}
-            ${photoHtml}
-            <div class="f-clearance">CLEARANCE: ${d.clearance || 'NONE'} // SCANS: ${d.scanCount || 0}</div>
           </div>`;
-      }).join('');
-    });
+      }
+      return `<div class="finding-card">
+        <div class="f-header">
+          <span class="f-agent">${d.agent||'AGENT_UNKNOWN'}</span>
+          <span class="f-time">${timeStr}</span>
+        </div>
+        <span class="f-color ${cc}">${cl}</span>
+        ${d.note?`<div class="f-note">${d.note}</div>`:''}
+        ${photoHtml}
+        <div class="f-clearance">CLEARANCE: ${d.clearance||'NONE'} // SCANS: ${d.scanCount||0}</div>
+      </div>`;
+    }).join('');
+  });
 }
-
-
 
 // ── BOOT ──
 initMasthead();
 decryptTransmission();
-generateHeadlines();
-
-// Auto-refresh headlines every 5 minutes
-setInterval(generateHeadlines, 300000);
 </script>
-
 </body>
 </html>
