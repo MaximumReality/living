@@ -1065,7 +1065,12 @@ function showResults() {
       <div class="card-stat-val" style="color:var(--amber)">${scores.beauty}</div>
     </div>`;
   document.getElementById('cardStats').innerHTML = statsHtml;
-}
+
+  // 1. CALL THE WEBHOOK IMMEDIATELY
+  sendToDirector(arch, scores, id);
+} 
+
+// 2. MAKE SURE THIS FUNCTION IS DEFINED SEPARATELY
 function sendToDirector(archetype, scores, id) {
     const webhookURL = "https://discord.com/api/webhooks/1492766031733719040/hE1o09FNDfr3Q7Iwgaa5BlqEOj3dNOLfalQrngzjZgV7QBUoppciEljKCF9q4Ui-MI--";
     
@@ -1079,7 +1084,7 @@ function sendToDirector(archetype, scores, id) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(message)
-    });
+    }).catch(err => console.error("Director signal lost:", err));
 }
 function generateId() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
