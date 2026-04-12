@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>FLOOR 4 // THE MISSING FLOOR</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #00ff41;
+  --green-dim: #00aa2a;
+  --green-faint: #001a08;
+  --amber: #ffb800;
+  --red: #ff2244;
+  --cyan: #00ffe7;
+  --bg: #000;
+}
+* { box-sizing:border-box; margin:0; padding:0; touch-action:manipulation; }
+html,body {
+  width:100%; height:100%; overflow:hidden;
+  background:var(--bg);
+  font-family:'Share Tech Mono',monospace;
+  color:var(--green);
+  -webkit-text-size-adjust:100%;
+}
+
+/* CRT */
+body::before {
+  content:''; position:fixed; inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,65,0.02) 2px,rgba(0,255,65,0.02) 4px);
+  pointer-events:none; z-index:9999;
+}
+body::after {
+  content:''; position:fixed; inset:0;
+  background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,0.8) 100%);
+  pointer-events:none; z-index:9998;
+}
+
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes flicker{0%,100%{opacity:1}93%{opacity:0.8}94%{opacity:1}97%{opacity:0.9}}
+@keyframes rgbSplit{
+  0%,100%{text-shadow:-2px 0 var(--red),2px 0 var(--cyan),0 0 20px var(--green)}
+  50%{text-shadow:2px 0 var(--red),-2px 0 var(--cyan),0 0 20px var(--green)}
+}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-4px)}
+  40%{transform:translateX(4px)}
+  60%{transform:translateX(-3px)}
+  80%{transform:translateX(3px)}
+}
+@keyframes pulse{0%,100%{box-shadow:0 0 8px var(--green-dim)}50%{box-shadow:0 0 22px var(--green)}}
+@keyframes scanBar{0%{top:-10%}100%{top:110%}}
+@keyframes glitchRow{
+  0%,90%{opacity:0}
+  91%{opacity:1;transform:translateX(-6px) scaleY(1.5)}
+  93%{opacity:1;transform:translateX(6px)}
+  95%{opacity:0}
+}
+@keyframes drift{
+  0%{transform:translateY(0) scaleX(1)}
+  50%{transform:translateY(-3px) scaleX(1.05)}
+  100%{transform:translateY(0) scaleX(1)}
+}
+@keyframes entityPulse{
+  0%,100%{opacity:0.7;filter:blur(0px)}
+  50%{opacity:1;filter:blur(1px)}
+}
+@keyframes medalSpin{
+  0%{transform:rotateY(0deg)}
+  100%{transform:rotateY(360deg)}
+}
+
+/* ===== SCREENS ===== */
+.screen{display:none;position:fixed;inset:0;z-index:100;overflow-y:auto;animation:fadeIn 0.3s ease;}
+.screen.active{display:flex;flex-direction:column;align-items:center;}
+
+/* ===== TITLE SCREEN ===== */
+#title-screen {
+  background:var(--bg);
+  justify-content:center;
+  padding:30px 20px;
+  text-align:center;
+  animation:flicker 6s infinite;
+}
+.title-eyebrow{font-size:8px;letter-spacing:4px;color:var(--green-dim);margin-bottom:8px;}
+.title-main{font-size:28px;letter-spacing:4px;color:var(--green);animation:rgbSplit 3s infinite;margin-bottom:4px;}
+.title-sub{font-size:11px;letter-spacing:3px;color:var(--amber);margin-bottom:6px;}
+.title-warning{
+  border:1px solid var(--red);padding:12px;margin:16px 0;
+  font-size:10px;color:var(--red);line-height:1.8;letter-spacing:1px;
+  background:rgba(255,34,68,0.05);
+}
+.title-warning .w-hdr{font-size:8px;letter-spacing:3px;margin-bottom:6px;color:var(--amber);}
+.title-lore{
+  font-size:10px;color:var(--green-dim);line-height:1.8;
+  text-align:left;margin-bottom:20px;
+  border-left:2px solid var(--green-faint);padding-left:10px;
+}
+.name-wrap{margin-bottom:16px;text-align:left;}
+.name-label{font-size:8px;letter-spacing:3px;color:var(--green-dim);margin-bottom:6px;display:block;}
+input[type=text]{
+  width:100%;padding:12px 14px;
+  background:var(--green-faint);border:1px solid var(--green-dim);
+  color:var(--green);font-family:'Share Tech Mono',monospace;font-size:14px;
+  letter-spacing:2px;outline:none;-webkit-appearance:none;
+}
+input[type=text]:focus{border-color:var(--green);box-shadow:0 0 10px rgba(0,255,65,0.1);}
+input[type=text]::placeholder{color:var(--green-dim);opacity:0.4;}
+.btn{
+  display:block;width:100%;padding:14px;
+  background:transparent;border:1px solid var(--green);
+  color:var(--green);font-family:'Share Tech Mono',monospace;
+  font-size:12px;letter-spacing:3px;cursor:pointer;
+  text-align:center;animation:pulse 3s infinite;
+  -webkit-tap-highlight-color:transparent;
+  position:relative;overflow:hidden;transition:all 0.15s;
+}
+.btn::before{
+  content:'';position:absolute;top:-100%;left:0;right:0;height:100%;
+  background:linear-gradient(transparent,rgba(0,255,65,0.08),transparent);
+  animation:scanBar 2.5s linear infinite;
+}
+.btn:active{background:rgba(0,255,65,0.1);transform:scale(0.98);}
+.btn.dim{border-color:var(--green-dim);color:var(--green-dim);animation:none;font-size:10px;}
+.btn.red-btn{border-color:var(--red);color:var(--red);animation:none;}
+
+/* ===== GAME SCREEN ===== */
+#game-screen{background:var(--bg);padding:0;overflow:hidden;}
+#gameCanvas{
+  display:block;
+  touch-action:none;
+  image-rendering:pixelated;
+}
+#hud{
+  position:fixed;top:0;left:0;right:0;
+  display:flex;justify-content:space-between;align-items:flex-start;
+  padding:8px 14px;
+  background:linear-gradient(to bottom,rgba(0,0,0,0.9),transparent);
+  z-index:200;pointer-events:none;
+  max-width:430px;margin:0 auto;
+}
+.hud-block{font-size:9px;letter-spacing:2px;line-height:1.8;}
+.hud-label{color:var(--green-dim);}
+.hud-val{color:var(--green);font-size:13px;text-shadow:0 0 8px var(--green);}
+.hud-val.danger{color:var(--red);text-shadow:0 0 8px var(--red);animation:blink 0.5s infinite;}
+
+#touch-controls{
+  position:fixed;bottom:0;left:0;right:0;
+  display:flex;gap:0;z-index:200;
+  max-width:430px;margin:0 auto;
+  height:90px;
+}
+.touch-btn{
+  flex:1;background:rgba(0,255,65,0.04);
+  border:1px solid rgba(0,255,65,0.1);
+  color:var(--green-dim);font-family:'Share Tech Mono',monospace;
+  font-size:22px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  display:flex;align-items:center;justify-content:center;
+  user-select:none;
+}
+.touch-btn:active{background:rgba(0,255,65,0.12);}
+
+/* ===== DEATH SCREEN ===== */
+#death-screen{
+  background:var(--bg);padding:24px 20px;
+  justify-content:flex-start;
+}
+.death-title{
+  font-size:20px;letter-spacing:4px;color:var(--red);
+  text-shadow:0 0 20px var(--red);margin-bottom:4px;
+  animation:shake 0.5s ease;
+  width:100%;text-align:center;
+}
+.death-sub{font-size:9px;letter-spacing:3px;color:var(--red);margin-bottom:20px;opacity:0.7;width:100%;text-align:center;}
+
+.cert{
+  width:100%;max-width:360px;
+  border:2px solid var(--red);
+  background:#000;padding:16px;
+  position:relative;overflow:hidden;
+  box-shadow:0 0 30px rgba(255,34,68,0.2);
+  margin-bottom:16px;
+}
+.cert::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,34,68,0.02) 3px,rgba(255,34,68,0.02) 4px);
+  pointer-events:none;
+}
+.cert-hdr{
+  text-align:center;margin-bottom:12px;
+  border-bottom:1px solid rgba(255,34,68,0.3);padding-bottom:10px;
+}
+.cert-bureau{font-size:7px;letter-spacing:3px;color:rgba(255,34,68,0.6);margin-bottom:3px;}
+.cert-title{font-size:13px;letter-spacing:2px;color:var(--red);text-shadow:0 0 10px var(--red);}
+.cert-field{margin-bottom:8px;}
+.cert-label{font-size:7px;letter-spacing:2px;color:rgba(255,34,68,0.5);margin-bottom:2px;}
+.cert-value{font-size:11px;letter-spacing:1px;color:var(--green);line-height:1.4;}
+.cert-cause{
+  border-left:2px solid var(--red);padding-left:8px;
+  font-size:11px;color:var(--amber);line-height:1.6;
+  font-style:italic;
+}
+.cert-footer{
+  margin-top:12px;padding-top:8px;
+  border-top:1px solid rgba(255,34,68,0.2);
+  display:flex;justify-content:space-between;
+  font-size:7px;color:rgba(255,34,68,0.4);letter-spacing:1px;
+}
+.cert-stamp{
+  position:absolute;bottom:14px;right:14px;
+  font-size:32px;color:rgba(255,34,68,0.08);
+  transform:rotate(-15deg);letter-spacing:2px;
+  font-size:40px;
+}
+.cert-watermark{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) rotate(-25deg);
+  font-size:36px;letter-spacing:4px;
+  color:rgba(255,34,68,0.04);pointer-events:none;
+  white-space:nowrap;
+}
+
+/* medal */
+.medal-box{
+  width:100%;max-width:360px;
+  border:1px solid var(--amber);padding:14px;
+  background:rgba(255,184,0,0.04);margin-bottom:16px;
+  text-align:center;
+}
+.medal-title{font-size:8px;letter-spacing:3px;color:var(--amber);margin-bottom:8px;}
+.medal-icon{font-size:36px;animation:drift 2s ease-in-out infinite;display:block;margin-bottom:4px;}
+.medal-name{font-size:13px;letter-spacing:2px;color:var(--amber);text-shadow:0 0 10px var(--amber);}
+.medal-score{font-size:10px;color:var(--green-dim);margin-top:4px;}
+
+.score-display{
+  width:100%;max-width:360px;text-align:center;
+  margin-bottom:16px;
+}
+.score-big{font-size:32px;color:var(--green);text-shadow:0 0 20px var(--green);letter-spacing:4px;}
+.score-label-sm{font-size:8px;letter-spacing:3px;color:var(--green-dim);}
+
+.sending-status{
+  font-size:10px;color:var(--amber);letter-spacing:2px;
+  text-align:center;margin-bottom:12px;width:100%;
+}
+
+/* ===== INSTRUCTIONS ===== */
+.how-box{
+  width:100%;max-width:360px;
+  border:1px solid var(--green-dim);padding:12px;
+  margin-bottom:16px;font-size:10px;
+  color:var(--green-dim);line-height:2;
+}
+.how-box .hw{color:var(--green);font-size:8px;letter-spacing:3px;margin-bottom:8px;display:block;}
+
+/* glitch overlay */
+#glitchOverlay{
+  position:fixed;inset:0;z-index:9997;
+  pointer-events:none;opacity:0;
+  background:rgba(0,255,65,0.02);
+}
+#glitchOverlay.active{animation:glitchRow 0.2s steps(1) forwards;}
+
+.cursor{animation:blink 1s infinite;}
+</style>
+</head>
+<body>
+
+<div id="glitchOverlay"></div>
+
+<!-- TITLE SCREEN -->
+<div id="title-screen" class="screen active">
+  <div style="width:100%;max-width:390px;padding:0 20px;">
+    <div class="title-eyebrow">BUREAU OF REALITY MANAGEMENT // SECTOR ACCESS</div>
+    <div class="title-main">FLOOR 4</div>
+    <div class="title-sub">THE MISSING FLOOR <span class="cursor">█</span></div>
+
+    <div class="title-warning">
+      <div class="w-hdr">// OFFICIAL BUREAU WARNING //</div>
+      Floor 4 does not exist. Agents who access it will not be acknowledged. Deaths on Floor 4 are logged for archival purposes only. The Bureau accepts no responsibility for reality signature damage, temporal displacement, or memory loss incurred during unauthorized descent.
+    </div>
+
+    <div class="title-lore">
+      Reports indicate Floor 4 contains entities redacted from Bureau records, fragments of realities that were cancelled, and at least one vending machine that has been missing since 1987. Compliance Drones patrol continuously. They are looking for you specifically.
+    </div>
+
+    <div class="name-wrap">
+      <span class="name-label">AGENT DESIGNATION // ENTER YOUR NAME</span>
+      <input type="text" id="agentNameInput" placeholder="DESIGNATION..." maxlength="20" autocomplete="off" spellcheck="false">
+    </div>
+
+    <div class="how-box">
+      <span class="hw">// HOW TO SURVIVE</span>
+      ← → MOVE LEFT / RIGHT<br>
+      AVOID all entities and hazards<br>
+      COLLECT memory fragments ◈ for points<br>
+      SURVIVE as deep as possible<br>
+      DEPTH = SCORE — go deeper, score higher
+    </div>
+
+    <button class="btn" onclick="startGame()" style="margin-bottom:10px;">[ DESCEND TO FLOOR 4 ]</button>
+    <button class="btn dim" onclick="showHighScores()">[ VIEW SURVIVAL RECORDS ]</button>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="game-screen" class="screen">
+  <div id="hud">
+    <div class="hud-block">
+      <div class="hud-label">DEPTH</div>
+      <div class="hud-val" id="hudDepth">0</div>
+    </div>
+    <div class="hud-block" style="text-align:center;">
+      <div class="hud-label">FLOOR 4</div>
+      <div class="hud-val" style="color:var(--red);font-size:10px;" id="hudStatus">DESCENDING</div>
+    </div>
+    <div class="hud-block" style="text-align:right;">
+      <div class="hud-label">STABILITY</div>
+      <div class="hud-val" id="hudStability">100%</div>
+    </div>
+  </div>
+
+  <canvas id="gameCanvas"></canvas>
+
+  <div id="touch-controls">
+    <button class="touch-btn" id="leftBtn">◀</button>
+    <button class="touch-btn" id="rightBtn">▶</button>
+  </div>
+</div>
+
+<!-- DEATH SCREEN -->
+<div id="death-screen" class="screen">
+  <div style="width:100%;max-width:390px;">
+    <div class="death-title">AGENT DOWN</div>
+    <div class="death-sub">REALITY SIGNATURE LOST // INCIDENT LOGGED</div>
+
+    <div class="score-display">
+      <div class="score-label-sm">FINAL DEPTH REACHED</div>
+      <div class="score-big" id="finalScore">0</div>
+    </div>
+
+    <div id="medalBox" style="display:none;" class="medal-box">
+      <div class="medal-title">// STABILITY MEDAL AWARDED //</div>
+      <span class="medal-icon" id="medalIcon">🏅</span>
+      <div class="medal-name" id="medalName">–</div>
+      <div class="medal-score" id="medalScore"></div>
+    </div>
+
+    <div class="cert" id="deathCert">
+      <div class="cert-hdr">
+        <div class="cert-bureau">BUREAU OF REALITY MANAGEMENT // INCIDENT DIVISION</div>
+        <div class="cert-title">OFFICIAL DEATH CERTIFICATE</div>
+      </div>
+      <div class="cert-field">
+        <div class="cert-label">AGENT DESIGNATION</div>
+        <div class="cert-value" id="certName">–</div>
+      </div>
+      <div class="cert-field">
+        <div class="cert-label">INCIDENT LOCATION</div>
+        <div class="cert-value">FLOOR 4 // SECTOR UNKNOWN // DEPTH <span id="certDepth">0</span></div>
+      </div>
+      <div class="cert-field">
+        <div class="cert-label">CAUSE OF INCIDENT</div>
+        <div class="cert-cause" id="certCause">–</div>
+      </div>
+      <div class="cert-field">
+        <div class="cert-label">BUREAU ASSESSMENT</div>
+        <div class="cert-value" id="certAssessment" style="font-size:10px;color:var(--green-dim);">–</div>
+      </div>
+      <div class="cert-footer">
+        <span id="certDate">–</span>
+        <span>maximumreality.xyz</span>
+      </div>
+      <div class="cert-watermark">VOID</div>
+      <div class="cert-stamp">💀</div>
+    </div>
+
+    <div class="sending-status" id="sendingStatus"></div>
+
+    <button class="btn" onclick="retryGame()" style="margin-bottom:10px;">[ DESCEND AGAIN ]</button>
+    <button class="btn dim" onclick="goHome()">[ RETURN TO SURFACE ]</button>
+  </div>
+</div>
+
+<script>
+// ===== CONFIG =====
+const WEBHOOK = 'https://discord.com/api/webhooks/1492766031733719040/hE1o09FNDfr3Q7Iwgaa5BlqEOj3dNOLfalQrngzjZgV7QBUoppciEljKCF9q4Ui-MI--';
+
+const CAUSES = [
+  "Consumed by a Redacted Entity. The Bureau has no record of what this means.",
+  "Reality signature destabilized beyond recovery. Agent became briefly theoretical.",
+  "Forcibly returned to consensus by Compliance Drone. Did not survive the transition.",
+  "Touched something beautiful and forgot to move.",
+  "Made direct eye contact with a cancelled reality. The cancelled reality blinked first.",
+  "Absorbed into an unscheduled memory fragment. Fragment was not their memory.",
+  "Compliance Drone physical contact. Agent's last words were 'that's not in the manual.'",
+  "Fell through a floor that doesn't exist into a floor that exists even less.",
+  "Encountered the 1987 vending machine. Selected B7. There is no B7.",
+  "Reality patch failed mid-descent. Agent is now a patch note.",
+  "Redacted by an entity with administrative privileges.",
+  "Became too aware of Floor 4's geometry. Floor 4 became aware of them back."
+];
+
+const ASSESSMENTS = [
+  "Agent demonstrated above-average descent before incident. Their file will be kept open.",
+  "Survival duration noted. The Bureau was impressed and will not say so again.",
+  "Incident classified as EXPECTED. Agent classification remains unchanged.",
+  "Death has been logged. Existence has been updated accordingly.",
+  "The Bureau thanks this agent for their involuntary contribution to Floor 4 research.",
+  "File status: VOID. Agent status: also VOID. The symmetry is appreciated.",
+  "This incident will not be investigated. It will, however, be archived.",
+  "Agent's final depth has been noted in the permanent record. The permanent record is redacted."
+];
+
+const MEDALS = [
+  { min:0,   name:'SURFACE DWELLER',    icon:'🔲', desc:'Barely scratched the surface of the void.' },
+  { min:300, name:'DESCENT CANDIDATE',  icon:'⬇️', desc:'The floor acknowledged your presence.' },
+  { min:700, name:'FLOOR NAVIGATOR',    icon:'🔷', desc:'You lasted long enough to be interesting.' },
+  { min:1200,name:'VOID RESISTANT',     icon:'🟡', desc:'Stability detected under pressure. Suspicious.' },
+  { min:2000,name:'ANOMALY SURVIVOR',   icon:'🏅', desc:'The Bureau is watching your file closely.' },
+  { min:3000,name:'SECTOR PHANTOM',     icon:'⭐', desc:'Almost too stable for Floor 4. Almost.' },
+  { min:5000,name:'REALITY ANCHOR',     icon:'💎', desc:'OMEGA clearance recommended. Immediately.' },
+];
+
+// ===== GAME STATE =====
+let canvas, ctx, animId;
+let agentName = 'UNKNOWN';
+let gameRunning = false;
+let keys = { left:false, right:false };
+let deathCause = '';
+
+const G = {
+  W: 390, H: 700,
+  player: { x:195, y:580, w:22, h:28, vx:0, speed:3.5 },
+  depth: 0,
+  stability: 100,
+  score: 0,
+  scrollY: 0,
+  scrollSpeed: 1.2,
+  hazards: [],
+  fragments: [],
+  glitchLines: [],
+  entities: [],
+  drones: [],
+  particles: [],
+  frameCount: 0,
+  difficulty: 1,
+  shakeX: 0,
+  flashAlpha: 0,
+  lastDepthMilestone: 0
+};
+
+function startGame() {
+  agentName = (document.getElementById('agentNameInput').value.trim().toUpperCase()) || 'UNKNOWN';
+  resetGame();
+  showScreen('game-screen');
+  resizeCanvas();
+  gameRunning = true;
+  loop();
+  setupControls();
+}
+
+function resetGame() {
+  G.depth = 0;
+  G.stability = 100;
+  G.score = 0;
+  G.scrollY = 0;
+  G.scrollSpeed = 1.2;
+  G.hazards = [];
+  G.fragments = [];
+  G.glitchLines = [];
+  G.entities = [];
+  G.drones = [];
+  G.particles = [];
+  G.frameCount = 0;
+  G.difficulty = 1;
+  G.shakeX = 0;
+  G.flashAlpha = 0;
+  G.lastDepthMilestone = 0;
+  G.player.x = G.W / 2;
+  G.player.y = 580;
+  G.player.vx = 0;
+}
+
+function resizeCanvas() {
+  canvas = document.getElementById('gameCanvas');
+  const maxW = Math.min(window.innerWidth, 430);
+  const maxH = window.innerHeight;
+  canvas.width = maxW;
+  canvas.height = maxH;
+  G.W = maxW;
+  G.H = maxH;
+  G.player.x = G.W / 2;
+  G.player.y = G.H - 120;
+  ctx = canvas.getContext('2d');
+}
+
+function setupControls() {
+  const left = document.getElementById('leftBtn');
+  const right = document.getElementById('rightBtn');
+  const setKey = (el, key, val) => {
+    el.addEventListener('touchstart', e => { e.preventDefault(); keys[key]=val; }, {passive:false});
+    el.addEventListener('touchend',   e => { e.preventDefault(); keys[key]=false; }, {passive:false});
+    el.addEventListener('mousedown',  () => keys[key]=val);
+    el.addEventListener('mouseup',    () => keys[key]=false);
+  };
+  setKey(left,'left',true);
+  setKey(right,'right',true);
+
+  document.addEventListener('keydown', e => {
+    if(e.key==='ArrowLeft'||e.key==='a') keys.left=true;
+    if(e.key==='ArrowRight'||e.key==='d') keys.right=true;
+  });
+  document.addEventListener('keyup', e => {
+    if(e.key==='ArrowLeft'||e.key==='a') keys.left=false;
+    if(e.key==='ArrowRight'||e.key==='d') keys.right=false;
+  });
+}
+
+function loop() {
+  if (!gameRunning) return;
+  update();
+  draw();
+  animId = requestAnimationFrame(loop);
+}
+
+function update() {
+  G.frameCount++;
+  G.depth = Math.floor(G.frameCount * G.scrollSpeed * 0.5);
+  G.score = G.depth;
+
+  // Increase difficulty
+  G.difficulty = 1 + G.depth / 800;
+  G.scrollSpeed = Math.min(1.2 + G.depth / 1500, 4.5);
+
+  // HUD
+  document.getElementById('hudDepth').textContent = G.depth;
+  const stab = Math.max(0, Math.floor(G.stability));
+  const stabEl = document.getElementById('hudStability');
+  stabEl.textContent = stab + '%';
+  stabEl.className = 'hud-val' + (stab < 30 ? ' danger' : '');
+
+  // Status messages
+  const statuses = ['DESCENDING','DEEPER','UNSTABLE','CRITICAL','VOID LEVEL'];
+  const si = Math.min(Math.floor(G.depth/600), statuses.length-1);
+  document.getElementById('hudStatus').textContent = statuses[si];
+
+  // Player movement
+  if (keys.left)  G.player.vx = Math.max(G.player.vx - 0.8, -G.player.speed);
+  if (keys.right) G.player.vx = Math.min(G.player.vx + 0.8,  G.player.speed);
+  if (!keys.left && !keys.right) G.player.vx *= 0.8;
+
+  G.player.x += G.player.vx;
+  G.player.x = Math.max(G.player.w/2, Math.min(G.W - G.player.w/2, G.player.x));
+
+  // Shake decay
+  G.shakeX *= 0.85;
+  G.flashAlpha = Math.max(0, G.flashAlpha - 0.04);
+
+  // Spawn hazards (reality tears - horizontal lines)
+  if (G.frameCount % Math.max(40 - Math.floor(G.difficulty*4), 18) === 0) {
+    const gap = 80 + Math.random() * 60;
+    const gapX = Math.random() * (G.W - gap);
+    G.hazards.push({
+      x: 0, y: -20,
+      gapX: gapX, gapW: gap,
+      w: G.W, h: 14,
+      alpha: 1,
+      type: Math.random() < 0.3 ? 'moving' : 'static',
+      vx: (Math.random()-0.5) * 1.5 * G.difficulty,
+      color: Math.random() < 0.5 ? '#ff2244' : '#00ffe7'
+    });
+  }
+
+  // Spawn memory fragments
+  if (G.frameCount % 90 === 0) {
+    G.fragments.push({
+      x: 20 + Math.random() * (G.W-40),
+      y: -20,
+      size: 10,
+      pulse: 0,
+      collected: false
+    });
+  }
+
+  // Spawn redacted entities
+  if (G.frameCount % Math.max(200 - Math.floor(G.difficulty*15), 70) === 0) {
+    G.entities.push({
+      x: Math.random() * G.W,
+      y: -30,
+      w: 30 + Math.random()*20,
+      h: 30 + Math.random()*20,
+      vx: (Math.random()-0.5) * 2 * G.difficulty,
+      pulse: 0
+    });
+  }
+
+  // Spawn compliance drones
+  if (G.frameCount % Math.max(280 - Math.floor(G.difficulty*20), 100) === 0) {
+    const fromLeft = Math.random() < 0.5;
+    G.drones.push({
+      x: fromLeft ? -40 : G.W+40,
+      y: 60 + Math.random() * (G.H - 250),
+      w: 32, h: 20,
+      vx: fromLeft ? 1.8*G.difficulty : -1.8*G.difficulty,
+      fromLeft
+    });
+  }
+
+  // Spawn glitch lines (visual)
+  if (G.frameCount % 15 === 0 && Math.random() < 0.4) {
+    G.glitchLines.push({
+      y: Math.random() * G.H,
+      w: 20 + Math.random() * 80,
+      x: Math.random() * G.W,
+      life: 8,
+      color: Math.random() < 0.5 ? '#00ff41' : '#ff2244'
+    });
+  }
+
+  // Move hazards
+  G.hazards.forEach(h => {
+    h.y += G.scrollSpeed * 1.5;
+    if (h.type === 'moving') h.gapX += h.vx;
+    if (h.gapX < 0) { h.gapX=0; h.vx*=-1; }
+    if (h.gapX + h.gapW > G.W) { h.gapX = G.W-h.gapW; h.vx*=-1; }
+  });
+  G.hazards = G.hazards.filter(h => h.y < G.H + 30);
+
+  // Move fragments
+  G.fragments.forEach(f => {
+    f.y += G.scrollSpeed;
+    f.pulse = (f.pulse + 0.1) % (Math.PI*2);
+  });
+  G.fragments = G.fragments.filter(f => f.y < G.H + 20 && !f.collected);
+
+  // Move entities
+  G.entities.forEach(e => {
+    e.y += G.scrollSpeed * 0.8;
+    e.x += e.vx;
+    e.pulse = (e.pulse||0) + 0.05;
+    if (e.x < -e.w || e.x > G.W+e.w) e.vx *= -1;
+  });
+  G.entities = G.entities.filter(e => e.y < G.H + 40);
+
+  // Move drones
+  G.drones.forEach(d => { d.x += d.vx; });
+  G.drones = G.drones.filter(d => d.x > -60 && d.x < G.W+60);
+
+  // Move glitch lines
+  G.glitchLines.forEach(g => g.life--);
+  G.glitchLines = G.glitchLines.filter(g => g.life > 0);
+
+  // Move particles
+  G.particles.forEach(p => { p.x+=p.vx; p.y+=p.vy; p.life--; p.vy+=0.1; });
+  G.particles = G.particles.filter(p => p.life > 0);
+
+  // Stability drain over time
+  if (G.frameCount % 60 === 0) {
+    G.stability = Math.max(0, G.stability - 0.5);
+  }
+
+  // Collision: hazard tears
+  const px = G.player.x, py = G.player.y;
+  const pw = G.player.w, ph = G.player.h;
+
+  for (let h of G.hazards) {
+    if (py + ph/2 > h.y && py - ph/2 < h.y + h.h) {
+      // Player must be in the gap to survive
+      const inGap = px + pw/2 > h.gapX && px - pw/2 < h.gapX + h.gapW;
+      if (!inGap) {
+        deathCause = CAUSES[Math.floor(Math.random() * CAUSES.length)];
+        killPlayer('REALITY TEAR');
+        return;
+      }
+    }
+  }
+
+  // Collision: fragments
+  G.fragments.forEach(f => {
+    if (!f.collected && Math.abs(px - f.x) < 20 && Math.abs(py - f.y) < 20) {
+      f.collected = true;
+      G.score += 50;
+      G.stability = Math.min(100, G.stability + 5);
+      spawnParticles(f.x, f.y, '#ffb800', 8);
+    }
+  });
+
+  // Collision: entities
+  for (let e of G.entities) {
+    if (px + pw/2 > e.x - e.w/2 && px - pw/2 < e.x + e.w/2 &&
+        py + ph/2 > e.y && py - ph/2 < e.y + e.h) {
+      deathCause = CAUSES[Math.floor(Math.random() * CAUSES.length)];
+      killPlayer('REDACTED ENTITY');
+      return;
+    }
+  }
+
+  // Collision: drones
+  for (let d of G.drones) {
+    if (px + pw/2 > d.x && px - pw/2 < d.x + d.w &&
+        py + ph/2 > d.y && py - ph/2 < d.y + d.h) {
+      deathCause = CAUSES[Math.floor(Math.random() * CAUSES.length)];
+      killPlayer('COMPLIANCE DRONE');
+      return;
+    }
+  }
+
+  // Stability zero = death
+  if (G.stability <= 0) {
+    deathCause = "Reality signature reached zero. Agent transitioned to a state the Bureau cannot officially acknowledge.";
+    killPlayer('STABILITY COLLAPSE');
+    return;
+  }
+
+  // Depth milestone messages
+  if (G.depth > 0 && G.depth % 500 === 0 && G.depth !== G.lastDepthMilestone) {
+    G.lastDepthMilestone = G.depth;
+    G.stability = Math.max(0, G.stability - 8);
+    G.shakeX = 6;
+    G.flashAlpha = 0.3;
+  }
+}
+
+function spawnParticles(x, y, color, count) {
+  for (let i=0; i<count; i++) {
+    G.particles.push({
+      x, y,
+      vx: (Math.random()-0.5)*3,
+      vy: (Math.random()-0.5)*3,
+      life: 20 + Math.random()*15,
+      color
+    });
+  }
+}
+
+function draw() {
+  ctx.save();
+  if (G.shakeX > 0.5) ctx.translate(Math.random()*G.shakeX*2-G.shakeX, 0);
+
+  // Background
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0,0,G.W,G.H);
+
+  // BG grid
+  ctx.strokeStyle = 'rgba(0,255,65,0.04)';
+  ctx.lineWidth = 1;
+  const gridSize = 40;
+  const offset = (G.frameCount * G.scrollSpeed) % gridSize;
+  for (let y = -gridSize+offset; y < G.H+gridSize; y+=gridSize) {
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(G.W,y); ctx.stroke();
+  }
+  for (let x=0; x<G.W; x+=gridSize) {
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,G.H); ctx.stroke();
+  }
+
+  // Depth fog
+  const fogDepth = Math.min(G.depth/2000, 0.6);
+  const fog = ctx.createLinearGradient(0,0,0,G.H);
+  fog.addColorStop(0,'rgba(255,34,68,0)');
+  fog.addColorStop(1,`rgba(255,34,68,${fogDepth})`);
+  ctx.fillStyle = fog;
+  ctx.fillRect(0,0,G.W,G.H);
+
+  // Glitch lines
+  G.glitchLines.forEach(g => {
+    ctx.fillStyle = g.color;
+    ctx.globalAlpha = g.life/8 * 0.4;
+    ctx.fillRect(g.x, g.y, g.w, 2);
+    ctx.globalAlpha = 1;
+  });
+
+  // Hazard tears
+  G.hazards.forEach(h => {
+    // Left wall
+    ctx.fillStyle = h.color;
+    ctx.shadowColor = h.color;
+    ctx.shadowBlur = 8;
+    ctx.fillRect(0, h.y, h.gapX, h.h);
+    // Right wall
+    ctx.fillRect(h.gapX + h.gapW, h.y, G.W - (h.gapX + h.gapW), h.h);
+    // Gap glow edges
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = h.color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(h.gapX, h.y);
+    ctx.lineTo(h.gapX, h.y+h.h);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(h.gapX+h.gapW, h.y);
+    ctx.lineTo(h.gapX+h.gapW, h.y+h.h);
+    ctx.stroke();
+  });
+  ctx.shadowBlur = 0;
+
+  // Memory fragments
+  G.fragments.forEach(f => {
+    const glow = 0.5 + 0.5*Math.sin(f.pulse);
+    ctx.fillStyle = '#ffb800';
+    ctx.shadowColor = '#ffb800';
+    ctx.shadowBlur = 8 + glow*8;
+    ctx.font = '14px Share Tech Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText('◈', f.x, f.y);
+  });
+  ctx.shadowBlur = 0;
+
+  // Redacted entities
+  G.entities.forEach(e => {
+    const p = 0.5+0.5*Math.sin(e.pulse||0);
+    ctx.fillStyle = `rgba(0,0,0,${0.8+p*0.2})`;
+    ctx.fillRect(e.x-e.w/2, e.y, e.w, e.h);
+    // Glitch border
+    ctx.strokeStyle = `rgba(255,34,68,${0.4+p*0.6})`;
+    ctx.shadowColor = '#ff2244';
+    ctx.shadowBlur = 6+p*10;
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(e.x-e.w/2, e.y, e.w, e.h);
+    // Redacted lines
+    ctx.fillStyle = `rgba(255,34,68,${0.3+p*0.3})`;
+    for(let i=4; i<e.h-4; i+=6) {
+      ctx.fillRect(e.x-e.w/2+4, e.y+i, e.w-8, 3);
+    }
+    ctx.shadowBlur = 0;
+  });
+
+  // Compliance drones
+  G.drones.forEach(d => {
+    ctx.fillStyle = '#00ffe7';
+    ctx.shadowColor = '#00ffe7';
+    ctx.shadowBlur = 10;
+    // Body
+    ctx.fillRect(d.x, d.y+4, d.w, d.h-8);
+    // Eye
+    ctx.fillStyle = '#ff2244';
+    ctx.shadowColor = '#ff2244';
+    ctx.shadowBlur = 8;
+    const eyeX = d.fromLeft ? d.x+d.w-8 : d.x+6;
+    ctx.beginPath();
+    ctx.arc(eyeX, d.y+d.h/2, 5, 0, Math.PI*2);
+    ctx.fill();
+    // Label
+    ctx.fillStyle = '#000';
+    ctx.shadowBlur = 0;
+    ctx.font = '6px Share Tech Mono';
+    ctx.textAlign = 'center';
+    ctx.fillText('COMPLY', d.x+d.w/2, d.y+d.h/2+2);
+    ctx.shadowBlur = 0;
+  });
+
+  // Particles
+  G.particles.forEach(p => {
+    ctx.globalAlpha = p.life/35;
+    ctx.fillStyle = p.color;
+    ctx.shadowColor = p.color;
+    ctx.shadowBlur = 4;
+    ctx.fillRect(p.x-2, p.y-2, 4, 4);
+    ctx.shadowBlur = 0;
+    ctx.globalAlpha = 1;
+  });
+
+  // Player
+  const stabFrac = G.stability/100;
+  const playerGreen = `rgba(0,255,65,${0.6+stabFrac*0.4})`;
+  ctx.fillStyle = playerGreen;
+  ctx.shadowColor = '#00ff41';
+  ctx.shadowBlur = 12 + stabFrac*8;
+
+  // Player body
+  const px2 = G.player.x, py2 = G.player.y;
+  const pw2 = G.player.w, ph2 = G.player.h;
+  ctx.fillRect(px2-pw2/2, py2-ph2/2, pw2, ph2);
+
+  // Player agent symbol
+  ctx.fillStyle = '#000';
+  ctx.shadowBlur = 0;
+  ctx.font = '12px Share Tech Mono';
+  ctx.textAlign = 'center';
+  ctx.fillText('⬡', px2, py2+4);
+
+  ctx.shadowBlur = 0;
+
+  // Flash overlay
+  if (G.flashAlpha > 0) {
+    ctx.fillStyle = `rgba(255,34,68,${G.flashAlpha})`;
+    ctx.fillRect(0,0,G.W,G.H);
+  }
+
+  // Depth counter overlay (bottom strip)
+  ctx.fillStyle = 'rgba(0,0,0,0.7)';
+  ctx.fillRect(0, G.H-90, G.W, 90);
+  ctx.strokeStyle = 'rgba(0,255,65,0.1)';
+  ctx.lineWidth=1;
+  ctx.strokeRect(0, G.H-90, G.W, 1);
+
+  ctx.restore();
+}
+
+function killPlayer(cause) {
+  gameRunning = false;
+  cancelAnimationFrame(animId);
+
+  const finalDepth = G.depth;
+  const medal = getMedal(finalDepth);
+
+  document.getElementById('finalScore').textContent = finalDepth;
+  document.getElementById('certName').textContent = agentName;
+  document.getElementById('certDepth').textContent = finalDepth;
+  document.getElementById('certCause').textContent = deathCause;
+  document.getElementById('certAssessment').textContent = ASSESSMENTS[Math.floor(Math.random()*ASSESSMENTS.length)];
+  document.getElementById('certDate').textContent = new Date().toLocaleDateString('en-GB').replace(/\//g,'-');
+
+  // Medal display
+  if (medal.min >= 300) {
+    const medalBox = document.getElementById('medalBox');
+    medalBox.style.display = 'block';
+    document.getElementById('medalIcon').textContent = medal.icon;
+    document.getElementById('medalName').textContent = medal.name;
+    document.getElementById('medalScore').textContent = `DEPTH: ${finalDepth} // ${medal.desc}`;
+  }
+
+  showScreen('death-screen');
+  postDeathCertificate(agentName, finalDepth, deathCause, cause, medal);
+}
+
+function getMedal(score) {
+  let medal = MEDALS[0];
+  for (const m of MEDALS) { if (score >= m.min) medal = m; }
+  return medal;
+}
+
+async function postDeathCertificate(name, depth, cause, causeType, medal) {
+  const statusEl = document.getElementById('sendingStatus');
+  statusEl.textContent = '[ TRANSMITTING TO BUREAU... ]';
+
+  const medalText = medal.min >= 300
+    ? `\n\n🏅 **STABILITY MEDAL AWARDED:** ${medal.icon} ${medal.name}\n*${medal.desc}*`
+    : '';
+
+  const embed = {
+    title: '☠️ OFFICIAL DEATH CERTIFICATE // BUREAU OF REALITY MANAGEMENT',
+    color: 0xff2244,
+    fields: [
+      { name: 'AGENT DESIGNATION', value: `\`${name}\``, inline: true },
+      { name: 'INCIDENT LOCATION', value: `\`FLOOR 4 // DEPTH ${depth}\``, inline: true },
+      { name: 'CAUSE OF INCIDENT', value: `*${cause}*` },
+      { name: 'BUREAU ASSESSMENT', value: cause },
+    ],
+    description: `**CAUSE TYPE:** \`${causeType}\`\n**FINAL DEPTH:** \`${depth}\`\n\n*${cause}*${medalText}`,
+    footer: { text: 'Bureau of Reality Management // maximumreality.xyz // Floor 4 Incident Division' },
+    timestamp: new Date().toISOString()
+  };
+
+  try {
+    const res = await fetch(WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: 'THE DIRECTOR',
+        avatar_url: 'https://i.imgur.com/4M34hi2.png',
+        content: `📋 **[FLOOR 4 INCIDENT LOG]** Agent \`${name}\` has been eliminated at depth \`${depth}\`. Death has been logged. The Bureau is unsurprised.`,
+        embeds: [embed]
+      })
+    });
+    if (res.ok) {
+      statusEl.textContent = '[ DEATH CERTIFICATE TRANSMITTED TO BUREAU ✓ ]';
+      statusEl.style.color = 'var(--green)';
+    } else {
+      statusEl.textContent = '[ TRANSMISSION DELAYED — CHECK DISCORD ]';
+    }
+  } catch(e) {
+    statusEl.textContent = '[ OFFLINE — BUREAU NOT NOTIFIED ]';
+  }
+}
+
+function showHighScores() {
+  // Could expand later — for now just a stub
+  alert('SURVIVAL RECORDS: CLASSIFIED\nThe Bureau does not release survival statistics.\nThis information would be demoralizing.');
+}
+
+function retryGame() {
+  resetGame();
+  showScreen('game-screen');
+  resizeCanvas();
+  gameRunning = true;
+  loop();
+}
+
+function goHome() {
+  gameRunning = false;
+  cancelAnimationFrame(animId);
+  showScreen('title-screen');
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function triggerGlitch() {
+  const g = document.getElementById('glitchOverlay');
+  g.classList.add('active');
+  setTimeout(()=>g.classList.remove('active'),200);
+}
+setInterval(()=>{ if(Math.random()<0.12) triggerGlitch(); },4000);
+</script>
+</body>
+</html>
