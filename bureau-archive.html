@@ -877,10 +877,40 @@ function loadFindings(){
     }).join('');
   });
 }
+// ══════════════════════════════════════════════
+// DOSSIER PORTAL SYNC (FOR TRANSMISSIONS)
+// ══════════════════════════════════════════════
+function renderTransmissionsPortal() {
+  const portal = document.getElementById('dossier-portal');
+  if (!portal) return;
+
+  const name = localStorage.getItem('BUREAU_AGENT_NAME');
+  const clearance = localStorage.getItem('BUREAU_CLEARANCE');
+
+  if (name && clearance) {
+    // If the data exists, overwrite the static "NOT FOUND" HTML
+    portal.innerHTML = `
+      <div style="border:1px solid var(--cyan); padding:12px; background:rgba(0,255,231,0.05); text-align:left; position:relative; overflow:hidden;">
+        <div style="font-size:7px; color:var(--cyan); letter-spacing:3px; margin-bottom:6px; opacity:0.8;">// IDENTITY VERIFIED</div>
+        <div style="font-size:16px; color:#fff; text-shadow:0 0 10px var(--cyan); font-family:'Share Tech Mono', monospace;">${name}</div>
+        <div style="font-size:9px; color:var(--green); margin-top:4px; letter-spacing:1px;">RANK: ${clearance}</div>
+        <div style="margin-top:12px; border-top:1px solid rgba(0,255,231,0.2); padding-top:8px; font-size:7px; color:var(--muted); letter-spacing:1px;">
+          UPLINK STATUS: <span style="color:var(--green)">SECURE</span>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// iPhone Fix: Refresh the portal every time the user switches back to this tab
+window.addEventListener('focus', renderTransmissionsPortal);
 
 // ── BOOT ──
 initMasthead();
 decryptTransmission();
+renderTransmissionsPortal(); // Added this
+if(typeof renderFieldLog === 'function') renderFieldLog(); // Added this
+
 </script>
 </body>
 </html>
