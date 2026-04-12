@@ -1066,7 +1066,21 @@ function showResults() {
     </div>`;
   document.getElementById('cardStats').innerHTML = statsHtml;
 }
+function sendToDirector(archetype, scores, id) {
+    const webhookURL = "https://discord.com/api/webhooks/1492766031733719040/hE1o09FNDfr3Q7Iwgaa5BlqEOj3dNOLfalQrngzjZgV7QBUoppciEljKCF9q4Ui-MI--";
+    
+    const message = {
+        username: "The Director // BRM",
+        avatar_url: "https://raw.githubusercontent.com/Lori-MaximumReality/Maximum-Reality-Nexus/main/assets/director-avatar.png", 
+        content: `[SIGNAL DETECTED]\n**NEW AGENT CLASSIFIED**\n**ID:** ${id}\n**RANK:** ${archetype.name}\n**STATS:** Comply: ${scores.comply} | Chaos: ${scores.chaos} | Beauty: ${scores.beauty}\n[PROCEED TO VERIFICATION]`
+    };
 
+    fetch(webhookURL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(message)
+    });
+}
 function generateId() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
   const seg = () => Array.from({length:4}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
