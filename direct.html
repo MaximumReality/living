@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIRECTOR OVERRIDE</title>
+    <style>
+        body { background: #000; color: #00ff41; font-family: monospace; padding: 20px; }
+        textarea { 
+            width: 100%; height: 150px; 
+            background: #050505; color: #00ff41; 
+            border: 1px solid #00ff41; margin-bottom: 10px;
+            padding: 10px; font-family: monospace;
+        }
+        button { 
+            width: 100%; padding: 15px; 
+            background: #003310; color: #00ff41; 
+            border: 1px solid #00ff41; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2>[ DIRECTOR COMMAND CONSOLE ]</h2>
+    <textarea id="msg" placeholder="TYPE MESSAGE TO RECRUITS..."></textarea>
+    <button onclick="send()">[ TRANSMIT SIGNAL ]</button>
+
+    <script>
+        function send() {
+            const webhook = "YOUR_WEBHOOK_URL_HERE"; 
+            const content = document.getElementById('msg').value;
+
+            fetch(webhook, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: "The Director // BRM",
+                    avatar_url: "https://raw.githubusercontent.com/Lori-MaximumReality/Maximum-Reality-Nexus/main/assets/director-avatar.png",
+                    content: content
+                })
+            }).then(() => {
+                alert("MESSAGE DISPATCHED.");
+                document.getElementById('msg').value = '';
+            });
+        }
+    </script>
+</body>
+</html>
