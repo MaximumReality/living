@@ -362,50 +362,23 @@ footer{border-top:1px solid var(--border);padding:10px 14px;display:flex;justify
 
 <div class="card span2">
   <div class="card-head">
-    <div class="card-title">BUREAU BULLETIN <span class="sig"><span class="sig-dot amber"></span></span></div>
-    <div class="card-src">SRC: BUREAU_HEADLINES // AUTO-GENERATED</div>
+    <div class="card-title">AGENT DOSSIER <span class="sig"><span class="sig-dot cyan"></span></span></div>
+    <div class="card-src">SRC: BUREAU_LENS // IDENTITY_SCAN</div>
   </div>
-  <div class="card-body">
-    <div id="headlines-output"><div class="loading">GENERATING HEADLINES</div></div>
-    <button class="btn-transmit" style="border-color:var(--amber);color:var(--amber);margin-top:8px" onclick="generateHeadlines()">⬡ REFRESH HEADLINES</button>
-  </div>
-</div>
-
-
-  </div>
-</div>
-
-<!-- ══ FIELD LOG ══ -->
-
-<div class="section" id="sec-fieldlog">
-  <div class="grid">
-    <div class="card span2">
-      <div class="card-head">
-        <div class="card-title">AGENT DOSSIER <span class="sig"><span class="sig-dot cyan"></span></span></div>
-        <div class="card-src">SRC: BUREAU_LENS // LOCALSTORAGE</div>
+  <div class="card-body" id="dossier-body">
+    <div id="dossier-portal" style="text-align: center; padding: 5px 0;">
+      <div style="font-size: 9px; color: var(--green-dim); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; line-height: 1.4;">
+        IDENTITY SIGNATURE: <span style="color: var(--red);">NOT FOUND</span><br>
+        <span style="color: var(--amber);">[RE-CLASSIFICATION MANDATORY]</span>
       </div>
-      <div class="card-body" id="dossier-body">
-        <div class="loading">RETRIEVING FIELD DATA</div>
-      </div>
-    </div>
-
-
-<div class="card span2">
-  <div class="card-head">
-    <div class="card-title">SCAN HISTORY <span class="sig"><span class="sig-dot green"></span></span></div>
-    <div class="card-src">SRC: BUREAU_LENS // SESSION_LOG</div>
-  </div>
-  <div class="card-body">
-    <div id="scan-history-body"><div class="loading">LOADING SCAN HISTORY</div></div>
-    <div style="margin-top:10px">
-      <button class="btn-clear-log" onclick="clearFieldLog()">⬡ PURGE LOCAL RECORDS</button>
+      
+      <a href="https://maximumreality.github.io/living/dossier.html" target="_blank" style="display: block; padding: 12px; border: 1px solid var(--green); color: var(--green); text-decoration: none; font-size: 11px; letter-spacing: 2px; background: rgba(0, 255, 65, 0.05); text-shadow: 0 0 8px var(--green); box-shadow: inset 0 0 10px rgba(0,255,65,0.1);">
+        ⬡ ACCESS UPLINK PORTAL
+      </a>
     </div>
   </div>
 </div>
 
-
-  </div>
-</div>
 
 <!-- ══ BULLETIN BOARD ══ -->
 
