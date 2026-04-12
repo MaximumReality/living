@@ -89,32 +89,85 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 .section.active{display:block}
 
 /* ── ENCRYPTED TRANSMISSION ── */
-.transmission-box{
-  background:#02060d;border:1px solid var(--border);
-  border-left:3px solid var(--green);
-  padding:16px;font-family:'VT323',monospace;
-  font-size:18px;line-height:1.5;color:var(--green);
-  min-height:140px;position:relative;
-  text-shadow:0 0 8px var(--green);
-  white-space:pre-wrap;
+.transmission-box {
+  background: #02060d;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--green);
+  padding: 16px;
+  font-family: 'VT323', monospace;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--green);
+  min-height: 140px;
+  position: relative;
+  overflow: hidden; /* Keeps the watermark inside the edges */
+  text-shadow: 0 0 8px var(--green);
+  white-space: pre-wrap;
+  z-index: 1;
 }
-.transmission-box::after{content:'_';animation:cur 0.8s step-end infinite}
-@keyframes cur{0%,50%{opacity:1}51%,100%{opacity:0}}
-.transmission-header{
-  font-size:7px;letter-spacing:3px;color:var(--muted);
-  margin-bottom:10px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;
+
+/* CLASSIFIED WATERMARK */
+.transmission-box::before {
+  content: "CLASSIFIED";
+  position: absolute;
+  top: 50%; 
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-12deg);
+  font-family: 'VT323', monospace;
+  font-size: clamp(3.5rem, 12vw, 5rem);
+  -webkit-text-stroke: 1px rgba(57, 255, 20, 0.15);
+  color: rgba(57, 255, 20, 0.08);
+  pointer-events: none;
+  z-index: -1; /* Sits behind the code text */
+  text-transform: uppercase;
+  letter-spacing: 12px;
+  white-space: nowrap;
 }
-.transmission-header span{color:var(--amber)}
-.btn-transmit{
-  width:100%;padding:12px;background:#06030d;
-  border:1px solid var(--green);border-radius:2px;
-  color:var(--green);font-family:'Share Tech Mono',monospace;
-  font-size:9px;letter-spacing:4px;cursor:pointer;
-  text-transform:uppercase;transition:all 0.2s;
-  box-shadow:0 0 12px #00ff8820;margin-top:10px;
+
+/* TYPING CURSOR */
+.transmission-box::after {
+  content: '_';
+  animation: cur 0.8s step-end infinite;
 }
-.btn-transmit:hover{background:#0a1a0a;box-shadow:var(--gg)}
-.btn-transmit:active{transform:scale(0.98)}
+
+@keyframes cur {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.transmission-header {
+  font-size: 7px;
+  letter-spacing: 3px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.transmission-header span { color: var(--amber); }
+
+.btn-transmit {
+  width: 100%;
+  padding: 12px;
+  background: #06030d;
+  border: 1px solid var(--green);
+  border-radius: 2px;
+  color: var(--green);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  box-shadow: 0 0 12px #00ff8820;
+  margin-top: 10px;
+}
+
+.btn-transmit:hover { background: #0a1a0a; box-shadow: var(--gg); }
+.btn-transmit:active { transform: scale(0.98); }
+
 
 /* ── BULLETIN BOARD (shared findings) ── */
 .finding-card{
