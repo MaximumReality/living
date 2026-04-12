@@ -176,14 +176,75 @@ header {
 .apod-date  { font-size: 8px; letter-spacing: 2px; color: var(--muted); margin-bottom: 8px; }
 .apod-desc  { font-size: 9px; line-height: 1.7; color: var(--muted); max-height: 80px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border2) transparent; }
 
-.directive-box { border: 1px solid var(--border2); border-left: 3px solid var(--purple); padding: 12px 14px; background: #06030d; margin-bottom: 12px; position: relative; }
-.directive-label { font-size: 7px; letter-spacing: 3px; color: var(--purple); text-transform: uppercase; margin-bottom: 8px; text-shadow: var(--gp); }
-.directive-text { font-size: 13px; line-height: 1.6; color: var(--text); letter-spacing: 0.5px; }
-.directive-compliance { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-.compliance-tag { font-size: 7px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
-.compliance-val { font-size: 8px; letter-spacing: 2px; color: var(--green); text-shadow: var(--gg); }
-.btn-directive { width: 100%; background: #06030d; border: 1px solid var(--purple); border-radius: 2px; color: var(--purple); text-shadow: var(--gp); font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 3px; padding: 10px; cursor: pointer; text-transform: uppercase; transition: all 0.2s; box-shadow: 0 0 12px #bf00ff20; }
-.btn-directive:hover { background: #0d0520; box-shadow: var(--gp); }
+/* ── UPGRADED DIRECTIVE STYLES ── */
+.directive-box {
+  background: #02060d;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--amber);
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+  min-height: 160px;
+}
+.directive-watermark {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%) rotate(-12deg);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: clamp(2.5rem, 10vw, 4.5rem);
+  color: rgba(255,179,0,0.06);
+  pointer-events: none;
+  white-space: nowrap;
+  letter-spacing: 8px;
+  z-index: 0;
+}
+.directive-inner { position: relative; z-index: 1; }
+.directive-meta {
+  font-size: 8px; letter-spacing: 3px; color: var(--muted);
+  margin-bottom: 10px; display: flex;
+  justify-content: space-between; flex-wrap: wrap; gap: 4px;
+}
+.directive-meta span { color: var(--amber); }
+.directive-case {
+  font-size: 9px; letter-spacing: 3px; color: var(--amber);
+  margin-bottom: 8px; text-shadow: var(--ga);
+}
+.directive-body-text {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px; color: var(--text);
+  line-height: 1.65; margin-bottom: 14px;
+  white-space: pre-wrap;
+}
+.directive-body-text em { color: var(--green); font-style: normal; text-shadow: var(--gg); }
+.directive-signoff {
+  font-size: 8px; color: var(--muted);
+  letter-spacing: 1px; line-height: 1.8;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+}
+.directive-compliance {
+  margin-top: 10px; display: flex;
+  align-items: center; gap: 6px;
+}
+.compliance-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green); box-shadow: var(--gg);
+  animation: blink 1.4s infinite; display: inline-block;
+}
+.compliance-tag { font-size: 8px; letter-spacing: 3px; color: var(--green); text-shadow: var(--gg); }
+
+.btn-directive {
+  width: 100%; margin-top: 10px; padding: 12px;
+  background: #0a0800;
+  border: 1px solid var(--amber);
+  border-radius: 2px;
+  color: var(--amber);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 4px;
+  cursor: pointer; text-transform: uppercase;
+  transition: all 0.2s;
+  box-shadow: 0 0 12px rgba(255,179,0,0.1);
+}
+.btn-directive:hover { background: #1a1000; box-shadow: var(--ga); }
 .btn-directive:active { transform: scale(0.98); }
 
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -204,7 +265,6 @@ header {
 .term-cursor { display: inline-block; width: 7px; height: 11px; background: var(--cyan); vertical-align: middle; animation: cursor-blink 1s step-end infinite; }
 @keyframes cursor-blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
-/* ── FIELD TOOLS SECTION ── */
 .work-link-container {
   margin: 20px 0; padding: 10px;
   border: 1px solid rgba(0,102,255,0.2);
@@ -225,25 +285,6 @@ header {
 .report-text { font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 3px; color: #e0f2fe; text-shadow: 0 0 10px rgba(0,102,255,0.5); }
 .protocol-id { font-size: 7px; color: var(--muted); opacity: 0.6; }
 .glitch-icon { font-size: 16px; filter: drop-shadow(0 0 5px rgba(0,102,255,0.8)); }
-
-/* ── AGENT STATUS PANEL ── */
-.agent-panel {
-  border: 1px solid #00ff8830;
-  border-left: 3px solid var(--green);
-  padding: 12px 14px;
-  background: #00ff8806;
-  margin-bottom: 12px;
-}
-.agent-panel.no-data {
-  border-left-color: var(--amber);
-  border-color: #ffb30030;
-  background: #ffb30006;
-}
-.agent-label { font-size: 7px; letter-spacing: 3px; color: var(--green); text-transform: uppercase; margin-bottom: 8px; text-shadow: var(--gg); }
-.agent-panel.no-data .agent-label { color: var(--amber); text-shadow: var(--ga); }
-.agent-row { font-size: 9px; letter-spacing: 1px; color: var(--text); line-height: 1.9; }
-.agent-row span { color: var(--green); text-shadow: var(--gg); }
-.agent-panel.no-data .agent-row span { color: var(--amber); text-shadow: var(--ga); }
 
 footer { border-top: 1px solid var(--border); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .footer-text { font-size: 7px; letter-spacing: 2px; color: var(--muted); }
@@ -310,11 +351,11 @@ footer { border-top: 1px solid var(--border); padding: 12px 14px; display: flex;
     </div>
   </div>
 
-  <!-- DIRECTIVE -->
+  <!-- DIRECTIVE — upgraded -->
   <div class="card">
     <div class="card-head">
-      <div class="card-title">DAILY DIRECTIVE — CITIZEN GUIDANCE <span class="sig"><span class="sig-dot green"></span></span></div>
-      <div class="card-src">SRC: ADVICE_SLIP_API</div>
+      <div class="card-title">DAILY DIRECTIVE — CITIZEN GUIDANCE <span class="sig"><span class="sig-dot amber"></span></span></div>
+      <div class="card-src">SRC: ADVICE_SLIP_API // BUREAU_TEMPLATE_ENGINE v7.3</div>
     </div>
     <div class="card-body" id="directiveBody">
       <div class="loading">AWAITING_ASSIGNMENT</div>
@@ -322,32 +363,29 @@ footer { border-top: 1px solid var(--border); padding: 12px 14px; display: flex;
   </div>
 
   <!-- FIELD TOOLS -->
-    <div class="work-link-container">
-  <div class="system-tag">EMPLOYEE_PROTOCOL // FIELD_TOOLS</div>
-  
-  <a href="https://maximumreality.github.io/living/bureau-archive.html" class="report-link" style="border-left-color:var(--amber); margin-bottom:12px; background: linear-gradient(90deg, rgba(255,179,0,0.1) 0%, transparent 100%);">
-    <img src="https://maximumreality.github.io/living/shield-logo.JPG" 
-         style="width:22px; height:22px; margin-right:12px; filter: drop-shadow(0 0 5px #ff3355); border-radius:2px; object-fit: cover;" 
-         alt="Bureau Shield">
-    
-    <span class="report-text" style="color:var(--amber); text-shadow:var(--ga)">THE GAZETTE</span>
-    <span class="protocol-id">REF: BUREAU_ARCHIVE</span>
-  </a>
+  <div class="work-link-container">
+    <div class="system-tag">EMPLOYEE_PROTOCOL // FIELD_TOOLS</div>
 
-  <a href="https://maximumreality.github.io/living/index.html" class="report-link">
-    <span class="glitch-icon">🗂️</span>
-    <span class="report-text">REPORT TO WORK</span>
-    <span class="protocol-id">REF: LIVING_DIR</span>
-  </a>
+    <a href="https://maximumreality.github.io/living/bureau-archive.html" class="report-link" style="border-left-color:var(--amber); margin-bottom:12px; background: linear-gradient(90deg, rgba(255,179,0,0.1) 0%, transparent 100%);">
+      <img src="https://maximumreality.github.io/living/shield-logo.JPG"
+           style="width:22px; height:22px; margin-right:12px; filter: drop-shadow(0 0 5px #ff3355); border-radius:2px; object-fit: cover;"
+           alt="Bureau Shield">
+      <span class="report-text" style="color:var(--amber); text-shadow:var(--ga)">THE GAZETTE</span>
+      <span class="protocol-id">REF: BUREAU_ARCHIVE</span>
+    </a>
 
-  <a href="signal-decryptor.html" class="report-link" style="border-left-color:var(--green)">
-    <span class="glitch-icon" style="filter:drop-shadow(0 0 5px rgba(0,255,136,0.8))">⬡</span>
-    <span class="report-text" style="color:var(--green);text-shadow:var(--gg)">DEPLOY LENS</span>
-    <span class="protocol-id" id="lens-clearance">CLEARANCE: NONE</span>
-  </a>
-</div>
+    <a href="https://maximumreality.github.io/living/index.html" class="report-link">
+      <span class="glitch-icon">🗂️</span>
+      <span class="report-text">REPORT TO WORK</span>
+      <span class="protocol-id">REF: LIVING_DIR</span>
+    </a>
 
-
+    <a href="signal-decryptor.html" class="report-link" style="border-left-color:var(--green)">
+      <span class="glitch-icon" style="filter:drop-shadow(0 0 5px rgba(0,255,136,0.8))">⬡</span>
+      <span class="report-text" style="color:var(--green);text-shadow:var(--gg)">DEPLOY LENS</span>
+      <span class="protocol-id" id="lens-clearance">CLEARANCE: NONE</span>
+    </a>
+  </div>
 
   <!-- NASA APOD -->
   <div class="card span2">
@@ -467,19 +505,14 @@ function termLog(msg, type = '') {
   const timestamp  = localStorage.getItem('BUREAU_TIMESTAMP');
 
   if (clearance) {
-    // Update DEPLOY LENS button clearance badge
     const lc = document.getElementById('lens-clearance');
     if (lc) lc.textContent = 'CLEARANCE: ' + clearance;
-
-    // Update threat pill
     const pill = document.getElementById('threatPill');
     if (pill) {
       pill.textContent = 'AGENT: ' + clearance;
       pill.classList.remove('pill-amber');
       pill.classList.add('pill-green');
     }
-
-    // Inject terminal lines after boot delay
     setTimeout(() => {
       termLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'warn');
       termLog('RETURNING FIELD AGENT DETECTED', 'active');
@@ -492,7 +525,6 @@ function termLog(msg, type = '') {
       termLog('BUREAU ARCHIVE (THE GAZETTE): SYNCHRONIZED', 'active');
       termLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'warn');
     }, 1800);
-
   } else {
     setTimeout(() => {
       termLog('NO FIELD DATA ON RECORD', 'warn');
@@ -561,8 +593,8 @@ async function loadAPOD() {
                    || null;
       if (videoId) {
         mediaHTML = `<div class="apod-video-wrap"><iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1" allowfullscreen title="${data.title}"></iframe></div>`;
-      } else if (data.url.endsWith('.mp4') || data.url.includes('apod.nasa.gov/apod/image')) {
-        mediaHTML = `<div class="apod-video-wrap"><video autoplay loop muted playsinline style="width:100%;border-radius:4px;"><source src="${data.url}" type="video/mp4"><a href="${data.url}" style="color:var(--cyan)">View Feed</a></video></div>`;
+      } else if (data.url.endsWith('.mp4')) {
+        mediaHTML = `<div class="apod-video-wrap"><video autoplay loop muted playsinline style="width:100%;border-radius:4px;"><source src="${data.url}" type="video/mp4"></video></div>`;
       } else {
         mediaHTML = `<div class="apod-video-wrap"><a href="${data.url}" target="_blank" style="color:var(--cyan);font-size:10px;letter-spacing:2px;text-decoration:none;">▶ OPEN VIDEO FEED [EXTERNAL]</a></div>`;
       }
@@ -589,37 +621,123 @@ async function loadAPOD() {
   }
 }
 
-// ── DAILY DIRECTIVE ──
+// ══════════════════════════════════════════════
+// DAILY DIRECTIVE — BUREAU TEMPLATE ENGINE v7.3
+// ══════════════════════════════════════════════
+const DEPT_TITLES = [
+  'Dept. of Citizen Guidance',
+  'Dept. of Mandatory Wellness',
+  'Dept. of Epistemic Compliance',
+  'Dept. of Approved Thoughts',
+  'Dept. of Behavioral Calibration',
+  'Dept. of Reality Alignment',
+  'Dept. of Sanctioned Awareness',
+];
+
+const COUNSELOR_TITLES = [
+  'your assigned guidance counselor within the Bureau',
+  'a senior compliance officer in Sector 7G',
+  'the Bureau\'s Chief Epistemic Auditor',
+  'an unnamed analyst in the Dept. of Approved Thoughts',
+  'your designated reality handler',
+  'the Bureau\'s Director of Mandatory Wellness',
+  'a redacted official whose clearance exceeds this form',
+];
+
+const DIRECTIVE_TEMPLATES = [
+  (advice, caseNum, dept, counselor) =>
+    `Your ${counselor} has approved the following productivity advisory:\n\n"${advice}"\n\nNon-compliance will be noted in your permanent record.`,
+
+  (advice, caseNum, dept, counselor) =>
+    `MANDATORY EPISTEMIC UPDATE — CASE FILE ${caseNum}:\n\n${counselor.charAt(0).toUpperCase()+counselor.slice(1)} has approved the following productivity advisory: "${advice}" Non-compliance will be noted in your permanent record.`,
+
+  (advice, caseNum, dept, counselor) =>
+    `The following directive has been classified MANDATORY by ${dept}:\n\n"${advice}"\n\nYour compliance window closes at end of solar cycle. Act accordingly.`,
+
+  (advice, caseNum, dept, counselor) =>
+    `CITIZEN ADVISORY — PRIORITY ALPHA:\n\nField operatives are reminded that ${counselor} has issued the following standing order:\n\n"${advice}"\n\nFailure to integrate this directive constitutes a reality drift infraction.`,
+
+  (advice, caseNum, dept, counselor) =>
+    `Per Bureau Regulation 7.${caseNum % 99 + 1}(b), all agents must acknowledge:\n\n"${advice}"\n\nApproved by ${dept}. Your silence is compliance.`,
+
+  (advice, caseNum, dept, counselor) =>
+    `INTERCEPTED CIVILIAN GUIDANCE — RE-CLASSIFIED AS MANDATORY:\n\n"${advice}"\n\nOriginally flagged as unsolicited wisdom. ${dept} has determined it is, in fact, an order.`,
+];
+
+const SIGN_OFFS = [
+  '— Bureau of Reality Management, Dept. of Citizen Guidance',
+  '— Issued under Bureau Authority, Sector Ω',
+  '— Filed by the Office of Mandatory Compliance',
+  '— Approved by the Director. Do not question the Director.',
+  '— Bureau of Reality Management // This message will not self-destruct. It will linger.',
+  '— Dept. of Citizen Guidance // Your acknowledgement is assumed.',
+];
+
+function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function padCase(n) { return String(n).padStart(4, '0'); }
+
 async function loadDirective() {
   const el = document.getElementById('directiveBody');
   el.innerHTML = '<div class="loading">TRANSMITTING_DIRECTIVE</div>';
   termLog('REQUESTING BUREAU DIRECTIVE...');
   try {
-    const res = await fetch(`https://api.adviceslip.com/advice?t=${Date.now()}`);
+    const res  = await fetch('https://api.adviceslip.com/advice', { cache: 'no-cache' });
     const data = await res.json();
+    const advice     = data.slip.advice;
+    const slipId     = data.slip.id;
+    const caseNum    = padCase(slipId);
+    const dept       = getRandom(DEPT_TITLES);
+    const counselor  = getRandom(COUNSELOR_TITLES);
+    const template   = getRandom(DIRECTIVE_TEMPLATES);
+    const bodyText   = template(advice, slipId, dept, counselor);
+    const signOff    = getRandom(SIGN_OFFS);
+
     el.innerHTML = `
       <div class="directive-box">
-        <div class="directive-label">BUREAU DIRECTIVE #${data.slip.id}</div>
-        <div class="directive-text">${data.slip.advice}</div>
-        <div class="directive-compliance">
-          <span class="compliance-tag">COMPLIANCE_STATUS:</span>
-          <span class="compliance-val">EXPECTED</span>
+        <div class="directive-watermark">MANDATORY</div>
+        <div class="directive-inner">
+          <div class="directive-meta">
+            <span>BUREAU OF REALITY MANAGEMENT</span>
+            <span>DEPT:Ω</span>
+          </div>
+          <div class="directive-case">CASE_FILE: #${caseNum} // CLASSIFICATION: MANDATORY</div>
+          <div class="directive-body-text">${bodyText}</div>
+          <div class="directive-signoff">${signOff}</div>
+          <div class="directive-compliance">
+            <span class="compliance-dot"></span>
+            <span class="compliance-tag">COMPLIANCE_STATUS: EXPECTED</span>
+          </div>
         </div>
       </div>
-      <button class="btn-directive" onclick="loadDirective()">⟳ &nbsp; REQUEST NEW DIRECTIVE</button>
+      <button class="btn-directive" onclick="loadDirective()">⬡ REQUEST NEW DIRECTIVE</button>
     `;
     termLog('DIRECTIVE RECEIVED // COMPLIANCE REQUIRED', 'active');
   } catch(e) {
+    // Fallback: Bureau-flavored default if API is down
+    const fallbacks = [
+      'You are being watched. Compliance is non-negotiable. Have a nice day, citizen.',
+      'The Bureau reminds you that all thoughts should be pre-approved. Retroactive approval is available for a fee.',
+      'Reality is functioning within acceptable parameters. Your participation is mandatory.',
+      'An anomaly has been detected in your sector. It is probably fine. Probably.',
+    ];
     el.innerHTML = `
       <div class="directive-box">
-        <div class="directive-label">BUREAU DIRECTIVE</div>
-        <div class="directive-text">You are being watched. Compliance is non-negotiable. Have a nice day, citizen.</div>
-        <div class="directive-compliance">
-          <span class="compliance-tag">COMPLIANCE_STATUS:</span>
-          <span class="compliance-val">EXPECTED</span>
+        <div class="directive-watermark">MANDATORY</div>
+        <div class="directive-inner">
+          <div class="directive-meta">
+            <span>BUREAU OF REALITY MANAGEMENT</span>
+            <span>DEPT:Ω</span>
+          </div>
+          <div class="directive-case">CASE_FILE: #0000 // CLASSIFICATION: MANDATORY</div>
+          <div class="directive-body-text">${getRandom(fallbacks)}</div>
+          <div class="directive-signoff">— Bureau of Reality Management, Dept. of Citizen Guidance</div>
+          <div class="directive-compliance">
+            <span class="compliance-dot"></span>
+            <span class="compliance-tag">COMPLIANCE_STATUS: EXPECTED</span>
+          </div>
         </div>
       </div>
-      <button class="btn-directive" onclick="loadDirective()">⟳ &nbsp; REQUEST NEW DIRECTIVE</button>
+      <button class="btn-directive" onclick="loadDirective()">⬡ REQUEST NEW DIRECTIVE</button>
     `;
     termLog('DIRECTIVE: FALLBACK PROTOCOL ENGAGED', 'warn');
   }
