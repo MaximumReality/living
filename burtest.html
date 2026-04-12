@@ -842,58 +842,59 @@ function postFinding(){
 
 
 function loadFindings(){
-  const el=document.getElementById('findings-feed');
-  el.innerHTML='<div class="loading">CONNECTING TO BUREAU NETWORK</div>';
+  const el = document.getElementById('findings-feed');
+  el.innerHTML = '<div class="loading">CONNECTING TO BUREAU NETWORK</div>';
 
   db.collection(FINDINGS_COL)
     .orderBy('timestamp','desc')
     .limit(20)
-    .onSnapshot(snap=>{
+    .onSnapshot(snap => {
       if(snap.empty){
-        el.innerHTML='<div class="empty-state"><div class="e-icon">▶</div>NO FINDINGS POSTED YET<br><br>BE THE FIRST AGENT TO REPORT AN ANOMALY</div>';
+        el.innerHTML = '<div class="empty-state"><div class="e-icon">▶</div>NO FINDINGS POSTED YET</div>';
         return;
       }
-      const colClass={RED:'col-red',BLUE:'col-blue',GREEN:'col-green',YELLOW:'col-yellow',NEUTRAL:'col-neutral'};
-      const colLabel={RED:'⬡ RED-SHIFT ANOMALY',BLUE:'◈ AZUL QUANTUM SIGNATURE',GREEN:'░ VOID BLOOM RESIDUE',YELLOW:'▶ AMBER PROTOCOL',NEUTRAL:'— BACKGROUND RADIATION'};
       
-      el.innerHTML=snap.docs.map(doc=>{
-        const d=doc.data();
-        const ts=d.timestamp?.toDate();
-        const timeStr=ts?ts.toLocaleString():'TIMESTAMP REDACTED';
-        const cc=colClass[d.color]||'col-neutral';
-        const cl=colLabel[d.color]||d.color;
+      const colClass = {RED:'col-red', BLUE:'col-blue', GREEN:'col-green', YELLOW:'col-yellow', NEUTRAL:'col-neutral'};
+      const colLabel = {RED:'⬡ RED-SHIFT ANOMALY', BLUE:'◈ AZUL QUANTUM SIGNATURE', GREEN:'░ VOID BLOOM RESIDUE', YELLOW:'▶ AMBER PROTOCOL', NEUTRAL:'— BACKGROUND RADIATION'};
+      
+      el.innerHTML = snap.docs.map(doc => {
+        const d = doc.data();
+        const ts = d.timestamp?.toDate();
+        const timeStr = ts ? ts.toLocaleString() : 'TIMESTAMP REDACTED';
+        const cc = colClass[d.color] || 'col-neutral';
+        const cl = colLabel[d.color] || d.color;
 
-        // ── VISUAL EVIDENCE LOGIC ──
+        // ── ADVANCED PHOTO DETECTION ──
         let photoHtml = '';
-        if(d.imgUrl && d.imgUrl.startsWith('http')) {
-          let originHost = 'EXTERNAL_SOURCE';
-          try { originHost = new URL(d.imgUrl).hostname; } catch(e) {}
-          
+        // Check if the URL exists and looks like an image or a Discord CDN link
+        if(d.imgUrl && (d.imgUrl.includes('discordapp') || d.imgUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i))) {
           photoHtml = `
-            <div style="margin:12px 0; border:1px solid var(--border2); background:#000; position:relative; overflow:hidden;">
-              <img src="${d.imgUrl}" style="width:100%; display:block; filter: brightness(0.8) contrast(1.1) sepia(0.3) hue-rotate(-15deg); opacity:0.9;" onerror="this.parentElement.style.display='none'">
-              <div style="font-size:6px; background:rgba(0,0,0,0.8); color:var(--cyan); padding:4px; text-align:center; letter-spacing:2px; border-top:1px solid var(--border2); font-family:monospace;">
-                SCAN_RECOVERED // ORIGIN: ${originHost.toUpperCase()}
+            <div style="margin:12px 0; border:1px solid var(--border2); background:#000; position:relative; line-height:0;">
+              <img src="${d.imgUrl}" 
+                   style="width:100%; display:block; filter: brightness(0.8) contrast(1.2) sepia(0.2); opacity:0.9;" 
+                   onerror="this.style.display='none'; console.log('Image failed to load');">
+              <div style="font-size:6px; background:rgba(0,0,0,0.8); color:var(--cyan); padding:4px; text-align:center; letter-spacing:2px; border-top:1px solid var(--border2); font-family:monospace; line-height:1;">
+                VISUAL_EVIDENCE // DECRYPTED
               </div>
             </div>
           `;
         }
 
-        return `<div class="finding-card">
-          <div class="f-header">
-            <span class="f-agent">${d.agent||'AGENT_UNKNOWN'}</span>
-            <span class="f-time">${timeStr}</span>
-          </div>
-          <span class="f-color ${cc}">${cl}</span>
-          ${d.note?`<div class="f-note">${d.note}</div>`:''}
-          
-          ${photoHtml} <div class="f-clearance">CLEARANCE: ${d.clearance||'NONE'} // SCANS: ${d.scanCount||0}</div>
-        </div>`;
+        return `
+          <div class="finding-card">
+            <div class="f-header">
+              <span class="f-agent">${d.agent || 'AGENT_UNKNOWN'}</span>
+              <span class="f-time">${timeStr}</span>
+            </div>
+            <span class="f-color ${cc}">${cl}</span>
+            ${d.note ? `<div class="f-note">${d.note}</div>` : ''}
+            ${photoHtml}
+            <div class="f-clearance">CLEARANCE: ${d.clearance || 'NONE'} // SCANS: ${d.scanCount || 0}</div>
+          </div>`;
       }).join('');
-    },err=>{
-      el.innerHTML=`<div class="empty-state"><div class="e-icon">📡</div>FIREBASE CONNECTION FAILED<br><br>${err.message}</div>`;
     });
 }
+
 
 
 // ── BOOT ──
