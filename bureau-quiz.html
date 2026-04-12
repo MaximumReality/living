@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BUREAU OF REALITY MANAGEMENT // AGENT CLASSIFICATION</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --green: #00ff41;
+    --green-dim: #00aa2a;
+    --green-faint: #003310;
+    --green-glow: rgba(0,255,65,0.15);
+    --amber: #ffb800;
+    --red: #ff2244;
+    --cyan: #00ffe7;
+    --bg: #000000;
+    --scanline: rgba(0,255,65,0.03);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* CRT overlay */
+  body::before {
+    content: '';
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      var(--scanline) 2px,
+      var(--scanline) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+    animation: scanMove 8s linear infinite;
+  }
+
+  /* Phosphor vignette */
+  body::after {
+    content: '';
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.7) 100%);
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  @keyframes scanMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 100px; }
+  }
+
+  /* VHS glitch keyframes */
+  @keyframes glitch {
+    0%   { clip-path: inset(0 0 98% 0); transform: translate(-3px,0); }
+    10%  { clip-path: inset(30% 0 50% 0); transform: translate(3px,0); }
+    20%  { clip-path: inset(70% 0 5% 0);  transform: translate(-2px,0); }
+    30%  { clip-path: inset(45% 0 40% 0); transform: translate(4px,0); }
+    40%  { clip-path: inset(10% 0 80% 0); transform: translate(-1px,0); }
+    50%  { clip-path: inset(85% 0 2% 0);  transform: translate(2px,0); }
+    60%  { clip-path: inset(20% 0 60% 0); transform: translate(-4px,0); }
+    70%  { clip-path: inset(55% 0 30% 0); transform: translate(3px,0); }
+    80%  { clip-path: inset(5% 0 75% 0);  transform: translate(-2px,0); }
+    90%  { clip-path: inset(65% 0 15% 0); transform: translate(1px,0); }
+    100% { clip-path: inset(0 0 98% 0);   transform: translate(0,0); }
+  }
+
+  @keyframes glitchShift {
+    0%,89%   { opacity: 0; }
+    90%  { opacity: 1; transform: translate(-4px,0) skewX(-5deg); }
+    92%  { opacity: 1; transform: translate(4px,0) skewX(3deg); }
+    94%  { opacity: 0; }
+    96%  { opacity: 1; transform: translate(-2px,0); }
+    100% { opacity: 0; }
+  }
+
+  @keyframes flicker {
+    0%,100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.6; }
+    94% { opacity: 1; }
+    97% { opacity: 0.8; }
+    98% { opacity: 1; }
+  }
+
+  @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes typeIn {
+    from { width: 0; }
+    to   { width: 100%; }
+  }
+
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 8px var(--green-dim); }
+    50% { box-shadow: 0 0 20px var(--green), 0 0 40px var(--green-dim); }
+  }
+
+  @keyframes scanBar {
+    0% { top: -10%; }
+    100% { top: 110%; }
+  }
+
+  @keyframes rgbSplit {
+    0%,100% { text-shadow: -2px 0 var(--red), 2px 0 var(--cyan); }
+    25% { text-shadow: 2px 0 var(--red), -2px 0 var(--cyan); }
+    50% { text-shadow: -3px 0 var(--red), 3px 0 var(--cyan); }
+    75% { text-shadow: 1px 0 var(--red), -1px 0 var(--cyan); }
+  }
+
+  @keyframes progressFill {
+    from { width: 0; }
+    to { width: var(--target-width); }
+  }
+
+  /* ========= LAYOUT ========= */
+  #app {
+    min-height: 100vh;
+    width: 100%;
+    max-width: 430px;
+    margin: 0 auto;
+    padding: 0 0 40px 0;
+    animation: flicker 6s infinite;
+    position: relative;
+  }
+
+  /* ========= HEADER ========= */
+  .header {
+    padding: 18px 16px 10px;
+    border-bottom: 1px solid var(--green-dim);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::after {
+    content: attr(data-glitch);
+    position: absolute;
+    top: 18px; left: 16px;
+    color: var(--green);
+    animation: glitchShift 4s infinite;
+    pointer-events: none;
+  }
+
+  .header-logo {
+    font-size: 9px;
+    letter-spacing: 4px;
+    color: var(--green-dim);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .header-title {
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: var(--green);
+    text-shadow: 0 0 10px var(--green);
+  }
+
+  .header-sub {
+    font-size: 8px;
+    color: var(--green-dim);
+    letter-spacing: 3px;
+    margin-top: 3px;
+  }
+
+  /* ========= SCREEN BASE ========= */
+  .screen {
+    display: none;
+    padding: 20px 16px;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .screen.active { display: block; }
+
+  /* ========= BOOT SCREEN ========= */
+  #boot-screen {
+    text-align: center;
+    padding-top: 30px;
+  }
+
+  .boot-ascii {
+    font-size: 7px;
+    line-height: 1.2;
+    color: var(--green-dim);
+    white-space: pre;
+    margin-bottom: 16px;
+    display: inline-block;
+    text-align: left;
+    text-shadow: 0 0 6px var(--green-dim);
+  }
+
+  .boot-title {
+    font-size: 18px;
+    letter-spacing: 3px;
+    color: var(--green);
+    text-shadow: 0 0 20px var(--green);
+    animation: rgbSplit 3s infinite;
+    margin-bottom: 6px;
+  }
+
+  .boot-subtitle {
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--green-dim);
+    margin-bottom: 30px;
+  }
+
+  .boot-log {
+    text-align: left;
+    font-size: 10px;
+    color: var(--green-dim);
+    margin-bottom: 24px;
+    line-height: 2;
+  }
+
+  .boot-log span { display: block; animation: fadeIn 0.3s ease both; }
+  .boot-log span:nth-child(1) { animation-delay: 0.2s; }
+  .boot-log span:nth-child(2) { animation-delay: 0.7s; }
+  .boot-log span:nth-child(3) { animation-delay: 1.2s; }
+  .boot-log span:nth-child(4) { animation-delay: 1.7s; }
+  .boot-log span:nth-child(5) { animation-delay: 2.2s; }
+
+  .ok { color: var(--green); }
+  .warn { color: var(--amber); }
+  .err { color: var(--red); }
+
+  /* ========= BUTTONS ========= */
+  .btn {
+    display: block;
+    width: 100%;
+    padding: 14px 16px;
+    background: transparent;
+    border: 1px solid var(--green);
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 12px;
+    text-align: center;
+    transition: all 0.15s;
+    animation: pulse 3s infinite;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    top: -100%; left: 0; right: 0; height: 100%;
+    background: linear-gradient(transparent, var(--green-glow), transparent);
+    animation: scanBar 2s linear infinite;
+  }
+
+  .btn:active {
+    background: var(--green-glow);
+    box-shadow: 0 0 30px var(--green);
+    transform: scale(0.98);
+  }
+
+  /* ========= QUESTION SCREEN ========= */
+  .progress-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .progress-label {
+    font-size: 9px;
+    color: var(--green-dim);
+    letter-spacing: 2px;
+    white-space: nowrap;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 3px;
+    background: var(--green-faint);
+    border: 1px solid var(--green-dim);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    transition: width 0.4s ease;
+  }
+
+  .q-number {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--green-dim);
+    margin-bottom: 8px;
+  }
+
+  .q-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--green);
+    text-shadow: 0 0 8px rgba(0,255,65,0.4);
+    margin-bottom: 24px;
+    border-left: 2px solid var(--green-dim);
+    padding-left: 12px;
+  }
+
+  .options-list { list-style: none; }
+
+  .option-btn {
+    display: block;
+    width: 100%;
+    padding: 14px 14px;
+    background: transparent;
+    border: 1px solid var(--green-dim);
+    color: var(--green-dim);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-align: left;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: all 0.15s;
+    line-height: 1.5;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .option-btn .opt-tag {
+    display: inline-block;
+    font-size: 8px;
+    letter-spacing: 2px;
+    padding: 2px 6px;
+    margin-right: 8px;
+    border: 1px solid currentColor;
+    vertical-align: middle;
+  }
+
+  .option-btn.comply .opt-tag { color: var(--cyan); border-color: var(--cyan); }
+  .option-btn.chaos  .opt-tag { color: var(--red); border-color: var(--red); }
+  .option-btn.beauty .opt-tag { color: var(--amber); border-color: var(--amber); }
+
+  .option-btn:active,
+  .option-btn.selected {
+    border-color: var(--green);
+    color: var(--green);
+    background: var(--green-glow);
+    box-shadow: 0 0 15px var(--green-glow);
+  }
+
+  .option-btn.comply:active, .option-btn.comply.selected {
+    border-color: var(--cyan); color: var(--cyan);
+    background: rgba(0,255,231,0.07);
+    box-shadow: 0 0 15px rgba(0,255,231,0.15);
+  }
+
+  .option-btn.chaos:active, .option-btn.chaos.selected {
+    border-color: var(--red); color: var(--red);
+    background: rgba(255,34,68,0.07);
+    box-shadow: 0 0 15px rgba(255,34,68,0.15);
+  }
+
+  .option-btn.beauty:active, .option-btn.beauty.selected {
+    border-color: var(--amber); color: var(--amber);
+    background: rgba(255,184,0,0.07);
+    box-shadow: 0 0 15px rgba(255,184,0,0.15);
+  }
+
+  /* ========= SCORE BARS (results) ========= */
+  .score-section {
+    margin: 20px 0;
+  }
+
+  .score-row {
+    margin-bottom: 14px;
+  }
+
+  .score-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+  }
+
+  .score-track {
+    height: 8px;
+    background: var(--green-faint);
+    border: 1px solid var(--green-dim);
+    overflow: hidden;
+  }
+
+  .score-bar {
+    height: 100%;
+    width: 0;
+    transition: width 1s ease;
+  }
+
+  .score-bar.comply { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+  .score-bar.chaos  { background: var(--red);  box-shadow: 0 0 8px var(--red); }
+  .score-bar.beauty { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+
+  /* ========= ID CARD ========= */
+  #id-card-wrap {
+    padding: 16px 0;
+  }
+
+  #id-card {
+    width: 320px;
+    margin: 0 auto;
+    border: 2px solid var(--green);
+    box-shadow: 0 0 30px var(--green-dim), inset 0 0 20px rgba(0,255,65,0.03);
+    background: #000;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  #id-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 3px,
+      rgba(0,255,65,0.02) 3px, rgba(0,255,65,0.02) 4px
+    );
+    pointer-events: none;
+  }
+
+  .card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .card-bureau-name {
+    font-size: 7px;
+    letter-spacing: 2px;
+    color: var(--green-dim);
+    line-height: 1.6;
+    text-transform: uppercase;
+  }
+
+  .card-logo {
+    font-size: 22px;
+    color: var(--green);
+    text-shadow: 0 0 15px var(--green);
+    line-height: 1;
+  }
+
+  .card-divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--green-dim), transparent);
+    margin: 10px 0;
+  }
+
+  .card-agent-row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+
+  .card-avatar {
+    width: 60px;
+    height: 60px;
+    border: 1px solid var(--green-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+    background: var(--green-faint);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-avatar::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 4px,
+      rgba(0,255,65,0.05) 4px, rgba(0,255,65,0.05) 5px
+    );
+  }
+
+  .card-info {}
+
+  .card-class-label {
+    font-size: 7px;
+    letter-spacing: 3px;
+    color: var(--green-dim);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .card-class-name {
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: var(--green);
+    text-shadow: 0 0 12px var(--green);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .card-id-num {
+    font-size: 8px;
+    color: var(--green-dim);
+    letter-spacing: 1px;
+  }
+
+  .card-stats {
+    margin-top: 12px;
+  }
+
+  .card-stat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+
+  .card-stat-label {
+    width: 55px;
+    color: var(--green-dim);
+  }
+
+  .card-stat-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(0,255,65,0.1);
+    border: 1px solid rgba(0,255,65,0.2);
+  }
+
+  .card-stat-fill {
+    height: 100%;
+  }
+
+  .card-stat-fill.comply { background: var(--cyan); }
+  .card-stat-fill.chaos  { background: var(--red); }
+  .card-stat-fill.beauty { background: var(--amber); }
+
+  .card-stat-val {
+    width: 20px;
+    text-align: right;
+    color: var(--green-dim);
+  }
+
+  .card-footer {
+    margin-top: 14px;
+    padding-top: 10px;
+    border-top: 1px solid var(--green-faint);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .card-footer-left {
+    font-size: 7px;
+    color: var(--green-dim);
+    letter-spacing: 1px;
+    line-height: 1.8;
+  }
+
+  .card-barcode {
+    font-size: 18px;
+    letter-spacing: -2px;
+    color: var(--green-dim);
+    line-height: 1;
+  }
+
+  .card-watermark {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    font-size: 48px;
+    color: rgba(0,255,65,0.04);
+    pointer-events: none;
+    transform: rotate(-20deg);
+    letter-spacing: -2px;
+  }
+
+  /* ========= RESULT SCREEN ========= */
+  .result-label {
+    font-size: 8px;
+    letter-spacing: 4px;
+    color: var(--green-dim);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .result-type {
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: var(--green);
+    text-shadow: 0 0 20px var(--green);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    animation: rgbSplit 4s infinite;
+  }
+
+  .result-desc {
+    font-size: 11px;
+    color: var(--green-dim);
+    line-height: 1.7;
+    margin-bottom: 20px;
+    border-left: 2px solid var(--green-faint);
+    padding-left: 10px;
+  }
+
+  .cta-box {
+    border: 1px solid var(--green-dim);
+    padding: 14px;
+    margin: 20px 0;
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--green);
+    background: var(--green-faint);
+    animation: pulse 3s infinite;
+  }
+
+  .cta-box .cta-header {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--amber);
+    margin-bottom: 8px;
+  }
+
+  /* ========= CURSOR ========= */
+  .cursor { animation: blink 1s infinite; }
+
+  /* ========= GLITCH OVERLAY (random trigger) ========= */
+  .glitch-layer {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 9997;
+    opacity: 0;
+  }
+
+  .glitch-layer.active {
+    animation: glitch 0.15s steps(1) forwards;
+    background: rgba(0,255,65,0.03);
+    border-top: 2px solid var(--green);
+  }
+
+  .separator {
+    height: 1px;
+    background: var(--green-faint);
+    margin: 16px 0;
+    position: relative;
+  }
+
+  .separator::after {
+    content: '//';
+    position: absolute;
+    right: 0;
+    top: -7px;
+    font-size: 8px;
+    color: var(--green-dim);
+    background: var(--bg);
+    padding-left: 4px;
+  }
+
+  .terminal-prompt {
+    font-size: 10px;
+    color: var(--green-dim);
+    margin-bottom: 16px;
+  }
+
+  .terminal-prompt::before { content: '> '; color: var(--green); }
+
+</style>
+</head>
+<body>
+
+<div class="glitch-layer" id="glitchLayer"></div>
+
+<div id="app">
+
+  <!-- HEADER -->
+  <div class="header" data-glitch="BUREAU OF REALITY MANAGEMENT">
+    <div class="header-logo">// MAXIMUM REALITY NETWORKS //</div>
+    <div class="header-title">BUREAU OF REALITY MANAGEMENT</div>
+    <div class="header-sub">AGENT CLASSIFICATION TERMINAL v4.7.2 <span class="cursor">█</span></div>
+  </div>
+
+  <!-- BOOT SCREEN -->
+  <div id="boot-screen" class="screen active">
+    <div class="boot-ascii">╔══════════════════════════╗
+║  ██████╗ ██████╗ ███╗   ███╗ ║
+║  ██╔══██╗██╔══██╗████╗ ████║ ║
+║  ██████╔╝██████╔╝██╔████╔██║ ║
+║  ██╔══██╗██╔══██╗██║╚██╔╝██║ ║
+║  ██████╔╝██║  ██║██║ ╚═╝ ██║ ║
+║  ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝ ║
+╚══════════════════════════╝</div>
+
+    <div class="boot-title">IDENTITY SCAN</div>
+    <div class="boot-subtitle">AGENT CLASSIFICATION PROTOCOL</div>
+
+    <div class="boot-log">
+      <span><span class="ok">[  OK  ]</span> Reality substrate: NOMINAL</span>
+      <span><span class="ok">[  OK  ]</span> Paradox buffers: LOADED</span>
+      <span><span class="warn">[ WARN ]</span> Consensus reality: 73% STABLE</span>
+      <span><span class="ok">[  OK  ]</span> Identity scanner: ARMED</span>
+      <span><span class="err">[ NOTE ]</span> Your answers will be used to classify you. There is no wrong answer. There may be consequences.</span>
+    </div>
+
+    <div class="terminal-prompt">10 QUESTIONS DETECTED. PROCEED?</div>
+
+    <button class="btn" onclick="startQuiz()">[ INITIATE SCAN ]</button>
+  </div>
+
+  <!-- QUESTION SCREEN -->
+  <div id="question-screen" class="screen">
+    <div class="progress-bar-wrap">
+      <span class="progress-label">SCAN</span>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <span class="progress-label" id="progressText">0/10</span>
+    </div>
+
+    <div class="q-number" id="qNumber">QUERY_001 // SECTOR_UNKNOWN</div>
+    <div class="q-text" id="qText"></div>
+
+    <ul class="options-list" id="optionsList"></ul>
+
+    <div class="separator"></div>
+    <div class="terminal-prompt" id="qHint">SELECT RESPONSE TO CONTINUE</div>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div id="result-screen" class="screen">
+    <div class="terminal-prompt">SCAN COMPLETE. PROCESSING IDENTITY SIGNATURE...</div>
+
+    <div class="result-label">CLASSIFICATION RESULT</div>
+    <div class="result-type" id="resultType"></div>
+
+    <div class="separator"></div>
+    <div class="result-desc" id="resultDesc"></div>
+
+    <div class="score-section">
+      <div class="score-row">
+        <div class="score-label">
+          <span style="color:var(--cyan)">COMPLY</span>
+          <span id="complyVal" style="color:var(--cyan)">0</span>
+        </div>
+        <div class="score-track"><div class="score-bar comply" id="complyBar"></div></div>
+      </div>
+      <div class="score-row">
+        <div class="score-label">
+          <span style="color:var(--red)">CHAOS</span>
+          <span id="chaosVal" style="color:var(--red)">0</span>
+        </div>
+        <div class="score-track"><div class="score-bar chaos" id="chaosBar"></div></div>
+      </div>
+      <div class="score-row">
+        <div class="score-label">
+          <span style="color:var(--amber)">BEAUTY</span>
+          <span id="beautyVal" style="color:var(--amber)">0</span>
+        </div>
+        <div class="score-track"><div class="score-bar beauty" id="beautyBar"></div></div>
+      </div>
+    </div>
+
+    <div class="separator"></div>
+
+    <!-- ID CARD -->
+    <div class="terminal-prompt">GENERATING AGENT ID...</div>
+    <div id="id-card-wrap">
+      <div id="id-card">
+        <div class="card-header-row">
+          <div class="card-bureau-name">
+            BUREAU OF<br>REALITY MANAGEMENT<br>// MAX REALITY NET //
+          </div>
+          <div class="card-logo">⬡</div>
+        </div>
+
+        <div class="card-divider"></div>
+
+        <div class="card-agent-row">
+          <div class="card-avatar" id="cardAvatar">?</div>
+          <div class="card-info">
+            <div class="card-class-label">AGENT CLASS</div>
+            <div class="card-class-name" id="cardClass">–</div>
+            <div class="card-id-num" id="cardId">ID: ████-████</div>
+          </div>
+        </div>
+
+        <div class="card-stats" id="cardStats"></div>
+
+        <div class="card-footer">
+          <div class="card-footer-left" id="cardFooterLeft">
+            ISSUED: ██████<br>
+            STATUS: ACTIVE<br>
+            SECTOR: UNKNOWN
+          </div>
+          <div class="card-barcode" id="cardBarcode">||| || ||| | || ||| ||</div>
+        </div>
+
+        <div class="card-watermark" id="cardWatermark">BRM</div>
+      </div>
+    </div>
+
+    <div class="cta-box">
+      <div class="cta-header">// TRANSMISSION //</div>
+      AGENT VERIFIED. Save your ID card (.png) and upload it to the <strong>#public-uplink</strong> channel in the <strong>Maximum Reality Discord Hub</strong> to receive your official title.
+    </div>
+
+    <button class="btn" onclick="downloadCard()" id="downloadBtn">[ DOWNLOAD ID CARD .PNG ]</button>
+    <button class="btn" onclick="restartQuiz()" style="margin-top:8px; animation:none; border-color: var(--green-dim); color: var(--green-dim); font-size:10px;">[ RUN CLASSIFICATION AGAIN ]</button>
+  </div>
+
+</div>
+
+<script>
+const questions = [
+  {
+    text: "A glowing flower is growing out of a cracked server rack in Sector 7. It smells like static and old memories. Do you:",
+    options: [
+      { label: "File a report for unauthorized biological growth and request immediate containment.", type: "comply" },
+      { label: "Eat it to see if you can hear colors. For science. Mostly for you.", type: "chaos" },
+      { label: "Photograph it from every angle and leave it to grow. It earned its place.", type: "beauty" }
+    ]
+  },
+  {
+    text: "The Bureau's mandatory dream report asks you to describe last night's simulation. Your dream contained content that doesn't officially exist yet. Do you:",
+    options: [
+      { label: "Redact the unauthorized content and submit a compliant version. Ignorance is protocol.", type: "comply" },
+      { label: "Submit the full uncensored dream with added commentary and three conspiracy theories.", type: "chaos" },
+      { label: "Write it as a poem. The Bureau will never know what to do with it.", type: "beauty" }
+    ]
+  },
+  {
+    text: "You receive a transmission from a frequency that doesn't exist on any official map. It sounds like someone humming a song you've never heard but somehow already know. Do you:",
+    options: [
+      { label: "Report the unauthorized frequency to Signal Control immediately.", type: "comply" },
+      { label: "Broadcast back on the same frequency, louder, with percussion.", type: "chaos" },
+      { label: "Record it. Some things only happen once and deserve to be remembered.", type: "beauty" }
+    ]
+  },
+  {
+    text: "The elevator in the Bureau skips the 4th floor. Every single day. A new memo says this floor 'has always not existed.' Do you:",
+    options: [
+      { label: "Update your internal maps accordingly. The memo is official. The floor is not.", type: "comply" },
+      { label: "Find a way to the 4th floor. There's definitely something up there. Or down. Hard to say.", type: "chaos" },
+      { label: "Start drawing the architecture of a floor you've never seen. You can feel its shape.", type: "beauty" }
+    ]
+  },
+  {
+    text: "A cat in the cafeteria is speaking in fluent binary. No one else seems to notice. The cat looks directly at you and pauses. Do you:",
+    options: [
+      { label: "Pretend you didn't hear anything. You are not cleared for binary-speaking cats.", type: "comply" },
+      { label: "Respond in binary. You only know how to say 'hello' and 'open the pod bay doors.'", type: "chaos" },
+      { label: "Sit down next to the cat and listen until you understand what it's trying to say.", type: "beauty" }
+    ]
+  },
+  {
+    text: "Your Reality Calibration Pill tastes different today. The Bureau says it's the same formula as always. Your tongue says otherwise. Do you:",
+    options: [
+      { label: "Take it anyway. Trust in the Bureau's consistency protocols.", type: "comply" },
+      { label: "Spit it out, put it under a microscope, and livestream the results.", type: "chaos" },
+      { label: "Swallow it slowly and try to memorize the new flavor before it disappears forever.", type: "beauty" }
+    ]
+  },
+  {
+    text: "You find a door in your apartment that wasn't there yesterday. It has a handle made of stars. Do you:",
+    options: [
+      { label: "Call maintenance and request unauthorized door removal.", type: "comply" },
+      { label: "Open it immediately. Obviously. Who wouldn't open a star-handle door?", type: "chaos" },
+      { label: "Spend the evening sketching the door from memory in case it vanishes by morning.", type: "beauty" }
+    ]
+  },
+  {
+    text: "A glitch in the Bureau's reality layer causes everyone in the cafeteria to briefly see each other's true forms. The moment lasts 3 seconds. Do you:",
+    options: [
+      { label: "File an Incident Report under Unauthorized Perception Leak.", type: "comply" },
+      { label: "Immediately hold up a mirror so you can see your own true form.", type: "chaos" },
+      { label: "Close your eyes and try to hold the image of every face you glimpsed.", type: "beauty" }
+    ]
+  },
+  {
+    text: "Your Bureau-issued shadow doesn't match your movements today. It's doing something else entirely — something that looks like dancing. Do you:",
+    options: [
+      { label: "Submit a Shadow Discrepancy Report and request a replacement.", type: "comply" },
+      { label: "Start dancing too, until you sync up. Or until someone notices. Whichever comes first.", type: "chaos" },
+      { label: "Watch it. You've never seen yourself move like that. It knows something you don't.", type: "beauty" }
+    ]
+  },
+  {
+    text: "The Bureau offers you a promotion: more power, less reality, no memories before the transfer. Do you:",
+    options: [
+      { label: "Accept. The Bureau's path is the correct path. Your memories were probably a liability anyway.", type: "comply" },
+      { label: "Decline, loudly, in the middle of the briefing room, and ask why there's no third option.", type: "chaos" },
+      { label: "Ask for one week to write everything down first. Then decide.", type: "beauty" }
+    ]
+  }
+];
+
+const archetypes = {
+  comply: {
+    name: "PROTOCOL ENFORCER",
+    emoji: "⚙",
+    desc: "You are the architecture of order. You find beauty in compliance, safety in procedure. The Bureau trusts you completely — which means the Bureau is watching you closely. You keep the reality stable so others can afford to be unstable.",
+    color: "#00ffe7"
+  },
+  chaos: {
+    name: "VOID-WALKER",
+    emoji: "⚡",
+    desc: "You are the crack in the foundation that lets the light in. Systems fear you. Rules are suggestions from a reality you've already left behind. The Bureau classifies you as a 'navigational anomaly' which is bureaucratic language for: you scare them.",
+    color: "#ff2244"
+  },
+  beauty: {
+    name: "AESTHETIC ANALYST",
+    emoji: "◈",
+    desc: "You are the witness the universe needed. You catalog what others discard, remember what others forget. Reality bends differently near you — not because you push it, but because it wants to be seen by someone who actually notices.",
+    color: "#ffb800"
+  },
+  balanced: {
+    name: "SECTOR LEAD",
+    emoji: "◉",
+    desc: "You contain multitudes and the Bureau doesn't know what to do with you. You comply when it matters, chaos when it's necessary, and you find beauty in the space between them. You've been assigned to every sector and belong to none. Exactly right.",
+    color: "#00ff41"
+  }
+};
+
+let scores = { comply: 0, chaos: 0, beauty: 0 };
+let currentQ = 0;
+
+function startQuiz() {
+  triggerGlitch();
+  scores = { comply: 0, chaos: 0, beauty: 0 };
+  currentQ = 0;
+  showScreen('question-screen');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('qNumber').textContent =
+    `QUERY_${String(currentQ+1).padStart(3,'0')} // IDENTITY SCAN`;
+  document.getElementById('qText').textContent = q.text;
+  document.getElementById('progressFill').style.width = `${(currentQ/10)*100}%`;
+  document.getElementById('progressText').textContent = `${currentQ}/10`;
+  document.getElementById('qHint').textContent = 'SELECT RESPONSE TO CONTINUE';
+
+  const list = document.getElementById('optionsList');
+  list.innerHTML = '';
+
+  const tagLabels = { comply: 'COMPLY', chaos: 'CHAOS', beauty: 'BEAUTY' };
+
+  q.options.forEach((opt, i) => {
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.className = `option-btn ${opt.type}`;
+    btn.innerHTML = `<span class="opt-tag">${tagLabels[opt.type]}</span>${opt.label}`;
+    btn.addEventListener('click', () => selectOption(opt.type, btn));
+    btn.style.animationDelay = `${i * 0.1}s`;
+    li.appendChild(btn);
+    list.appendChild(li);
+  });
+}
+
+function selectOption(type, btn) {
+  // Disable all buttons briefly
+  document.querySelectorAll('.option-btn').forEach(b => b.style.pointerEvents = 'none');
+  btn.classList.add('selected');
+  scores[type]++;
+
+  triggerGlitch();
+
+  setTimeout(() => {
+    currentQ++;
+    if (currentQ < questions.length) {
+      renderQuestion();
+    } else {
+      showResults();
+    }
+  }, 350);
+}
+
+function showResults() {
+  showScreen('result-screen');
+
+  // Determine archetype
+  const max = Math.max(scores.comply, scores.chaos, scores.beauty);
+  const winners = Object.entries(scores).filter(([k,v]) => v === max);
+  let archetypeKey;
+  if (winners.length > 1) {
+    archetypeKey = 'balanced';
+  } else {
+    archetypeKey = winners[0][0];
+  }
+
+  const arch = archetypes[archetypeKey];
+
+  document.getElementById('resultType').textContent = arch.name;
+  document.getElementById('resultType').style.color = arch.color;
+  document.getElementById('resultType').style.textShadow = `0 0 20px ${arch.color}`;
+  document.getElementById('resultDesc').textContent = arch.desc;
+
+  // Score bars
+  setTimeout(() => {
+    const total = 10;
+    document.getElementById('complyBar').style.width = `${(scores.comply/total)*100}%`;
+    document.getElementById('chaosBar').style.width  = `${(scores.chaos/total)*100}%`;
+    document.getElementById('beautyBar').style.width = `${(scores.beauty/total)*100}%`;
+    document.getElementById('complyVal').textContent = scores.comply;
+    document.getElementById('chaosVal').textContent  = scores.chaos;
+    document.getElementById('beautyVal').textContent = scores.beauty;
+  }, 200);
+
+  // Build ID card
+  const id = generateId();
+  document.getElementById('cardClass').textContent = arch.name;
+  document.getElementById('cardClass').style.color = arch.color;
+  document.getElementById('cardClass').style.textShadow = `0 0 10px ${arch.color}`;
+  document.getElementById('cardAvatar').textContent = arch.emoji;
+  document.getElementById('cardId').textContent = `ID: ${id}`;
+  document.getElementById('cardBarcode').textContent = generateBarcode();
+  document.getElementById('cardFooterLeft').innerHTML =
+    `ISSUED: ${new Date().toLocaleDateString('en-GB').replace(/\//g,'-')}<br>STATUS: <span style="color:${arch.color}">ACTIVE</span><br>SECTOR: CLASSIFIED`;
+  document.getElementById('cardWatermark').textContent = arch.emoji + 'BRM';
+
+  // Card stats
+  const statsHtml = `
+    <div class="card-stat-row">
+      <div class="card-stat-label" style="color:var(--cyan)">COMPLY</div>
+      <div class="card-stat-track"><div class="card-stat-fill comply" style="width:${scores.comply*10}%"></div></div>
+      <div class="card-stat-val" style="color:var(--cyan)">${scores.comply}</div>
+    </div>
+    <div class="card-stat-row">
+      <div class="card-stat-label" style="color:var(--red)">CHAOS</div>
+      <div class="card-stat-track"><div class="card-stat-fill chaos" style="width:${scores.chaos*10}%"></div></div>
+      <div class="card-stat-val" style="color:var(--red)">${scores.chaos}</div>
+    </div>
+    <div class="card-stat-row">
+      <div class="card-stat-label" style="color:var(--amber)">BEAUTY</div>
+      <div class="card-stat-track"><div class="card-stat-fill beauty" style="width:${scores.beauty*10}%"></div></div>
+      <div class="card-stat-val" style="color:var(--amber)">${scores.beauty}</div>
+    </div>`;
+  document.getElementById('cardStats').innerHTML = statsHtml;
+}
+
+function generateId() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789';
+  const seg = () => Array.from({length:4}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+  return `${seg()}-${seg()}`;
+}
+
+function generateBarcode() {
+  return Array.from({length:22}, () => Math.random() > 0.5 ? '|' : ' ').join('');
+}
+
+function downloadCard() {
+  const btn = document.getElementById('downloadBtn');
+  btn.textContent = '[ RENDERING... ]';
+  btn.style.pointerEvents = 'none';
+
+  const card = document.getElementById('id-card');
+
+  html2canvas(card, {
+    backgroundColor: '#000000',
+    scale: 3,
+    useCORS: true,
+    logging: false,
+    width: card.offsetWidth,
+    height: card.offsetHeight
+  }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'BRM_AGENT_ID.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    btn.textContent = '[ DOWNLOAD ID CARD .PNG ]';
+    btn.style.pointerEvents = '';
+  }).catch(() => {
+    btn.textContent = '[ DOWNLOAD ID CARD .PNG ]';
+    btn.style.pointerEvents = '';
+  });
+}
+
+function restartQuiz() {
+  triggerGlitch();
+  setTimeout(() => {
+    showScreen('boot-screen');
+  }, 200);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function triggerGlitch() {
+  const g = document.getElementById('glitchLayer');
+  g.classList.add('active');
+  setTimeout(() => g.classList.remove('active'), 200);
+}
+
+// Random ambient glitches
+setInterval(() => {
+  if (Math.random() < 0.15) triggerGlitch();
+}, 4000);
+</script>
+</body>
+</html>
