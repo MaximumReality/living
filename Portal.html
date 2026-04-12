@@ -485,6 +485,7 @@ function termLog(msg, type = '') {
       if (anomaly)   termLog('ANOMALY ON RECORD: ' + anomaly, 'warn');
       if (timestamp) termLog('LAST FIELD OP: ' + new Date(timestamp).toLocaleString());
       termLog('WELCOME BACK, AGENT. LOCAL SECTOR STILL COMPROMISED.', 'active');
+      termLog('BUREAU ARCHIVE (THE GAZETTE): SYNCHRONIZED', 'active');
       termLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'warn');
     }, 1800);
 
