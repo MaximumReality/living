@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>BUREAU FIELD LENS // SIGNAL DECRYPTOR v3.8</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root {
+  --void:#04080f; --green:#00ff88; --cyan:#00ffe5; --amber:#ffb300;
+  --red:#ff3355; --purple:#bf00ff; --muted:#2a4a60; --border:#0d2035;
+  --gg:0 0 10px #00ff88,0 0 24px #00ff8830;
+  --gc:0 0 12px #00ffe5,0 0 30px #00ffe530;
+  --ga:0 0 10px #ffb300,0 0 22px #ffb30030;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;background:#000;color:var(--green);font-family:'Share Tech Mono',monospace;overflow:hidden;-webkit-text-size-adjust:100%;}
+
+/* CAMERA BG */
+.viewfinder{position:fixed;inset:0;z-index:0;overflow:hidden;}
+#lensStream{width:100%;height:100%;object-fit:cover;filter:brightness(0.7) contrast(1.15) saturate(0.8);}
+
+/* CRT + VIGNETTE */
+.crt{position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,136,0.015) 2px,rgba(0,255,136,0.015) 4px);pointer-events:none;z-index:1;}
+.vig{position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,0.82) 100%);pointer-events:none;z-index:1;}
+
+/* HUD CROSSHAIR */
+.hud-cross{position:fixed;inset:0;pointer-events:none;z-index:2;}
+.hud-cross::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;border:1px solid rgba(0,255,136,0.25);border-radius:50%;}
+.hud-cross::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:8px;height:8px;border-radius:50%;background:rgba(0,255,136,0.4);box-shadow:0 0 8px rgba(0,255,136,0.6);}
+
+/* CORNERS */
+.corner{position:fixed;width:20px;height:20px;z-index:3;pointer-events:none;}
+.corner::before,.corner::after{content:'';position:absolute;background:rgba(0,255,136,0.45);}
+.c-tl{top:62px;left:12px;} .c-tl::before{top:0;left:0;width:100%;height:1px;} .c-tl::after{top:0;left:0;width:1px;height:100%;}
+.c-tr{top:62px;right:12px;} .c-tr::before{top:0;right:0;width:100%;height:1px;} .c-tr::after{top:0;right:0;width:1px;height:100%;}
+.c-bl{bottom:202px;left:12px;} .c-bl::before{bottom:0;left:0;width:100%;height:1px;} .c-bl::after{bottom:0;left:0;width:1px;height:100%;}
+.c-br{bottom:202px;right:12px;} .c-br::before{bottom:0;right:0;width:100%;height:1px;} .c-br::after{bottom:0;right:0;width:1px;height:100%;}
+
+/* FLASH + SEAL */
+#scanFlash{position:fixed;inset:0;opacity:0;pointer-events:none;z-index:9997;transition:opacity 0.05s;}
+#bureauSeal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(2);font-size:150px;opacity:0;pointer-events:none;z-index:10000;transition:all 0.12s ease;}
+.seal-flash{opacity:0.65!important;transform:translate(-50%,-50%) scale(1)!important;}
+
+/* CAMERA OFFLINE */
+#cameraOffline{position:fixed;inset:0;z-index:50;background:var(--void);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:30px;text-align:center;}
+.off-icon{font-size:40px;opacity:0.4;}
+.off-title{font-size:11px;letter-spacing:3px;color:var(--amber);}
+.off-desc{font-size:9px;color:var(--muted);line-height:1.8;letter-spacing:1px;}
+.off-btn{padding:12px 20px;background:transparent;border:1px solid var(--green);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.off-btn.dim{border-color:var(--muted);color:var(--muted);margin-top:6px;}
+
+/* AZUL */
+#azulOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.93);z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;text-align:center;}
+.az-title{font-size:22px;letter-spacing:4px;color:var(--cyan);text-shadow:var(--gc);margin-bottom:8px;}
+.az-sub{font-size:9px;letter-spacing:3px;color:var(--muted);margin-bottom:20px;}
+.az-icon{font-size:60px;margin-bottom:16px;animation:pulse 2s infinite;}
+.az-body{font-size:11px;color:var(--cyan);line-height:1.8;margin-bottom:20px;border:1px solid rgba(0,255,229,0.2);padding:14px;background:rgba(0,255,229,0.03);}
+.az-close{padding:12px 24px;background:transparent;border:1px solid var(--cyan);color:var(--cyan);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:3px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+
+/* LOG PANEL */
+#logPanel{position:fixed;bottom:-100%;left:0;right:0;max-width:430px;margin:0 auto;background:rgba(4,8,15,0.97);border-top:1px solid var(--border);z-index:200;transition:bottom 0.3s ease;max-height:60vh;display:flex;flex-direction:column;}
+#logPanel.open{bottom:0;}
+.log-hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.log-title{font-size:9px;letter-spacing:3px;color:var(--green);}
+.log-close{background:transparent;border:none;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:11px;cursor:pointer;padding:2px 8px;-webkit-tap-highlight-color:transparent;}
+.log-scroll{overflow-y:auto;padding:10px 14px;flex:1;scrollbar-width:thin;}
+.cap-entry{border-left:3px solid var(--ecolor,var(--green));padding:8px 10px;margin-bottom:8px;background:rgba(0,0,0,0.4);animation:fadeIn 0.3s ease;}
+.cap-code{font-size:8px;letter-spacing:2px;}
+.cap-title{font-size:10px;letter-spacing:1px;margin:3px 0;}
+.cap-meta{font-size:7px;color:var(--muted);letter-spacing:1px;}
+.empty-log{text-align:center;padding:20px;font-size:9px;letter-spacing:2px;color:var(--muted);line-height:2;}
+
+/* MAIN UI */
+#app{position:fixed;inset:0;display:flex;flex-direction:column;max-width:430px;margin:0 auto;z-index:10;pointer-events:none;}
+#app>*{pointer-events:all;}
+
+.lens-hdr{padding:10px 14px 6px;border-bottom:1px solid rgba(13,32,53,0.8);background:rgba(4,8,15,0.8);backdrop-filter:blur(6px);flex-shrink:0;}
+.lh-row{display:flex;justify-content:space-between;align-items:flex-start;}
+.lh-title{font-size:10px;letter-spacing:3px;color:var(--green);text-shadow:var(--gg);}
+.lh-sub{font-size:7px;letter-spacing:2px;color:var(--muted);margin-top:2px;}
+.lh-r{text-align:right;}
+.lh-time{font-size:7px;letter-spacing:2px;color:var(--muted);}
+.lh-clr{font-size:7px;letter-spacing:2px;color:var(--green);margin-top:2px;}
+
+.ticker-wrap{background:rgba(2,6,13,0.75);border-bottom:1px solid rgba(13,32,53,0.6);padding:3px 0;overflow:hidden;position:relative;flex-shrink:0;backdrop-filter:blur(4px);}
+.ticker-wrap::before,.ticker-wrap::after{content:'';position:absolute;top:0;width:20px;height:100%;z-index:2;pointer-events:none;}
+.ticker-wrap::before{left:0;background:linear-gradient(90deg,rgba(4,8,15,0.9),transparent);}
+.ticker-wrap::after{right:0;background:linear-gradient(-90deg,rgba(4,8,15,0.9),transparent);}
+.ticker{display:flex;animation:ticker-scroll 28s linear infinite;white-space:nowrap;}
+.t-item{font-size:7px;letter-spacing:2px;color:var(--muted);padding:0 16px;}
+.t-item span{color:var(--amber);}
+
+.anomaly-banner{margin:6px 10px;padding:8px 10px;border:1px solid var(--green);background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);flex-shrink:0;position:relative;}
+.ab-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:4px;}
+.ab-code{font-size:8px;letter-spacing:3px;}
+.ab-threat{font-size:7px;color:var(--muted);letter-spacing:1px;}
+.ab-title{font-size:11px;letter-spacing:1px;margin-bottom:3px;line-height:1.3;}
+.ab-mission{font-size:8px;color:rgba(255,255,255,0.45);letter-spacing:1px;line-height:1.5;}
+.ab-reroll{position:absolute;top:6px;right:6px;background:transparent;border:none;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:9px;cursor:pointer;padding:2px 6px;-webkit-tap-highlight-color:transparent;}
+.ab-reroll:active{color:var(--green);}
+
+.sensor-row{display:flex;gap:6px;padding:0 10px 6px;flex-shrink:0;}
+.sc{flex:1;padding:6px 8px;border:1px solid rgba(13,32,53,0.8);background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);}
+.sc-lbl{font-size:6px;letter-spacing:2px;color:var(--muted);margin-bottom:2px;}
+.sc-val{font-size:10px;color:var(--green);text-shadow:var(--gg);line-height:1.2;}
+.sc-sub{font-size:6px;color:var(--muted);margin-top:1px;}
+
+.spacer{flex:1;pointer-events:none;}
+
+.bottom-bar{border-top:1px solid rgba(13,32,53,0.8);background:rgba(4,8,15,0.88);backdrop-filter:blur(8px);padding:8px 10px 10px;flex-shrink:0;}
+.capture-btn{width:100%;padding:14px;background:rgba(0,0,0,0.5);border:1px solid var(--green);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:4px;cursor:pointer;text-transform:uppercase;transition:all 0.15s;-webkit-tap-highlight-color:transparent;margin-bottom:8px;text-shadow:0 0 8px var(--green);}
+.capture-btn:active{background:rgba(0,255,136,0.12);transform:scale(0.98);}
+.bar-links{display:flex;gap:6px;}
+.bar-link{flex:1;padding:8px 4px;background:rgba(0,0,0,0.5);border:1px solid rgba(13,32,53,0.8);color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:7px;letter-spacing:2px;text-align:center;cursor:pointer;text-decoration:none;display:block;-webkit-tap-highlight-color:transparent;transition:all 0.15s;}
+.bar-link:active{color:var(--green);border-color:var(--green);}
+
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:0.6}50%{opacity:1}}
+@keyframes ticker-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes radarSweep{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.cursor{animation:blink 1s infinite;}
+
+/* ── RADAR ── */
+#radarContainer{
+  position:fixed;
+  top:130px;right:14px;
+  width:100px;height:100px;
+  border-radius:50%;
+  border:1.5px solid var(--green);
+  z-index:100;
+  overflow:hidden;
+  box-shadow:var(--gg);
+  pointer-events:none;
+  background:var(--void);
+}
+/* sweep line */
+#radarContainer::after{
+  content:'';
+  position:absolute;
+  top:50%;left:50%;
+  width:50%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--green));
+  transform-origin:left center;
+  animation:radarSweep 3s linear infinite;
+  z-index:102;
+  pointer-events:none;
+}
+/* center dot */
+#radarContainer::before{
+  content:'';
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:var(--gg);
+  z-index:103;
+  pointer-events:none;
+}
+#radarMap{
+  width:100%;height:100%;
+  filter:invert(100%) hue-rotate(90deg) brightness(1.1) saturate(0.5);
+  opacity:0.75;
+}
+/* hide Leaflet attribution & zoom on radar */
+#radarMap .leaflet-control-zoom,
+#radarMap .leaflet-control-attribution{display:none!important;}
+.radar-dot{
+  width:8px;height:8px;
+  background:var(--green);
+  border-radius:50%;
+  box-shadow:0 0 8px var(--green);
+  border:none;
+}
+/* offline radar fallback */
+#radarOffline{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:7px;letter-spacing:1px;color:var(--muted);
+  text-align:center;line-height:1.6;
+  background:var(--void);
+}
+</style>
+</head>
+<body>
+
+<!-- CAMERA -->
+<div class="viewfinder">
+  <video id="lensStream" autoplay playsinline muted></video>
+  <canvas id="snapshotCanvas" style="display:none;"></canvas>
+</div>
+
+<div class="crt"></div>
+<div class="vig"></div>
+<div class="hud-cross"></div>
+<div class="corner c-tl"></div><div class="corner c-tr"></div>
+<div class="corner c-bl"></div><div class="corner c-br"></div>
+
+<!-- RADAR -->
+<div id="radarContainer">
+  <div id="radarMap"></div>
+  <div id="radarOffline">GPS<br>LOCK...</div>
+</div>
+
+<div id="scanFlash"></div>
+<div id="bureauSeal">⬡</div>
+
+<!-- CAMERA OFFLINE -->
+<div id="cameraOffline">
+  <div class="off-icon">📷</div>
+  <div class="off-title">CAMERA ACCESS REQUIRED</div>
+  <div class="off-desc">
+    The Bureau Field Lens requires camera access<br>
+    to document anomalies in your sector.<br><br>
+    Without camera, captures are logged<br>
+    but stamped photos cannot be generated.
+  </div>
+  <button class="off-btn" onclick="retryCamera()">⬡ GRANT CAMERA ACCESS</button>
+  <button class="off-btn dim" onclick="dismissOffline()">CONTINUE WITHOUT CAMERA</button>
+</div>
+
+<!-- AZUL -->
+<div id="azulOverlay">
+  <div class="az-icon">⚡</div>
+  <div class="az-title">AZUL DETECTED</div>
+  <div class="az-sub">QUANTUM SIGNATURE // UNSCHEDULED SIGHTING</div>
+  <div class="az-body" id="azulMsg">...</div>
+  <button class="az-close" onclick="closeAzul()">[ ACKNOWLEDGE // COMPLY ]</button>
+</div>
+
+<!-- LOG PANEL -->
+<div id="logPanel">
+  <div class="log-hdr">
+    <span class="log-title">// CAPTURE LOG // SESSION</span>
+    <button class="log-close" onclick="toggleLog()">✕ CLOSE</button>
+  </div>
+  <div class="log-scroll" id="captureLog">
+    <div class="empty-log">NO ANOMALIES LOGGED<br><span style="font-size:8px">CAPTURE TO BEGIN</span></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+
+  <div class="lens-hdr">
+    <div class="lh-row">
+      <div>
+        <div class="lh-title">BUREAU FIELD LENS</div>
+        <div class="lh-sub">SIGNAL DECRYPTOR v3.8 // ANOMALY CAPTURE</div>
+      </div>
+      <div class="lh-r">
+        <div class="lh-time" id="lensTime">--:--:--</div>
+        <div class="lh-clr">CLR: <span id="clearanceDisplay">NONE</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ticker-wrap">
+    <div class="ticker">
+      <span class="t-item">LENS ACTIVE // ANOMALY SCAN ENABLED</span>
+      <span class="t-item">AZUL: <span>UNCONFIRMED</span></span>
+      <span class="t-item">BEAUTY ANOMALIES: <span>UNLOGGED</span></span>
+      <span class="t-item">CHAOS SIGNATURES: <span>DETECTED</span></span>
+      <span class="t-item">COMPLY INDEX: <span>MONITORING</span></span>
+      <span class="t-item">UPLOAD TO #PUBLIC-UPLINK</span>
+      <span class="t-item">LENS ACTIVE // ANOMALY SCAN ENABLED</span>
+      <span class="t-item">AZUL: <span>UNCONFIRMED</span></span>
+      <span class="t-item">BEAUTY ANOMALIES: <span>UNLOGGED</span></span>
+      <span class="t-item">CHAOS SIGNATURES: <span>DETECTED</span></span>
+      <span class="t-item">COMPLY INDEX: <span>MONITORING</span></span>
+      <span class="t-item">UPLOAD TO #PUBLIC-UPLINK</span>
+    </div>
+  </div>
+
+  <div class="anomaly-banner" id="anomalyBanner">
+    <button class="ab-reroll" onclick="rollAnomaly()">↻ NEW</button>
+    <div class="ab-hdr">
+      <span class="ab-code" id="abCode">SCANNING...</span>
+      <span class="ab-threat" id="abThreat">–</span>
+    </div>
+    <div class="ab-title" id="abTitle">INITIALIZING ANOMALY SCANNER...</div>
+    <div class="ab-mission" id="abMission"></div>
+  </div>
+
+  <div class="sensor-row">
+    <div class="sc">
+      <div class="sc-lbl">LOCATION</div>
+      <div class="sc-val" id="locVal" style="font-size:8px;">ACQUIRING</div>
+      <div class="sc-sub" id="locSub">GPS LOCK...</div>
+    </div>
+    <div class="sc" style="text-align:center;">
+      <div class="sc-lbl">HDG</div>
+      <div class="sc-val" id="headingVal">---°</div>
+    </div>
+    <div class="sc">
+      <div class="sc-lbl">SCANS</div>
+      <div class="sc-val" id="scanCount">0</div>
+      <div class="sc-sub" id="clearanceVal">CLR: NONE</div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="bottom-bar">
+    <button class="capture-btn" id="captureBtn" onclick="captureAndComply()">
+      ⬡ CAPTURE ANOMALY <span class="cursor">█</span>
+    </button>
+    <div class="bar-links">
+      <a href="Portal.html" class="bar-link">◀ PORTAL</a>
+      <a href="https://discord.gg/aJhkqCuX" class="bar-link" target="_blank">⬡ UPLINK</a>
+      <button class="bar-link" onclick="rollAnomaly()">↻ DIRECTIVE</button>
+      <button class="bar-link" onclick="toggleLog()" id="logBtn">📋 LOG(0)</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const ANOMALIES=[
+  {type:'BEAUTY',code:'BEAUTY-1',color:'#ffb300',colorDim:'rgba(255,179,0,0.15)',threat:'THREAT: LOW',title:'ACCIDENTAL SYMMETRY DETECTED',mission:'Find something symmetric that was not designed to be. A puddle, shadow, crack in a wall.',boost:1},
+  {type:'BEAUTY',code:'BEAUTY-2',color:'#ffb300',colorDim:'rgba(255,179,0,0.15)',threat:'THREAT: LOW',title:'UNAUTHORIZED LIGHT BEHAVIOR',mission:'Light doing something unexpected — through glass, between buildings, at the wrong angle.',boost:1},
+  {type:'BEAUTY',code:'BEAUTY-3',color:'#ffb300',colorDim:'rgba(255,179,0,0.15)',threat:'THREAT: MODERATE',title:'COLOR MISPLACEMENT EVENT',mission:'Something that is a color it has no business being. A door, a wall, a sky, a car.',boost:1},
+  {type:'BEAUTY',code:'BEAUTY-4',color:'#ffb300',colorDim:'rgba(255,179,0,0.15)',threat:'THREAT: LOW',title:'OLD/NEW COLLISION SIGNATURE',mission:'Something old next to something new. Ancient next to modern. Worn next to pristine.',boost:1},
+  {type:'BEAUTY',code:'BEAUTY-5',color:'#ffb300',colorDim:'rgba(255,179,0,0.15)',threat:'THREAT: LOW',title:'SMALL THING BEING MAGNIFICENT',mission:'Something tiny that is inexplicably beautiful. A bug, a pebble, a crack, a dropped receipt.',boost:2},
+  {type:'BEAUTY',code:'BEAUTY-6',color:'#ffb300',colorDim:'rgba(255,179,0,0.15)',threat:'THREAT: LOW',title:'NATURE TRESPASSING ON STRUCTURE',mission:'A plant in pavement, moss on a wall, roots lifting tiles, flowers growing in a fence.',boost:1},
+  {type:'BEAUTY',code:'BEAUTY-7',color:'#ffb300',colorDim:'rgba(255,179,0,0.15)',threat:'THREAT: MODERATE',title:'TEXTURE ANOMALY // SURFACE DEPTH',mission:'A texture that demands attention. Peeling paint, rust, weathered wood, aged stone.',boost:1},
+  {type:'CHAOS',code:'CHAOS-1',color:'#ff3355',colorDim:'rgba(255,51,85,0.15)',threat:'THREAT: HIGH',title:'FUNCTIONAL DESTRUCTION EVENT',mission:'Something broken but still working. Cracked screen displaying. Taped window holding.',boost:2},
+  {type:'CHAOS',code:'CHAOS-2',color:'#ff3355',colorDim:'rgba(255,51,85,0.15)',threat:'THREAT: HIGH',title:'OBJECT PROXIMITY VIOLATION',mission:'Two things that should not be near each other. The weirder the combination, the better.',boost:2},
+  {type:'CHAOS',code:'CHAOS-3',color:'#ff3355',colorDim:'rgba(255,51,85,0.15)',threat:'THREAT: EXTREME',title:'RULE VIOLATION EVIDENCE',mission:'Evidence a posted rule has been ignored. Do not enter ignored. Wet paint touched.',boost:3},
+  {type:'CHAOS',code:'CHAOS-4',color:'#ff3355',colorDim:'rgba(255,51,85,0.15)',threat:'THREAT: HIGH',title:'MID-TRANSFORMATION OBJECT',mission:'Something mid-change. Construction, demolition, rust spreading, decay in progress.',boost:2},
+  {type:'CHAOS',code:'CHAOS-5',color:'#ff3355',colorDim:'rgba(255,51,85,0.15)',threat:'THREAT: HIGH',title:'IMPROVISED REPAIR DETECTED',mission:'A repair that should not work but does. Duct tape, wire, rope, a rock as a doorstop.',boost:2},
+  {type:'CHAOS',code:'CHAOS-6',color:'#ff3355',colorDim:'rgba(255,51,85,0.15)',threat:'THREAT: MODERATE',title:'UNAUTHORIZED HUMAN TRACE',mission:'Graffiti, a forgotten object, a worn path through grass, footprints where none should be.',boost:1},
+  {type:'CHAOS',code:'CHAOS-7',color:'#ff3355',colorDim:'rgba(255,51,85,0.15)',threat:'THREAT: EXTREME',title:'ENTROPY CASCADE IN PROGRESS',mission:'Visible decay or disorder in progress. Peeling, crumbling, leaning, flooding.',boost:3},
+  {type:'COMPLY',code:'COMPLY-1',color:'#00ffe5',colorDim:'rgba(0,255,229,0.15)',threat:'THREAT: MINIMAL',title:'PERFECT REPETITION ARRAY',mission:'Something repeated perfectly. Tiles, windows, seats, poles, bricks in an orderly row.',boost:1},
+  {type:'COMPLY',code:'COMPLY-2',color:'#00ffe5',colorDim:'rgba(0,255,229,0.15)',threat:'THREAT: MINIMAL',title:'CLASSIFICATION SYSTEM DETECTED',mission:'Signs, labels, numbers, categories, official markings. Something organized by a system.',boost:1},
+  {type:'COMPLY',code:'COMPLY-3',color:'#00ffe5',colorDim:'rgba(0,255,229,0.15)',threat:'THREAT: MINIMAL',title:'INFRASTRUCTURE GRID SIGHTING',mission:'Power lines, pipes, cables, roads, fences, walls. The systems that hold reality together.',boost:1},
+  {type:'COMPLY',code:'COMPLY-4',color:'#00ffe5',colorDim:'rgba(0,255,229,0.15)',threat:'THREAT: LOW',title:'ORDER IMPOSED ON CHAOS',mission:'A tended garden next to wilderness, a swept corner, a labeled jar, anything deliberately organized.',boost:1},
+  {type:'COMPLY',code:'COMPLY-5',color:'#00ffe5',colorDim:'rgba(0,255,229,0.15)',threat:'THREAT: MINIMAL',title:'QUEUE OR LINE FORMATION',mission:'A line, a queue, parked vehicles in a row, people waiting — anything in sequence.',boost:1},
+  {type:'COMPLY',code:'COMPLY-6',color:'#00ffe5',colorDim:'rgba(0,255,229,0.15)',threat:'THREAT: MINIMAL',title:'GEOMETRIC PURITY EVENT',mission:'Perfect geometry in architecture or nature. A circle, a grid, a right angle, a straight line.',boost:1},
+  {type:'ENTITY',code:'ENTITY-AZUL',color:'#bf00ff',colorDim:'rgba(191,0,255,0.15)',threat:'THREAT: UNCLASSIFIABLE',title:'AZUL QUANTUM SIGNATURE',mission:'Any cat. Any hairless cat especially. Photograph immediately. Do not make eye contact.',boost:5,rare:true},
+  {type:'ENTITY',code:'ENTITY-MOCHKIL',color:'#bf00ff',colorDim:'rgba(191,0,255,0.15)',threat:'THREAT: CULINARY',title:'MOCHKIL TUXEDO SIGNATURE',mission:'A tuxedo cat, black and white cat, or any cat near food. Caution near kitchens.',boost:5,rare:true},
+  {type:'ENTITY',code:'ENTITY-VOID',color:'#bf00ff',colorDim:'rgba(191,0,255,0.15)',threat:'THREAT: METAPHYSICAL',title:'VOID BLOOM DETECTED',mission:'Somewhere that feels like the edge of something. A doorway, horizon, tunnel, threshold.',boost:4,rare:true},
+];
+
+const AZUL_MSGS=[
+  'Azul has been at this location before you. Azul will be here after. Your presence is noted and considered irrelevant.',
+  'The quantum signature confirms Azul proximity. The Bureau has been trying to track Azul for 4 years. You have 30 seconds.',
+  'Azul does not acknowledge Bureau authority. Azul acknowledges you are here. This is more than the Bureau gets.',
+  'Unscheduled Sphynx event logged. Clearance elevated. Azul is already gone.',
+  'The Sphynx was observed running calculations Bureau analysts cannot replicate. Logged as: "cat stuff."',
+];
+
+const CLEARANCES=[
+  {min:0,label:'NONE',color:'#2a4a60'},
+  {min:3,label:'LVL_01',color:'#00ff88'},
+  {min:8,label:'LVL_02',color:'#00ff88'},
+  {min:15,label:'LVL_03',color:'#00ff88'},
+  {min:25,label:'LVL_04',color:'#ffb300'},
+  {min:40,label:'LVL_05',color:'#ffb300'},
+  {min:60,label:'LVL_06',color:'#ffb300'},
+  {min:85,label:'LVL_07',color:'#ff3355'},
+  {min:110,label:'LVL_08',color:'#ff3355'},
+  {min:140,label:'OMEGA',color:'#bf00ff'},
+];
+
+let currentAnomaly=null, sessionCaptures=[], totalScore=0, heading=0, lat=null, lon=null, cameraActive=false, logOpen=false;
+
+function init(){
+  updateClock(); setInterval(updateClock,1000);
+  loadState(); rollAnomaly(); startCamera(); startCompass(); startLocation();
+}
+
+function updateClock(){
+  const n=new Date();
+  document.getElementById('lensTime').textContent=[n.getHours(),n.getMinutes(),n.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');
+}
+
+async function startCamera(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080}},audio:false});
+    document.getElementById('lensStream').srcObject=stream;
+    cameraActive=true;
+    document.getElementById('cameraOffline').style.display='none';
+  }catch(e){
+    cameraActive=false;
+    document.getElementById('cameraOffline').style.display='flex';
+  }
+}
+function retryCamera(){document.getElementById('cameraOffline').style.display='none';startCamera();}
+function dismissOffline(){document.getElementById('cameraOffline').style.display='none';}
+
+function loadState(){
+  totalScore=parseInt(localStorage.getItem('BUREAU_SCAN_SCORE')||'0');
+  const count=parseInt(localStorage.getItem('BUREAU_SCAN_COUNT')||'0');
+  const clr=localStorage.getItem('BUREAU_CLEARANCE')||'NONE';
+  document.getElementById('scanCount').textContent=count;
+  const c=getClearance(totalScore);
+  document.getElementById('clearanceVal').textContent='CLR: '+clr;
+  document.getElementById('clearanceVal').style.color=c.color;
+  document.getElementById('clearanceDisplay').textContent=clr;
+  document.getElementById('clearanceDisplay').style.color=c.color;
+}
+
+function saveState(a){
+  const count=parseInt(localStorage.getItem('BUREAU_SCAN_COUNT')||'0')+1;
+  totalScore+=a.boost;
+  const c=getClearance(totalScore);
+  localStorage.setItem('BUREAU_SCAN_COUNT',count);
+  localStorage.setItem('BUREAU_SCAN_SCORE',totalScore);
+  localStorage.setItem('BUREAU_CLEARANCE',c.label);
+  localStorage.setItem('BUREAU_LAST_SCAN',a.type);
+  localStorage.setItem('BUREAU_ANOMALY',a.code);
+  localStorage.setItem('BUREAU_TIMESTAMP',new Date().toISOString());
+  document.getElementById('scanCount').textContent=count;
+  document.getElementById('clearanceVal').textContent='CLR: '+c.label;
+  document.getElementById('clearanceVal').style.color=c.color;
+  document.getElementById('clearanceDisplay').textContent=c.label;
+  document.getElementById('clearanceDisplay').style.color=c.color;
+}
+
+function getClearance(score){
+  let c=CLEARANCES[0];
+  for(const l of CLEARANCES){if(score>=l.min)c=l;}
+  return c;
+}
+
+function rollAnomaly(){
+  const pool=Math.random()<0.08?ANOMALIES.filter(a=>a.rare):ANOMALIES.filter(a=>!a.rare);
+  currentAnomaly=pool[Math.floor(Math.random()*pool.length)];
+  const a=currentAnomaly;
+  const banner=document.getElementById('anomalyBanner');
+  banner.style.borderColor=a.color;
+  banner.style.background=a.colorDim;
+  const btn=document.getElementById('captureBtn');
+  btn.style.borderColor=a.color; btn.style.color=a.color;
+  btn.style.textShadow=`0 0 8px ${a.color}`;
+  document.getElementById('scanFlash').style.background=a.color;
+  document.getElementById('bureauSeal').style.color=a.color;
+  document.getElementById('bureauSeal').style.textShadow=`0 0 30px ${a.color}`;
+  document.getElementById('abCode').textContent=a.code;
+  document.getElementById('abCode').style.color=a.color;
+  document.getElementById('abThreat').textContent=a.threat;
+  document.getElementById('abTitle').textContent=a.title;
+  document.getElementById('abTitle').style.color=a.color;
+  document.getElementById('abMission').textContent='▶ '+a.mission;
+  document.getElementById('abMission').style.color=a.color;
+}
+
+function captureAndComply(){
+  if(!currentAnomaly)return;
+  const a=currentAnomaly;
+  // Flash
+  const flash=document.getElementById('scanFlash');
+  flash.style.opacity='0.35'; setTimeout(()=>{flash.style.opacity='0';},120);
+  // Seal
+  const seal=document.getElementById('bureauSeal');
+  seal.classList.add('seal-flash'); setTimeout(()=>seal.classList.remove('seal-flash'),180);
+  // Log
+  const now=new Date();
+  const ts=[now.getHours(),now.getMinutes(),now.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');
+  sessionCaptures.unshift({code:a.code,type:a.type,title:a.title,color:a.color,time:ts,
+    coords:lat?`${lat.toFixed(4)}, ${lon.toFixed(4)}`:'CLASSIFIED',mission:a.mission,boost:a.boost});
+  saveState(a);
+  renderLog();
+  document.getElementById('logBtn').textContent=`📋 LOG(${sessionCaptures.length})`;
+  // Stamp & download
+  if(cameraActive) stampAndDownload();
+  // Azul
+  if(a.rare&&a.code==='ENTITY-AZUL') setTimeout(showAzul,300);
+  setTimeout(rollAnomaly,500);
+}
+
+function stampAndDownload(){
+  const video=document.getElementById('lensStream');
+  const canvas=document.getElementById('snapshotCanvas');
+  const ctx=canvas.getContext('2d');
+  const a=currentAnomaly;
+  const agent=localStorage.getItem('BUREAU_CLEARANCE')||'L118';
+  canvas.width=video.videoWidth||1280;
+  canvas.height=video.videoHeight||720;
+  // Draw frame
+  ctx.drawImage(video,0,0,canvas.width,canvas.height);
+  // Scanlines
+  ctx.fillStyle='rgba(0,0,0,0.15)';
+  for(let y=0;y<canvas.height;y+=4){ctx.fillRect(0,y,canvas.width,1);}
+  // Vignette
+  const vig=ctx.createRadialGradient(canvas.width/2,canvas.height/2,canvas.height*0.3,canvas.width/2,canvas.height/2,canvas.height*0.9);
+  vig.addColorStop(0,'rgba(0,0,0,0)'); vig.addColorStop(1,'rgba(0,0,0,0.5)');
+  ctx.fillStyle=vig; ctx.fillRect(0,0,canvas.width,canvas.height);
+  // Color tint
+  ctx.fillStyle=a.colorDim.replace('0.15','0.07'); ctx.fillRect(0,0,canvas.width,canvas.height);
+  // Text setup
+  const S=canvas.width/1280;
+  ctx.fillStyle=a.color; ctx.shadowColor=a.color; ctx.shadowBlur=14;
+  // TOP LEFT: Agent
+  ctx.textAlign='left';
+  ctx.font=`bold ${Math.round(44*S)}px 'Share Tech Mono',monospace`;
+  ctx.fillText(`⬡ AGENT_${agent}`,50*S,90*S);
+  ctx.shadowBlur=8;
+  ctx.font=`${Math.round(22*S)}px 'Share Tech Mono',monospace`;
+  ctx.fillText(`STATUS: ${agent} // UPLINK_STABLE`,50*S,122*S);
+  // TOP RIGHT: Directive
+  ctx.textAlign='right'; ctx.shadowBlur=14;
+  ctx.font=`bold ${Math.round(38*S)}px 'Share Tech Mono',monospace`;
+  ctx.fillText(`DIRECTIVE: ${a.type}`,canvas.width-50*S,90*S);
+  ctx.shadowBlur=8;
+  ctx.font=`${Math.round(20*S)}px 'Share Tech Mono',monospace`;
+  ctx.fillText(`REF: ${a.code}`,canvas.width-50*S,122*S);
+  // CENTER crosshair
+  const cx=canvas.width/2, cy=canvas.height/2;
+  ctx.strokeStyle=`${a.color}44`; ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(cx-40*S,cy);ctx.lineTo(cx+40*S,cy);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx,cy-40*S);ctx.lineTo(cx,cy+40*S);ctx.stroke();
+  ctx.beginPath();ctx.arc(cx,cy,28*S,0,Math.PI*2);ctx.stroke();
+  // BOTTOM slogan
+  ctx.shadowBlur=18; ctx.textAlign='center';
+  ctx.font=`bold ${Math.round(50*S)}px 'Share Tech Mono',monospace`;
+  ctx.fillText('COMPLIANCE IS BEAUTY',canvas.width/2,canvas.height-110*S);
+  // BOTTOM data strip
+  ctx.shadowBlur=6;
+  ctx.font=`${Math.round(18*S)}px 'Share Tech Mono',monospace`;
+  ctx.textAlign='left';
+  ctx.fillText(lat?`GPS: ${lat.toFixed(4)}, ${lon.toFixed(4)}`:'GPS: CLASSIFIED',50*S,canvas.height-55*S);
+  ctx.textAlign='right';
+  ctx.fillText(`HDG: ${heading}° // maximumreality.xyz`,canvas.width-50*S,canvas.height-55*S);
+  // Download
+  const link=document.createElement('a');
+  link.download=`BRM_${a.type}_${a.code}_${Date.now()}.png`;
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+}
+
+function renderLog(){
+  const log=document.getElementById('captureLog');
+  if(sessionCaptures.length===0){
+    log.innerHTML='<div class="empty-log">NO ANOMALIES LOGGED<br><span style="font-size:8px">CAPTURE TO BEGIN</span></div>';
+    return;
+  }
+  log.innerHTML=sessionCaptures.map(e=>`
+    <div class="cap-entry" style="border-left-color:${e.color}">
+      <div class="cap-code" style="color:${e.color}">${e.code} // ${e.time}</div>
+      <div class="cap-title" style="color:${e.color}">${e.title}</div>
+      <div class="cap-meta">📍 ${e.coords} // +${e.boost} CLR PTS</div>
+      <div style="font-size:7px;color:var(--muted);margin-top:3px">${e.mission}</div>
+    </div>`).join('');
+}
+
+function toggleLog(){
+  logOpen=!logOpen;
+  document.getElementById('logPanel').classList.toggle('open',logOpen);
+}
+
+function showAzul(){
+  document.getElementById('azulMsg').textContent=AZUL_MSGS[Math.floor(Math.random()*AZUL_MSGS.length)];
+  document.getElementById('azulOverlay').style.display='flex';
+}
+function closeAzul(){document.getElementById('azulOverlay').style.display='none';}
+
+function startCompass(){
+  if(!('DeviceOrientationEvent' in window))return;
+  if(typeof DeviceOrientationEvent.requestPermission==='function'){
+    document.addEventListener('touchstart',()=>{
+      DeviceOrientationEvent.requestPermission()
+        .then(r=>{if(r==='granted')window.addEventListener('deviceorientation',handleOrientation,true);})
+        .catch(()=>{});
+    },{once:true});
+  }else{
+    window.addEventListener('deviceorientation',handleOrientation,true);
+  }
+}
+function handleOrientation(e){
+  if(e.alpha!==null){
+    heading=Math.round(e.alpha);
+    document.getElementById('headingVal').textContent=heading+'°';
+    // rotate radar map to face heading
+    const mapEl=document.getElementById('radarMap');
+    if(mapEl) mapEl.style.transform=`rotate(${-e.alpha}deg)`;
+  }
+}
+
+function startLocation(){
+  if(!('geolocation' in navigator))return;
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      lat=pos.coords.latitude; lon=pos.coords.longitude;
+      document.getElementById('locVal').textContent=`${lat.toFixed(3)}°N`;
+      document.getElementById('locSub').textContent=`${Math.abs(lon).toFixed(3)}°${lon<0?'W':'E'} ±${Math.round(pos.coords.accuracy)}m`;
+      initRadar(lat, lon);
+    },
+    ()=>{
+      document.getElementById('locVal').textContent='REDACTED';
+      document.getElementById('locSub').textContent='GPS BLOCKED';
+      document.getElementById('radarOffline').textContent='GPS\nBLOCKED';
+    },
+    {enableHighAccuracy:true,timeout:8000}
+  );
+}
+
+let radarMap, radarMarker;
+function initRadar(lat, lon){
+  // hide offline message
+  document.getElementById('radarOffline').style.display='none';
+  // init Leaflet map
+  radarMap = L.map('radarMap',{
+    zoomControl:false,
+    attributionControl:false,
+    dragging:false,
+    scrollWheelZoom:false,
+    touchZoom:false,
+    doubleClickZoom:false,
+    boxZoom:false,
+    keyboard:false,
+  }).setView([lat, lon], 17);
+  // OSM tiles — CSS filter turns these glowing green
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:19
+  }).addTo(radarMap);
+  // Agent position dot
+  const icon = L.divIcon({className:'radar-dot', iconSize:[8,8], iconAnchor:[4,4]});
+  radarMarker = L.marker([lat,lon],{icon}).addTo(radarMap);
+}
+
+init();
+</script>
+</body>
+</html>
