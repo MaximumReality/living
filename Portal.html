@@ -386,6 +386,26 @@ footer { border-top: 1px solid var(--border); padding: 12px 14px; display: flex;
     <span class="protocol-id" id="lens-clearance">CLR: OMEGA-7</span>
   </a>
 </div>
+    <div class="card">
+    <div class="card-head">
+      <div class="card-title">BUREAU_LIVE_UPLINK <span class="sig"><span class="sig-dot green" id="bot-sig"></span></span></div>
+      <div class="card-src">SRC: REPLIT_API // DISCORD_CDN</div>
+    </div>
+    <div class="card-body">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-label-s">DIRECTOR_STATUS <span class="stat-val-s" id="bot-status">OFFLINE</span></div>
+          <div class="stat-bar"><div class="stat-fill fill-g" id="bot-fill" style="width:0%"></div></div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label-s">ACTIVE_AGENTS <span class="stat-val-s" id="agent-count">0</span></div>
+          <div class="stat-bar"><div class="stat-fill fill-c" style="width:100%"></div></div>
+        </div>
+      </div>
+      <div class="term-line active" style="margin-top:10px; font-size:8px;" id="bot-activity">> AWAITING_CONNECTION...</div>
+    </div>
+  </div>
+
 
   <!-- NASA APOD -->
   <div class="card span2">
@@ -752,6 +772,36 @@ async function loadDirective() {
   loadDirective();
   await new Promise(r => setTimeout(r, 800));
   loadAPOD();
+    // ── BUREAU BOT UPLINK ──
+    async function updateBureauStats() {
+    try {
+      // REPLACE with your confirmed Replit URL
+      const response = await fetch('https://c3f3044d-13db-4dc6-9112-144c0525a751-00-3ahgj2a42ntpd.picard.replit.dev/api/bureau-status');
+      const data = await response.json();
+      
+      // Update the UI elements
+      document.getElementById('bot-status').innerText = data.status;
+      document.getElementById('agent-count').innerText = data.agentCount;
+      document.getElementById('bot-activity').innerText = `> LAST_SCAN: ${data.lastScan}`;
+      
+      // Visual feedback: turn the bar green and the signal dot on
+      document.getElementById('bot-fill').style.width = "100%";
+      document.getElementById('bot-sig').className = "sig-dot green";
+      
+      termLog(`BUREAU UPLINK: ${data.status} // AGENTS: ${data.agentCount}`, 'active');
+    } catch (err) {
+      document.getElementById('bot-status').innerText = 'OFFLINE';
+      document.getElementById('bot-sig').className = "sig-dot red";
+      document.getElementById('bot-fill').style.width = "10%";
+      termLog('BUREAU UPLINK: SIGNAL_LOST', 'err');
+    }
+  }
+
+  // Auto-refresh every 60 seconds to keep the portal live
+  setInterval(updateBureauStats, 60000);
+  updateBureauStats();
+
+
   setTimeout(() => termLog('ALL SYSTEMS NOMINAL // MONITORING ACTIVE', 'active'), 4000);
 })();
 </script>
