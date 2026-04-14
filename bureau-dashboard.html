@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>BUREAU // CONTROL</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+
+  :root {
+    --cyan: #00ffcc;
+    --orange: #ff6600;
+    --purple: #9900ff;
+    --red: #ff2244;
+    --bg: #050a0f;
+    --panel: #0a1520;
+    --border: #0d2535;
+    --text: #a0c8d8;
+    --dim: #3a5566;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    padding: 16px 14px 40px;
+    overflow-x: hidden;
+  }
+
+  /* scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,255,204,0.015) 2px,
+      rgba(0,255,204,0.015) 4px
+    );
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  header {
+    text-align: center;
+    padding: 20px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .logo {
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.35em;
+    color: var(--cyan);
+    text-shadow: 0 0 12px rgba(0,255,204,0.5);
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+  }
+
+  .status-dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--red);
+    margin-right: 6px;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  .status-dot.online { background: var(--cyan); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 14px;
+    position: relative;
+  }
+
+  .panel::before {
+    content: attr(data-label);
+    position: absolute;
+    top: -9px; left: 12px;
+    background: var(--panel);
+    padding: 0 8px;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--dim);
+  }
+
+  label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--dim);
+    margin-bottom: 6px;
+    margin-top: 12px;
+  }
+  label:first-of-type { margin-top: 0; }
+
+  input, select, textarea {
+    width: 100%;
+    background: rgba(0,255,204,0.04);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--cyan);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    padding: 10px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 8px rgba(0,255,204,0.15);
+  }
+
+  select option { background: #0a1520; }
+
+  textarea { resize: none; height: 60px; }
+
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 3px;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+    text-transform: uppercase;
+  }
+
+  .btn-primary {
+    background: var(--cyan);
+    color: var(--bg);
+  }
+  .btn-primary:active { transform: scale(0.97); background: #00ccaa; }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--orange);
+    color: var(--orange);
+  }
+  .btn-secondary:active { background: rgba(255,102,0,0.1); }
+
+  .btn-danger {
+    background: transparent;
+    border: 1px solid var(--dim);
+    color: var(--dim);
+  }
+  .btn-danger:active { border-color: var(--red); color: var(--red); }
+
+  .toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .toggle-label { font-size: 11px; letter-spacing: 0.1em; }
+
+  .toggle {
+    position: relative;
+    width: 44px; height: 24px;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 24px;
+    transition: 0.3s;
+    cursor: pointer;
+  }
+  .slider::before {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    left: 3px; top: 3px;
+    background: var(--dim);
+    border-radius: 50%;
+    transition: 0.3s;
+  }
+  input:checked + .slider { background: rgba(0,255,204,0.2); border: 1px solid var(--cyan); }
+  input:checked + .slider::before { transform: translateX(20px); background: var(--cyan); }
+
+  .log-box {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px;
+    height: 120px;
+    overflow-y: auto;
+    font-size: 11px;
+    line-height: 1.7;
+  }
+
+  .log-entry { color: var(--dim); }
+  .log-entry.ok { color: var(--cyan); }
+  .log-entry.err { color: var(--red); }
+  .log-entry.warn { color: var(--orange); }
+
+  .badge-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .badge {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    padding: 4px 10px;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    color: var(--dim);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .badge:active, .badge.active { border-color: var(--cyan); color: var(--cyan); background: rgba(0,255,204,0.08); }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 14px 0;
+  }
+
+  #token-warning {
+    font-size: 10px;
+    color: var(--orange);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+
+  .config-saved { color: var(--cyan); font-size: 10px; margin-top: 6px; display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⬡ BUREAU OF REALITY MANAGEMENT</div>
+  <div class="subtitle"><span class="status-dot" id="connDot"></span><span id="connLabel">DISCONNECTED</span></div>
+</header>
+
+<!-- CONFIG PANEL -->
+<div class="panel" data-label="◈ BOT CONFIG">
+  <label>BOT HTTP ENDPOINT (your Replit URL)</label>
+  <input type="url" id="endpointUrl" placeholder="https://your-repl.replit.app" autocomplete="off">
+  <label>DASHBOARD SECRET KEY</label>
+  <input type="password" id="secretKey" placeholder="set this in your bot's .env" autocomplete="off">
+  <button class="btn btn-secondary" onclick="saveConfig()">SAVE CONFIG</button>
+  <div class="config-saved" id="savedMsg">✓ Config saved locally</div>
+  <div id="token-warning">⚠ Never paste your bot token here. This dashboard communicates via a secret key you define in Replit Secrets.</div>
+</div>
+
+<!-- PRESENCE PANEL -->
+<div class="panel" data-label="◈ BOT PRESENCE">
+  <label>ACTIVITY TYPE</label>
+  <select id="actType">
+    <option value="0">Playing</option>
+    <option value="3">Watching</option>
+    <option value="2">Listening to</option>
+    <option value="5">Competing in</option>
+  </select>
+
+  <label>ACTIVITY NAME</label>
+  <input type="text" id="actName" value="Bureau of Reality Management" maxlength="128">
+
+  <label>STATUS</label>
+  <select id="botStatus">
+    <option value="online">🟢 Online</option>
+    <option value="idle">🟡 Idle</option>
+    <option value="dnd">🔴 Do Not Disturb</option>
+    <option value="invisible">⚫ Invisible</option>
+  </select>
+
+  <hr class="divider">
+  <div style="font-size:10px;letter-spacing:.15em;color:var(--dim);margin-bottom:10px;">QUICK PRESETS</div>
+  <div class="badge-row">
+    <div class="badge" onclick="applyPreset('bureau')">BUREAU</div>
+    <div class="badge" onclick="applyPreset('patrol')">ON PATROL</div>
+    <div class="badge" onclick="applyPreset('maintenance')">MAINTENANCE</div>
+    <div class="badge" onclick="applyPreset('offline')">OFFLINE MODE</div>
+  </div>
+
+  <button class="btn btn-primary" onclick="updatePresence()" style="margin-top:16px;">▶ PUSH PRESENCE</button>
+  <button class="btn btn-danger" onclick="clearPresence()">✕ CLEAR PRESENCE</button>
+</div>
+
+<!-- ANNOUNCE PANEL -->
+<div class="panel" data-label="◈ SERVER ANNOUNCE">
+  <label>CHANNEL ID</label>
+  <input type="text" id="channelId" placeholder="right-click channel → Copy ID">
+  <label>MESSAGE</label>
+  <textarea id="announceMsg" placeholder="Reality update: Bureau systems online..."></textarea>
+  <div class="badge-row" style="margin-top:8px;">
+    <div class="badge" onclick="quickMsg('🟢 Bureau systems are ONLINE. Enter the simulation.')">ONLINE</div>
+    <div class="badge" onclick="quickMsg('🔴 Bureau entering maintenance mode. Reality suspended.')">MAINT</div>
+    <div class="badge" onclick="quickMsg('⚠️ Reality anomaly detected. Agents stand by.')">ANOMALY</div>
+  </div>
+  <button class="btn btn-secondary" onclick="sendAnnounce()" style="margin-top:12px;">📡 BROADCAST</button>
+</div>
+
+<!-- LOG PANEL -->
+<div class="panel" data-label="◈ OPERATION LOG">
+  <div class="log-box" id="logBox">
+    <div class="log-entry">// dashboard initialized</div>
+    <div class="log-entry">// awaiting bot endpoint...</div>
+  </div>
+  <button class="btn btn-danger" onclick="clearLog()" style="margin-top:8px;padding:8px;">CLEAR LOG</button>
+</div>
+
+<script>
+  // ── CONFIG PERSISTENCE ────────────────────────────────────────
+  function saveConfig() {
+    localStorage.setItem('bureau_endpoint', document.getElementById('endpointUrl').value.trim());
+    localStorage.setItem('bureau_secret', document.getElementById('secretKey').value.trim());
+    const msg = document.getElementById('savedMsg');
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 2000);
+    log('config saved', 'ok');
+  }
+
+  function loadConfig() {
+    const ep = localStorage.getItem('bureau_endpoint');
+    const sk = localStorage.getItem('bureau_secret');
+    if (ep) document.getElementById('endpointUrl').value = ep;
+    if (sk) document.getElementById('secretKey').value = sk;
+  }
+
+  // ── LOGGING ──────────────────────────────────────────────────
+  function log(msg, type = '') {
+    const box = document.getElementById('logBox');
+    const el = document.createElement('div');
+    el.className = 'log-entry ' + type;
+    const time = new Date().toTimeString().slice(0,8);
+    el.textContent = `[${time}] ${msg}`;
+    box.appendChild(el);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function clearLog() {
+    document.getElementById('logBox').innerHTML = '<div class="log-entry">// log cleared</div>';
+  }
+
+  // ── CONNECTION CHECK ─────────────────────────────────────────
+  async function checkConnection() {
+    const endpoint = document.getElementById('endpointUrl').value.trim();
+    const secret = document.getElementById('secretKey').value.trim();
+    if (!endpoint) return;
+    try {
+      const res = await fetch(`${endpoint}/status`, {
+        headers: { 'x-bureau-key': secret }
+      });
+      if (res.ok) {
+        setConnected(true);
+        log('bot connection verified', 'ok');
+      } else {
+        setConnected(false);
+        log(`connection failed: HTTP ${res.status}`, 'err');
+      }
+    } catch (e) {
+      setConnected(false);
+      log('cannot reach bot endpoint', 'err');
+    }
+  }
+
+  function setConnected(val) {
+    const dot = document.getElementById('connDot');
+    const lbl = document.getElementById('connLabel');
+    dot.className = 'status-dot' + (val ? ' online' : '');
+    lbl.textContent = val ? 'BOT ONLINE' : 'DISCONNECTED';
+  }
+
+  // ── PRESENCE UPDATE ──────────────────────────────────────────
+  async function updatePresence() {
+    const endpoint = document.getElementById('endpointUrl').value.trim();
+    const secret   = document.getElementById('secretKey').value.trim();
+    const name     = document.getElementById('actName').value.trim();
+    const type     = parseInt(document.getElementById('actType').value);
+    const status   = document.getElementById('botStatus').value;
+
+    if (!endpoint || !secret) { log('set endpoint + secret key first', 'warn'); return; }
+    if (!name) { log('activity name cannot be empty', 'warn'); return; }
+
+    log(`pushing presence: ${status} / ${name}...`);
+    try {
+      const res = await fetch(`${endpoint}/presence`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-bureau-key': secret },
+        body: JSON.stringify({ name, type, status })
+      });
+      const data = await res.json();
+      if (res.ok) { log('✓ presence updated', 'ok'); setConnected(true); }
+      else { log(`error: ${data.error || res.status}`, 'err'); }
+    } catch (e) { log(`fetch error: ${e.message}`, 'err'); }
+  }
+
+  async function clearPresence() {
+    const endpoint = document.getElementById('endpointUrl').value.trim();
+    const secret   = document.getElementById('secretKey').value.trim();
+    if (!endpoint || !secret) { log('set endpoint + secret key first', 'warn'); return; }
+    try {
+      await fetch(`${endpoint}/presence`, {
+        method: 'DELETE',
+        headers: { 'x-bureau-key': secret }
+      });
+      log('presence cleared', 'ok');
+    } catch(e) { log('clear failed', 'err'); }
+  }
+
+  // ── ANNOUNCE ────────────────────────────────────────────────
+  async function sendAnnounce() {
+    const endpoint  = document.getElementById('endpointUrl').value.trim();
+    const secret    = document.getElementById('secretKey').value.trim();
+    const channelId = document.getElementById('channelId').value.trim();
+    const message   = document.getElementById('announceMsg').value.trim();
+
+    if (!endpoint || !secret) { log('set endpoint + secret key first', 'warn'); return; }
+    if (!channelId) { log('channel ID required', 'warn'); return; }
+    if (!message) { log('message cannot be empty', 'warn'); return; }
+
+    log(`broadcasting to #${channelId}...`);
+    try {
+      const res = await fetch(`${endpoint}/announce`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-bureau-key': secret },
+        body: JSON.stringify({ channelId, message })
+      });
+      const data = await res.json();
+      if (res.ok) { log('✓ message sent', 'ok'); document.getElementById('announceMsg').value = ''; }
+      else { log(`error: ${data.error || res.status}`, 'err'); }
+    } catch(e) { log(`fetch error: ${e.message}`, 'err'); }
+  }
+
+  // ── PRESETS ─────────────────────────────────────────────────
+  function applyPreset(key) {
+    const presets = {
+      bureau:      { name: 'Bureau of Reality Management', type: 0, status: 'online' },
+      patrol:      { name: 'Reality Patrol // Active', type: 3, status: 'online' },
+      maintenance: { name: 'System Maintenance', type: 3, status: 'dnd' },
+      offline:     { name: 'Bureau Offline', type: 3, status: 'idle' },
+    };
+    const p = presets[key];
+    if (!p) return;
+    document.getElementById('actName').value = p.name;
+    document.getElementById('actType').value = p.type;
+    document.getElementById('botStatus').value = p.status;
+    document.querySelectorAll('.badge').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    log(`preset loaded: ${key}`, 'ok');
+  }
+
+  function quickMsg(msg) { document.getElementById('announceMsg').value = msg; }
+
+  // ── INIT ─────────────────────────────────────────────────────
+  loadConfig();
+  if (document.getElementById('endpointUrl').value) checkConnection();
+</script>
+</body>
+</html>
