@@ -247,6 +247,74 @@ header {
 .btn-directive:hover { background: #1a1000; box-shadow: var(--ga); }
 .btn-directive:active { transform: scale(0.98); }
 
+/* ── FIELD ASSIGNMENT CARD ── */
+.assignment-none {
+  font-size: 9px; letter-spacing: 2px; color: var(--muted);
+  text-align: center; padding: 20px 0;
+  border: 1px dashed var(--border2);
+}
+.assignment-none a {
+  color: var(--amber); text-decoration: none;
+  display: block; margin-top: 10px;
+  font-size: 8px; letter-spacing: 3px;
+}
+
+.assignment-active {
+  background: #02060d;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--green);
+  padding: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.assignment-watermark {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%) rotate(-12deg);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: clamp(2rem, 8vw, 3.5rem);
+  color: rgba(0,255,136,0.05);
+  pointer-events: none;
+  white-space: nowrap;
+  letter-spacing: 8px;
+  z-index: 0;
+}
+.assignment-inner { position: relative; z-index: 1; }
+.assignment-id {
+  font-size: 8px; letter-spacing: 3px;
+  color: var(--muted); margin-bottom: 8px;
+  display: flex; justify-content: space-between;
+}
+.assignment-id span { color: var(--green); text-shadow: var(--gg); }
+.assignment-text {
+  font-size: 13px; letter-spacing: 1px;
+  color: #fff; line-height: 1.6; margin-bottom: 12px;
+}
+.assignment-time {
+  font-size: 7px; letter-spacing: 2px;
+  color: var(--muted); border-top: 1px solid var(--border);
+  padding-top: 8px; margin-bottom: 10px;
+}
+
+.btn-field-report {
+  width: 100%; padding: 11px;
+  background: #020d00;
+  border: 1px solid var(--green);
+  border-radius: 2px;
+  color: var(--green);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 4px;
+  cursor: pointer; text-transform: uppercase;
+  transition: all 0.2s;
+  box-shadow: 0 0 12px rgba(0,255,136,0.1);
+  animation: pulse-green 2s ease-in-out infinite;
+}
+.btn-field-report:hover { background: #041800; box-shadow: var(--gg); }
+.btn-field-report:active { transform: scale(0.98); }
+@keyframes pulse-green {
+  0%,100% { box-shadow: 0 0 8px rgba(0,255,136,0.15); }
+  50%      { box-shadow: 0 0 20px rgba(0,255,136,0.4); }
+}
+
 .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .stat-label-s { font-size: 7px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; margin-bottom: 4px; display: flex; justify-content: space-between; }
 .stat-val-s { color: var(--cyan); }
@@ -351,7 +419,7 @@ footer { border-top: 1px solid var(--border); padding: 12px 14px; display: flex;
     </div>
   </div>
 
-  <!-- DIRECTIVE — upgraded -->
+  <!-- DAILY DIRECTIVE -->
   <div class="card">
     <div class="card-head">
       <div class="card-title">DAILY DIRECTIVE — CITIZEN GUIDANCE <span class="sig"><span class="sig-dot amber"></span></span></div>
@@ -362,31 +430,51 @@ footer { border-top: 1px solid var(--border); padding: 12px 14px; display: flex;
     </div>
   </div>
 
-  <!-- FIELD TOOLS -->
+  <!-- FIELD TOOLS + FIELD ASSIGNMENT — same container -->
   <div class="work-link-container">
-  <div class="system-tag">AGENT_PROTOCOL // FIELD_TOOLS</div>
+    <div class="system-tag">AGENT_PROTOCOL // FIELD_TOOLS</div>
 
-  <a href="https://maximumreality.github.io/living/bureau-archive.html" class="report-link" style="border-left-color:var(--amber); margin-bottom:12px; background: linear-gradient(90deg, rgba(255,179,0,0.1) 0%, transparent 100%);">
-    <img src="https://maximumreality.github.io/living/shield-logo.JPG"
-         style="width:22px; height:22px; margin-right:12px; filter: drop-shadow(0 0 5px #ff3355); border-radius:2px; object-fit: cover;"
-         alt="Bureau Shield">
-    <span class="report-text" style="color:var(--amber); text-shadow:var(--ga)">THE GAZETTE</span>
-    <span class="protocol-id">REF: BUREAU_ARCHIVE</span>
-  </a>
+    <a href="https://maximumreality.github.io/living/bureau-archive.html" class="report-link" style="border-left-color:var(--amber); margin-bottom:12px; background: linear-gradient(90deg, rgba(255,179,0,0.1) 0%, transparent 100%);">
+      <img src="https://maximumreality.github.io/living/shield-logo.JPG"
+           style="width:22px; height:22px; margin-right:12px; filter: drop-shadow(0 0 5px #ff3355); border-radius:2px; object-fit: cover;"
+           alt="Bureau Shield">
+      <span class="report-text" style="color:var(--amber); text-shadow:var(--ga)">THE GAZETTE</span>
+      <span class="protocol-id">REF: BUREAU_ARCHIVE</span>
+    </a>
 
-  <a href="https://maximumreality.github.io/living/index.html" class="report-link">
-    <span class="glitch-icon">🗂️</span>
-    <span class="report-text">REPORT TO WORK</span>
-    <span class="protocol-id">REF: LIVING_DIR</span>
-  </a>
+    <a href="https://maximumreality.github.io/living/index.html" class="report-link">
+      <span class="glitch-icon">🗂️</span>
+      <span class="report-text">REPORT TO WORK</span>
+      <span class="protocol-id">REF: LIVING_DIR</span>
+    </a>
 
-  <a href="field-lens.html" class="report-link" style="border-left-color:var(--green); background: linear-gradient(90deg, rgba(0,255,136,0.05) 0%, transparent 100%);">
-    <span class="glitch-icon" style="filter:drop-shadow(0 0 5px rgba(0,255,136,0.8)); font-size: 1.2rem;">⬡</span>
-    <span class="report-text" style="color:var(--green); text-shadow:var(--gg)">FIELD LENS v3.8</span>
-    <span class="protocol-id" id="lens-clearance">CLR: OMEGA-7</span>
-  </a>
-</div>
-    <div class="card">
+    <a href="field-lens.html" class="report-link" style="border-left-color:var(--green); background: linear-gradient(90deg, rgba(0,255,136,0.05) 0%, transparent 100%);">
+      <span class="glitch-icon" style="filter:drop-shadow(0 0 5px rgba(0,255,136,0.8)); font-size:1.2rem;">⬡</span>
+      <span class="report-text" style="color:var(--green); text-shadow:var(--gg)">FIELD LENS v3.8</span>
+      <span class="protocol-id" id="lens-clearance">CLR: OMEGA-7</span>
+    </a>
+
+    <!-- DIRECTIVES TOOL — new -->
+    <a href="directive.html" class="report-link" style="border-left-color:var(--amber); background: linear-gradient(90deg, rgba(255,179,0,0.07) 0%, transparent 100%); margin-top:8px;">
+      <span class="glitch-icon" style="filter:drop-shadow(0 0 5px rgba(255,179,0,0.8)); font-size:1.1rem;">⬡</span>
+      <span class="report-text" style="color:var(--amber); text-shadow:var(--ga)">DIRECTIVES</span>
+      <span class="protocol-id" id="directive-link-status">DECRYPT // DEPLOY</span>
+    </a>
+  </div>
+
+  <!-- FIELD ASSIGNMENT STATUS — reads from localStorage -->
+  <div class="card">
+    <div class="card-head">
+      <div class="card-title">FIELD ASSIGNMENT <span class="sig"><span class="sig-dot amber" id="assignment-sig"></span></span></div>
+      <div class="card-src">SRC: BUREAU_DIRECTIVE_ENGINE // AGENT_UPLINK</div>
+    </div>
+    <div class="card-body" id="assignmentBody">
+      <div class="loading">SCANNING_FOR_ACTIVE_ASSIGNMENT</div>
+    </div>
+  </div>
+
+  <!-- BUREAU LIVE UPLINK -->
+  <div class="card">
     <div class="card-head">
       <div class="card-title">BUREAU_LIVE_UPLINK <span class="sig"><span class="sig-dot green" id="bot-sig"></span></span></div>
       <div class="card-src">SRC: REPLIT_API // DISCORD_CDN</div>
@@ -405,7 +493,6 @@ footer { border-top: 1px solid var(--border); padding: 12px 14px; display: flex;
       <div class="term-line active" style="margin-top:10px; font-size:8px;" id="bot-activity">> AWAITING_CONNECTION...</div>
     </div>
   </div>
-
 
   <!-- NASA APOD -->
   <div class="card span2">
@@ -454,7 +541,7 @@ footer { border-top: 1px solid var(--border); padding: 12px 14px; display: flex;
     </div>
     <div class="card-body">
       <div class="term" id="termLog">
-        <div class="term-line active">> PORTAL v1.0 BOOT SEQUENCE INITIATED</div>
+        <div class="term-line active">> PORTAL v1.18 BOOT SEQUENCE INITIATED</div>
         <div class="term-line">> LOADING BUREAU DIRECTIVES...</div>
         <div class="term-line">> SENSOR ARRAYS: ONLINE</div>
         <div class="term-line">> CITIZEN PROFILES: INDEXED</div>
@@ -467,7 +554,7 @@ footer { border-top: 1px solid var(--border); padding: 12px 14px; display: flex;
 </div>
 
 <footer>
-  <div class="footer-text">PORTAL v1.0 — Bureau of Reality Management — All Rights Reserved, Citizen</div>
+  <div class="footer-text">PORTAL v1.18 — Bureau of Reality Management — All Rights Reserved, Citizen</div>
   <div class="footer-stats">
     <div class="f-stat">CITIZENS MONITORED: <span>∞</span></div>
     <div class="f-stat">SESSION: <span id="sessionTime">0:00</span></div>
@@ -516,6 +603,92 @@ function termLog(msg, type = '') {
   term.scrollTop = term.scrollHeight;
 }
 
+// ── FIELD ASSIGNMENT CARD ──
+function renderAssignmentCard() {
+  const el            = document.getElementById('assignmentBody');
+  const sigDot        = document.getElementById('assignment-sig');
+  const activeText    = localStorage.getItem('BUREAU_ACTIVE_DIRECTIVE');
+  const activeId      = localStorage.getItem('BUREAU_ACTIVE_DIRECTIVE_ID');
+  const solvedAt      = localStorage.getItem('BUREAU_DIRECTIVE_SOLVED_AT');
+  const status        = localStorage.getItem('BUREAU_DIRECTIVE_STATUS');
+  const fieldReports  = localStorage.getItem('BUREAU_FIELD_REPORTS') || '0';
+  const lastReport    = localStorage.getItem('BUREAU_LAST_FIELD_REPORT');
+  const lastReportId  = localStorage.getItem('BUREAU_LAST_FIELD_DIRECTIVE_ID');
+
+  // Update directive link badge
+  const badge = document.getElementById('directive-link-status');
+
+  if (activeText && status === 'ACTIVE') {
+    // There is an unsatisfied active directive
+    sigDot.className = 'sig-dot amber';
+    if (badge) badge.textContent = 'ASSIGNMENT ACTIVE';
+
+    const solvedTime = solvedAt
+      ? new Date(solvedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      : '—';
+
+    el.innerHTML = `
+      <div class="assignment-active">
+        <div class="assignment-watermark">ACTIVE</div>
+        <div class="assignment-inner">
+          <div class="assignment-id">
+            <span>${activeId || 'DIRECTIVE'}</span>
+            <span>STATUS: PENDING FIELD CONFIRMATION</span>
+          </div>
+          <div class="assignment-text">${activeText}</div>
+          <div class="assignment-time">
+            DECRYPTED: ${solvedTime} &nbsp;//&nbsp;
+            FIELD REPORTS FILED: ${fieldReports}
+          </div>
+          <button class="btn-field-report" onclick="portalFieldReport()">
+            ⬡ FIELD REPORT: COMPLETE
+          </button>
+        </div>
+      </div>
+    `;
+  } else {
+    // No active assignment
+    sigDot.className = 'sig-dot cyan';
+    if (badge) badge.textContent = 'DECRYPT // DEPLOY';
+
+    let lastLine = '';
+    if (lastReportId) {
+      const t = lastReport
+        ? new Date(lastReport).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        : '—';
+      lastLine = `<div style="font-size:8px;letter-spacing:2px;color:var(--muted);margin-top:10px;">
+        LAST FILED: ${lastReportId} @ ${t}<br>
+        TOTAL REPORTS: ${fieldReports}
+      </div>`;
+    }
+
+    el.innerHTML = `
+      <div class="assignment-none">
+        NO ACTIVE FIELD ASSIGNMENT
+        <a href="directive.html">⬡ ACCESS DIRECTIVES TERMINAL</a>
+        ${lastLine}
+      </div>
+    `;
+  }
+}
+
+function portalFieldReport() {
+  const directiveId = localStorage.getItem('BUREAU_ACTIVE_DIRECTIVE_ID') || '—';
+  const count = parseInt(localStorage.getItem('BUREAU_FIELD_REPORTS') || '0') + 1;
+
+  localStorage.setItem('BUREAU_FIELD_REPORTS',        String(count));
+  localStorage.setItem('BUREAU_DIRECTIVE_STATUS',     'FILED');
+  localStorage.setItem('BUREAU_LAST_FIELD_REPORT',    new Date().toISOString());
+  localStorage.setItem('BUREAU_LAST_FIELD_DIRECTIVE_ID', directiveId);
+  localStorage.removeItem('BUREAU_ACTIVE_DIRECTIVE');
+  localStorage.removeItem('BUREAU_ACTIVE_DIRECTIVE_ID');
+
+  termLog(`FIELD REPORT #${count} RECEIVED — DIRECTIVE ${directiveId}`, 'active');
+  termLog('ASSIGNMENT CLOSED. SECTOR SCAN LOGGED.', 'active');
+
+  renderAssignmentCard();
+}
+
 // ── FIELD AGENT HANDSHAKE ──
 (function checkFieldData() {
   const clearance  = localStorage.getItem('BUREAU_CLEARANCE');
@@ -523,6 +696,8 @@ function termLog(msg, type = '') {
   const scanCount  = localStorage.getItem('BUREAU_SCAN_COUNT');
   const anomaly    = localStorage.getItem('BUREAU_ANOMALY');
   const timestamp  = localStorage.getItem('BUREAU_TIMESTAMP');
+  const completed  = JSON.parse(localStorage.getItem('completedDirectives') || '[]');
+  const fieldRpts  = localStorage.getItem('BUREAU_FIELD_REPORTS') || '0';
 
   if (clearance) {
     const lc = document.getElementById('lens-clearance');
@@ -541,8 +716,9 @@ function termLog(msg, type = '') {
       if (scanCount) termLog('TOTAL SCANS LOGGED: ' + scanCount);
       if (anomaly)   termLog('ANOMALY ON RECORD: ' + anomaly, 'warn');
       if (timestamp) termLog('LAST FIELD OP: ' + new Date(timestamp).toLocaleString());
+      if (completed.length) termLog(`DIRECTIVES DECRYPTED: ${completed.length}`, 'active');
+      if (fieldRpts !== '0') termLog(`FIELD REPORTS FILED: ${fieldRpts}`, 'active');
       termLog('WELCOME BACK, AGENT. LOCAL SECTOR STILL COMPROMISED.', 'active');
-      termLog('BUREAU ARCHIVE (THE GAZETTE): SYNCHRONIZED', 'active');
       termLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'warn');
     }, 1800);
   } else {
@@ -641,19 +817,13 @@ async function loadAPOD() {
   }
 }
 
-// ══════════════════════════════════════════════
-// DAILY DIRECTIVE — BUREAU TEMPLATE ENGINE v7.3
-// ══════════════════════════════════════════════
+// ── DAILY DIRECTIVE ──
 const DEPT_TITLES = [
-  'Dept. of Citizen Guidance',
-  'Dept. of Mandatory Wellness',
-  'Dept. of Epistemic Compliance',
-  'Dept. of Approved Thoughts',
-  'Dept. of Behavioral Calibration',
-  'Dept. of Reality Alignment',
+  'Dept. of Citizen Guidance','Dept. of Mandatory Wellness',
+  'Dept. of Epistemic Compliance','Dept. of Approved Thoughts',
+  'Dept. of Behavioral Calibration','Dept. of Reality Alignment',
   'Dept. of Sanctioned Awareness',
 ];
-
 const COUNSELOR_TITLES = [
   'your assigned guidance counselor within the Bureau',
   'a senior compliance officer in Sector 7G',
@@ -663,27 +833,20 @@ const COUNSELOR_TITLES = [
   'the Bureau\'s Director of Mandatory Wellness',
   'a redacted official whose clearance exceeds this form',
 ];
-
 const DIRECTIVE_TEMPLATES = [
   (advice, caseNum, dept, counselor) =>
     `Your ${counselor} has approved the following productivity advisory:\n\n"${advice}"\n\nNon-compliance will be noted in your permanent record.`,
-
   (advice, caseNum, dept, counselor) =>
     `MANDATORY EPISTEMIC UPDATE — CASE FILE ${caseNum}:\n\n${counselor.charAt(0).toUpperCase()+counselor.slice(1)} has approved the following productivity advisory: "${advice}" Non-compliance will be noted in your permanent record.`,
-
   (advice, caseNum, dept, counselor) =>
     `The following directive has been classified MANDATORY by ${dept}:\n\n"${advice}"\n\nYour compliance window closes at end of solar cycle. Act accordingly.`,
-
   (advice, caseNum, dept, counselor) =>
     `CITIZEN ADVISORY — PRIORITY ALPHA:\n\nField operatives are reminded that ${counselor} has issued the following standing order:\n\n"${advice}"\n\nFailure to integrate this directive constitutes a reality drift infraction.`,
-
   (advice, caseNum, dept, counselor) =>
     `Per Bureau Regulation 7.${caseNum % 99 + 1}(b), all agents must acknowledge:\n\n"${advice}"\n\nApproved by ${dept}. Your silence is compliance.`,
-
   (advice, caseNum, dept, counselor) =>
     `INTERCEPTED CIVILIAN GUIDANCE — RE-CLASSIFIED AS MANDATORY:\n\n"${advice}"\n\nOriginally flagged as unsolicited wisdom. ${dept} has determined it is, in fact, an order.`,
 ];
-
 const SIGN_OFFS = [
   '— Bureau of Reality Management, Dept. of Citizen Guidance',
   '— Issued under Bureau Authority, Sector Ω',
@@ -703,14 +866,14 @@ async function loadDirective() {
   try {
     const res  = await fetch('https://api.adviceslip.com/advice', { cache: 'no-cache' });
     const data = await res.json();
-    const advice     = data.slip.advice;
-    const slipId     = data.slip.id;
-    const caseNum    = padCase(slipId);
-    const dept       = getRandom(DEPT_TITLES);
-    const counselor  = getRandom(COUNSELOR_TITLES);
-    const template   = getRandom(DIRECTIVE_TEMPLATES);
-    const bodyText   = template(advice, slipId, dept, counselor);
-    const signOff    = getRandom(SIGN_OFFS);
+    const advice    = data.slip.advice;
+    const slipId    = data.slip.id;
+    const caseNum   = padCase(slipId);
+    const dept      = getRandom(DEPT_TITLES);
+    const counselor = getRandom(COUNSELOR_TITLES);
+    const template  = getRandom(DIRECTIVE_TEMPLATES);
+    const bodyText  = template(advice, slipId, dept, counselor);
+    const signOff   = getRandom(SIGN_OFFS);
 
     el.innerHTML = `
       <div class="directive-box">
@@ -733,7 +896,6 @@ async function loadDirective() {
     `;
     termLog('DIRECTIVE RECEIVED // COMPLIANCE REQUIRED', 'active');
   } catch(e) {
-    // Fallback: Bureau-flavored default if API is down
     const fallbacks = [
       'You are being watched. Compliance is non-negotiable. Have a nice day, citizen.',
       'The Bureau reminds you that all thoughts should be pre-approved. Retroactive approval is available for a fee.',
@@ -763,47 +925,45 @@ async function loadDirective() {
   }
 }
 
+// ── BUREAU BOT UPLINK ──
+async function updateBureauStats() {
+  try {
+    const response = await fetch('https://c3f3044d-13db-4dc6-9112-144c0525a751-00-3ahgj2a42ntpd.picard.replit.dev/api/bureau-status');
+    const data = await response.json();
+    document.getElementById('bot-status').innerText   = data.status;
+    document.getElementById('agent-count').innerText  = data.agentCount;
+    document.getElementById('bot-activity').innerText = `> LAST_SCAN: ${data.lastScan}`;
+    document.getElementById('bot-fill').style.width   = "100%";
+    document.getElementById('bot-sig').className      = "sig-dot green";
+    termLog(`BUREAU UPLINK: ${data.status} // AGENTS: ${data.agentCount}`, 'active');
+  } catch (err) {
+    document.getElementById('bot-status').innerText = 'OFFLINE';
+    document.getElementById('bot-sig').className    = "sig-dot red";
+    document.getElementById('bot-fill').style.width = "10%";
+    termLog('BUREAU UPLINK: SIGNAL_LOST', 'err');
+  }
+}
+setInterval(updateBureauStats, 60000);
+
 // ── BOOT SEQUENCE ──
 (async () => {
-  termLog('PORTAL v1.0 ONLINE');
+  termLog('PORTAL v1.18 ONLINE');
   await new Promise(r => setTimeout(r, 400));
   loadWeather();
   await new Promise(r => setTimeout(r, 600));
   loadDirective();
   await new Promise(r => setTimeout(r, 800));
   loadAPOD();
-    // ── BUREAU BOT UPLINK ──
-    async function updateBureauStats() {
-    try {
-      // REPLACE with your confirmed Replit URL
-      const response = await fetch('https://c3f3044d-13db-4dc6-9112-144c0525a751-00-3ahgj2a42ntpd.picard.replit.dev/api/bureau-status');
-      const data = await response.json();
-      
-      // Update the UI elements
-      document.getElementById('bot-status').innerText = data.status;
-      document.getElementById('agent-count').innerText = data.agentCount;
-      document.getElementById('bot-activity').innerText = `> LAST_SCAN: ${data.lastScan}`;
-      
-      // Visual feedback: turn the bar green and the signal dot on
-      document.getElementById('bot-fill').style.width = "100%";
-      document.getElementById('bot-sig').className = "sig-dot green";
-      
-      termLog(`BUREAU UPLINK: ${data.status} // AGENTS: ${data.agentCount}`, 'active');
-    } catch (err) {
-      document.getElementById('bot-status').innerText = 'OFFLINE';
-      document.getElementById('bot-sig').className = "sig-dot red";
-      document.getElementById('bot-fill').style.width = "10%";
-      termLog('BUREAU UPLINK: SIGNAL_LOST', 'err');
-    }
-  }
-
-  // Auto-refresh every 60 seconds to keep the portal live
-  setInterval(updateBureauStats, 60000);
+  await new Promise(r => setTimeout(r, 1000));
   updateBureauStats();
-
-
+  await new Promise(r => setTimeout(r, 1200));
+  renderAssignmentCard();
+  termLog('FIELD ASSIGNMENT MODULE: ONLINE', 'active');
   setTimeout(() => termLog('ALL SYSTEMS NOMINAL // MONITORING ACTIVE', 'active'), 4000);
 })();
+
+// Refresh assignment card when agent returns to this tab
+window.addEventListener('focus', renderAssignmentCard);
 </script>
 </body>
 </html>
