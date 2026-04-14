@@ -175,7 +175,7 @@ input::after {
 
 <div id="terminal">
     <div class="header">
-        <span>BUREAU OF REALITY MANAGEMENT // V.2026</span>
+        <span>BUREAU OF REALITY MANAGEMENT // AGENT: <span id="agent-name"></span></span></span>
         <span id="timer">STABILITY: 30s</span>
     </div>
 <div class="log">
@@ -206,16 +206,19 @@ input::after {
 
 <script>
     const database = [
-    { id: "LOG_001", plain: "PROCEED TO FOREST NODE AND SCAN LARGEST TREE", type: "atbash" },
-    { id: "LOG_002", plain: "ALIGN FIELD LENS WITH SKY AND CAPTURE SIGNAL", type: "caesar" },
-    { id: "LOG_003", plain: "RETURN DATA TO REPO AND AWAIT NEXT DIRECTIVE", type: "caesar" },
-    { id: "LOG_004", plain: "LOCATE REFLECTIVE SURFACE AND VERIFY SECOND IMAGE", type: "atbash" },
-    { id: "LOG_005", plain: "STAND STILL FOR TEN SECONDS AND RECORD AMBIENT AUDIO", type: "caesar" },
-    { id: "LOG_006", plain: "POINT DEVICE NORTH AND HOLD UNTIL INTERFACE RESPONDS", type: "atbash" },
-    { id: "LOG_007", plain: "SCAN NEAREST MOVING OBJECT AND TRACK ITS PATH", type: "caesar" },
-    { id: "LOG_008", plain: "ENTER DARK ENVIRONMENT AND INITIATE LOW LIGHT MODE", type: "atbash" },
-    { id: "LOG_009", plain: "FOCUS ON HAND AND VERIFY FINGER COUNT IN DISPLAY", type: "caesar" },
-    { id: "LOG_010", plain: "CLOSE ONE EYE AND OBSERVE DIFFERENCE IN OVERLAY", type: "atbash" }
+    { id: "LOG_001", plain: "PROCEED TO FOREST NODE AND SCAN LARGEST TREE", type: "atbash", clearance: "LEVEL_1" },
+    { id: "LOG_002", plain: "ALIGN FIELD LENS WITH SKY AND CAPTURE SIGNAL", type: "caesar", clearance: "LEVEL_1" },
+    { id: "LOG_003", plain: "RETURN DATA TO REPO AND AWAIT NEXT DIRECTIVE", type: "caesar", clearance: "LEVEL_1" },
+
+    { id: "LOG_004", plain: "LOCATE REFLECTIVE SURFACE AND VERIFY SECOND IMAGE", type: "atbash", clearance: "LEVEL_2" },
+    { id: "LOG_005", plain: "STAND STILL FOR TEN SECONDS AND RECORD AMBIENT AUDIO", type: "caesar", clearance: "LEVEL_2" },
+
+    { id: "LOG_006", plain: "POINT DEVICE NORTH AND HOLD UNTIL INTERFACE RESPONDS", type: "atbash", clearance: "LEVEL_3" },
+    { id: "LOG_007", plain: "SCAN NEAREST MOVING OBJECT AND TRACK ITS PATH", type: "caesar", clearance: "LEVEL_3" },
+    { id: "LOG_008", plain: "ENTER DARK ENVIRONMENT AND INITIATE LOW LIGHT MODE", type: "atbash", clearence: "LEVEL_4" },
+    { id: "LOG_009", plain: "FOCUS ON HAND AND VERIFY FINGER COUNT IN DISPLAY", type: "caesar", clearence: "LEVEL_4" },
+    { id: "LOG_010", plain: "CLOSE ONE EYE AND OBSERVE DIFFERENCE IN OVERLAY", type: "atbash", clearence: "LEVEL_4" }
+LEVEL_3" }
 ];
 <p id="decoded-text"></p>
     let currentIdx = 0;
@@ -558,8 +561,85 @@ let directiveSolved = false;
     updateDecoded();
     updateKeypad();
     addLog("MAPPING CLEARED", "log");
+},
+function getNextDirective() {
+    let used = JSON.parse(localStorage.getItem("usedDirectives")) || [];
+
+    // filter by clearance
+    const availableByClearance = database.filter(d => {
+        return d.clearance <= clearance;
+    });
+
+    if (used.length === availableByClearance.length) {
+        used = [];
+    }
+
+    let available = availableByClearance.filter(d => !used.includes(d.id));
+    let selected = available[Math.floor(Math.random() * available.length)];
+
+    used.push(selected.id);
+    localStorage.setItem("usedDirectives", JSON.stringify(used));
+
+    return selected;
 }
+function renderTransmissionsPortal() {
+  const portal = document.getElementById('dossier-portal');
+  if (!portal) return;
+
+  const name = localStorage.getItem('BUREAU_AGENT_NAME');
+  const clearance = localStorage.getItem('BUREAU_CLEARANCE');
+
+  if (name && clearance) {
+    // If the data exists, overwrite the static "NOT FOUND" HTML
+    portal.innerHTML = `
+      <div style="border:1px solid var(--cyan); padding:12px; background:rgba(0,255,231,0.05); text-align:left; position:relative; overflow:hidden;">
+        <div style="font-size:7px; color:var(--cyan); letter-spacing:3px; margin-bottom:6px; opacity:0.8;">// IDENTITY VERIFIED</div>
+        <div style="font-size:16px; color:#fff; text-shadow:0 0 10px var(--cyan); font-family:'Share Tech Mono', monospace;">${name}</div>
+        <div style="font-size:9px; color:var(--green); margin-top:4px; letter-spacing:1px;">RANK: ${clearance}</div>
+        <div style="margin-top:12px; border-top:1px solid rgba(0,255,231,0.2); padding-top:8px; font-size:7px; color:var(--muted); letter-spacing:1px;">
+          UPLINK STATUS: <span style="color:var(--green)">SECURE</span>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// iPhone Fix: Refresh the portal every time the user switches back to this tab
+window.addEventListener('focus', renderTransmissionsPortal);
+document.getElementById("agent-name").innerText = agentName;
+decryptTransmission();
+renderTransmissionsPortal(); // Added this
+if(typeof renderFieldLog === 'function') renderFieldLog(); // Added this
+
+const agentName = localStorage.getItem('BUREAU_AGENT_NAME') || "UNKNOWN_AGENT";
+const clearance = localStorage.getItem('BUREAU_CLEARANCE') || "LEVEL_0";>
+}
+addLog(`AGENT ${agentName} AUTHENTICATED`, "success");
+addLog(`CLEARANCE: ${clearance}`, "log");
+function onDirectiveSolved() {
+    clearInterval(timerInterval);
+
+    let completed = JSON.parse(localStorage.getItem("completedDirectives")) || [];
+    completed.push(currentDirective.id);
+    localStorage.setItem("completedDirectives", JSON.stringify(completed));
+
+    addLog("DECRYPTION COMPLETE", "success");
+
+    setTimeout(() => {
+        addLog("UPLINKING TO CENTRAL REPO...", "log");
+    }, 800);
+
+    setTimeout(() => {
+        display.innerText = "DIRECTIVE ACCEPTED";
+    }, 1500);
+
+    setTimeout(() => {
+        directiveSolved = false;
+        loadDirective();
+    }, 3000);
 }
 </script>
 </body>
 </html>
+
+//put in bureau archive localStorage.getItem("completedDirectives")
