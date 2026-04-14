@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BRM | DIRECTIVES</title>
+    <style>
+        :root {
+            --bureau-green: #00ff41;
+            --bureau-red: #ff0055;
+            --bureau-bg: #050505;
+            --terminal-font: 'Courier New', Courier, monospace;
+        }
+
+        /* Lock the viewport to prevent the "iPhone bounce" */
+        html, body {
+            position: fixed;
+            overflow: hidden;
+            width: 100%;
+            height: 100dvh; 
+            margin: 0;
+            padding: 0;
+            background-color: var(--bureau-bg);
+            touch-action: none;
+        }
+
+        body {
+            color: var(--bureau-green);
+            font-family: var(--terminal-font);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Scanline Overlay */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        #terminal {
+            flex-grow: 1;
+            border: 1px solid #333;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Prevent the terminal container itself from scrolling */
+        }
+#keypad {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.key {
+    padding: 10px 0;
+    text-align: center;
+    border: 1px solid #333;
+    background: rgba(0,255,65,0.05);
+    color: var(--bureau-green);
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.key:active {
+    background: var(--bureau-green);
+    color: black;
+}
+
+.key.used {
+    opacity: 0.3;
+}
+        .header {
+            flex: 0 0 auto;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .directive-box {
+            flex: 0 0 auto;
+            background: rgba(0, 255, 65, 0.05);
+            padding: 15px;
+            border-left: 3px solid var(--bureau-green);
+            margin-bottom: 10px;
+        }
+
+        #encoded-text {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            word-break: break-all;
+            margin: 10px 0;
+        }
+        #decoded-text {
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    color: white;
+    margin-top: 10px;
+}
+
+.letter {
+    display: inline-block;
+    width: 18px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.letter.active {
+    background: var(--bureau-green);
+    color: black;
+}
+
+        /* History container scrolls internally */
+        #history {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            mask-image: linear-gradient(to top, black 80%, transparent 100%);
+        }
+
+        .input-area {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            padding-bottom: 10px;
+            border-top: 1px solid #222;
+            padding-top: 10px;
+        }
+
+        .prompt { margin-right: 10px; font-size: 0.9rem; }
+
+        input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: var(--terminal-font);
+            font-size: 16px; /* Prevents iOS zoom-in */
+            width: 100%;
+            outline: none;
+            text-transform: uppercase;
+        }
+input::after {
+    content: "_";
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50%, 100% { opacity: 1; }
+    25%, 75% { opacity: 0; }
+}
+        #timer {
+            color: var(--bureau-red);
+            font-weight: bold;
+        }
+
+        .log { font-size: 0.8rem; margin-top: 5px; opacity: 0.7; }
+        .error { color: var(--bureau-red); }
+        .success { color: white; }
+
+    </style>
+</head>
+<body>
+
+<div id="terminal">
+    <div class="header">
+        <span>BUREAU OF REALITY MANAGEMENT // V.2026</span>
+        <span id="timer">STABILITY: 30s</span>
+    </div>
+<div class="log">
+> AGENT ACCESS CONFIRMED  
+> DIRECTIVES ARE ENCRYPTED FOR SECURITY  
+> DECRYPT MESSAGE TO RECEIVE ASSIGNMENT  
+</div>
+    <div class="directive-box">
+        <div class="log">> INCOMING_FROM: DIRECTOR_VANE</div>
+        <div class="log">> STATUS: MANDATORY_COMPLIANCE</div>
+        <p id="encoded-text">INITIALIZING...</p>
+    </div>
+
+    <div id="history"></div>
+
+    <div class="input-area">
+        <span class="prompt">BRM@LIVING_REPO:~$</span>
+        <input type="text" id="user-input" 
+               inputmode="text" 
+               autocapitalize="none" 
+               autocomplete="off" 
+               spellcheck="false"
+               autofocus>
+    </div>
+    <div id="keypad"></div>
+    <div class="key" onclick="clearMapping()">CLEAR</div>
+</div>
+
+<script>
+    const database = [
+    { id: "LOG_001", plain: "PROCEED TO FOREST NODE AND SCAN LARGEST TREE", type: "atbash" },
+    { id: "LOG_002", plain: "ALIGN FIELD LENS WITH SKY AND CAPTURE SIGNAL", type: "caesar" },
+    { id: "LOG_003", plain: "RETURN DATA TO REPO AND AWAIT NEXT DIRECTIVE", type: "caesar" },
+    { id: "LOG_004", plain: "LOCATE REFLECTIVE SURFACE AND VERIFY SECOND IMAGE", type: "atbash" },
+    { id: "LOG_005", plain: "STAND STILL FOR TEN SECONDS AND RECORD AMBIENT AUDIO", type: "caesar" },
+    { id: "LOG_006", plain: "POINT DEVICE NORTH AND HOLD UNTIL INTERFACE RESPONDS", type: "atbash" },
+    { id: "LOG_007", plain: "SCAN NEAREST MOVING OBJECT AND TRACK ITS PATH", type: "caesar" },
+    { id: "LOG_008", plain: "ENTER DARK ENVIRONMENT AND INITIATE LOW LIGHT MODE", type: "atbash" },
+    { id: "LOG_009", plain: "FOCUS ON HAND AND VERIFY FINGER COUNT IN DISPLAY", type: "caesar" },
+    { id: "LOG_010", plain: "CLOSE ONE EYE AND OBSERVE DIFFERENCE IN OVERLAY", type: "atbash" }
+];
+<p id="decoded-text"></p>
+    let currentIdx = 0;
+    let timeLeft = 30;
+    let timerInterval;
+
+    const display = document.getElementById('encoded-text');
+    const input = document.getElementById('user-input');
+    const history = document.getElementById('history');
+    const timerDisplay = document.getElementById('timer');
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        timeLeft = 30;
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerDisplay.innerText = `STABILITY: ${timeLeft}s`;
+            if (timeLeft <= 0) {
+                failDirective();
+            }
+        }, 1000);
+    }
+
+  function typeEffect(text, element, speed = 30) {
+    element.innerText = "";
+    let i = 0;
+
+    function type() {
+        if (i < text.length) {
+            element.innerText += text[i];
+            i++;
+            setTimeout(type, speed);
+        }
+    }
+
+    type();
+}
+    function atbash(str) {
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const reversed = alphabet.split("").reverse().join("");
+
+    return str.replace(/[A-Z]/g, char => {
+        return reversed[alphabet.indexOf(char)];
+    });
+}
+
+function caesar(str, shift = 3) {
+    return str.replace(/[A-Z]/g, char => {
+        return String.fromCharCode((char.charCodeAt(0) - 65 + shift) % 26 + 65);
+    });
+}
+    function scrambleReveal(finalText, element) {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let iterations = 0;
+
+    const interval = setInterval(() => {
+        element.innerText = finalText
+            .split("")
+            .map((char, i) => {
+                if (i < iterations) return finalText[i];
+                return chars[Math.floor(Math.random() * chars.length)];
+            })
+            .join("");
+
+        if (iterations >= finalText.length) {
+            clearInterval(interval);
+        }
+
+        iterations += 1 / 2;
+    }, 30);
+}
+    function glitchScreen() {
+    document.body.style.filter = "hue-rotate(90deg) contrast(2)";
+    setTimeout(() => {
+        document.body.style.filter = "none";
+    }, 200);
+}
+
+function encryptDirective(data) {
+    if (data.type === "atbash") return atbash(data.plain);
+    if (data.type === "caesar") return caesar(data.plain, 3);
+    return data.plain;
+}
+
+function loadDirective() {
+    const data = getNextDirective();
+
+    const encrypted = encryptDirective(data);
+
+    scrambleReveal(encrypted, display);
+    addLog(`CIPHER: ${data.type.toUpperCase()}`, "log");
+
+    startTimer();
+}
+    function getHint(type) {
+    if (type === "atbash") return "HINT: ALPHABET IS REVERSED (A ↔ Z)";
+    if (type === "caesar") return "HINT: LETTERS ARE SHIFTED BY A FIXED AMOUNT";
+    return "";
+}
+    function getNextDirective() {
+    let used = JSON.parse(localStorage.getItem("usedDirectives")) || [];
+
+    if (used.length === database.length) {
+        used = []; // reset cycle
+    }
+
+    let available = database.filter(d => !used.includes(d.id));
+    let selected = available[Math.floor(Math.random() * available.length)];
+let currentCipher = "";
+let mapping = {};
+let selectedLetter = null;
+    used.push(selected.id);
+    localStorage.setItem("usedDirectives", JSON.stringify(used));
+
+    return selected;
+}
+    function addLog(msg, className) {
+        const div = document.createElement('div');
+        div.className = className;
+        div.innerText = `> ${msg}`;
+        history.prepend(div);
+    }
+function revealLetter(solution, element) {
+    let revealed = "";
+    let index = 0;
+
+    setInterval(() => {
+        if (index < solution.length) {
+            revealed += solution[index];
+            element.innerText = revealed;
+            index++;
+        }
+    }, 3000);
+    function renderCipher(text) {
+    const container = document.getElementById("encoded-text");
+    container.innerHTML = "";
+
+    text.split("").forEach(char => {
+        const span = document.createElement("span");
+        span.innerText = char;
+
+        if (/[A-Z]/.test(char)) {
+            span.classList.add("letter");
+            span.addEventListener("click", () => selectLetter(char));
+        }
+
+        container.appendChild(span);
+    });
+},
+    function selectLetter(letter) {
+    selectedLetter = letter;
+    addLog(`SELECTED: ${letter}`, "log");
+},
+}
+   
+ function failDirective() {
+    glitchScreen();
+    addLog("TIME EXPIRED. SYSTEM RESET.", "error");
+    input.value = "";
+    loadDirective();
+}
+
+    input.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            const guess = input.value.toUpperCase().trim();
+            const solution = data.plain;
+
+if (solution.includes(guess) && guess.length > 4) {
+    addLog("PARTIAL MATCH DETECTED...", "log");
+}
+
+if (guess === solution) {
+
+            if (solution.includes(guess) && guess.length > 3)
+                addLog("DIRECTIVE DECODED. TRANSMITTING...", "success");
+                currentIdx++;
+                input.value = "";
+                
+                if (currentIdx < database.length) {
+                    setTimeout(loadDirective, 1000);
+                } else {
+                    clearInterval(timerInterval);
+                    display.innerText = "REPO SYNCED. ALL REALITIES STABLE.";
+                    addLog("DIRECTIVE STREAM COMPLETE.", "success");
+                }
+            } else {
+                addLog("DECRYPTION FAILED. PATTERN MISMATCH.", "error");
+                input.value = "";
+            }
+        }
+    });
+input.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+        const guess = input.value.toUpperCase().trim();
+
+        if (selectedLetter && guess.length === 1) {
+            mapping[selectedLetter] = guess;
+            updateDecoded();
+            input.value = "";
+            return;
+        }
+
+        checkSolution(guess);
+    }
+});
+    function updateDecoded() {
+    const decoded = currentCipher.split("").map(char => {
+        if (mapping[char]) return mapping[char];
+        if (/[A-Z]/.test(char)) return "_";
+        return char;
+    }).join("");
+mapping = {};
+selectedLetter = null;
+
+const encrypted = encryptDirective(data);
+currentCipher = encrypted;
+
+renderCipher(encrypted);
+updateDecoded();
+    document.getElementById("decoded-text").innerText = decoded;
+}
+    window.onload = loadDirective;
+    addLog(getHint(data.type), "log");
+function checkSolution(guess) {
+    const solution = currentDirective.plain;
+
+    if (guess === solution) {
+        addLog("DIRECTIVE DECODED. TRANSMITTING...", "success");
+    } else {
+        addLog("DECRYPTION FAILED. PATTERN MISMATCH.", "error");
+    }
+}let currentDirective;
+    currentDirective = data;
+    function createKeypad() {
+    const keypad = document.getElementById("keypad");
+    keypad.innerHTML = "";
+
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    alphabet.split("").forEach(letter => {
+        const key = document.createElement("div");
+        key.className = "key";
+        key.innerText = letter;
+
+        key.addEventListener("click", () => assignLetter(letter));
+
+        keypad.appendChild(key);
+    });
+        function assignLetter(letter) {
+    if (!selectedLetter) {
+        addLog("SELECT A CIPHER LETTER FIRST", "error");
+        return;
+    }
+
+    // prevent duplicate mapping (real cryptogram behavior)
+    for (let key in mapping) {
+        if (mapping[key] === letter) {
+            addLog(`LETTER ${letter} ALREADY USED`, "error");
+            return;
+        }
+    }
+
+    mapping[selectedLetter] = letter;
+    updateDecoded();
+    updateKeypad();
+
+    addLog(`${selectedLetter} → ${letter}`, "success");
+},
+        function updateKeypad() {
+    const usedLetters = Object.values(mapping);
+    const keys = document.querySelectorAll(".key");
+
+    keys.forEach(key => {
+        if (usedLetters.includes(key.innerText)) {
+            key.classList.add("used");
+        } else {
+            key.classList.remove("used");
+        }
+    });
+}
+        function selectLetter(letter) {
+    selectedLetter = letter;
+
+    document.querySelectorAll(".letter").forEach(el => {
+        el.classList.remove("active");
+        if (el.innerText === letter) {
+            el.classList.add("active");
+        }
+    });
+let directiveSolved = false;
+            function updateDecoded() {
+    const solution = currentDirective.plain;
+
+    const decoded = currentCipher.split("").map(char => {
+        if (mapping[char]) return mapping[char];
+        if (/[A-Z]/.test(char)) return "_";
+        return char;
+    }).join("");
+
+    document.getElementById("decoded-text").innerText = decoded;
+
+    // 🔥 AUTO-DETECT COMPLETION
+    if (!directiveSolved && decoded === solution) {
+        directiveSolved = true;
+        onDirectiveSolved();
+    },
+                function onDirectiveSolved() {
+    clearInterval(timerInterval);
+
+    addLog("DECRYPTION COMPLETE", "success");
+
+    setTimeout(() => {
+        addLog("DIRECTIVE VERIFIED", "success");
+    }, 500);
+
+    setTimeout(() => {
+        addLog("TRANSMITTING TO AGENT...", "log");
+    }, 1000);
+
+    setTimeout(() => {
+        display.innerText = "DIRECTIVE ACCEPTED";
+    }, 1500);
+
+    // load next directive after delay
+    setTimeout(() => {
+        directiveSolved = false;
+        loadDirective();
+    }, 3000);
+},
+           directiveSolved = false;
+                if (!directiveSolved && !decoded.includes("_")) {
+    addLog("PATTERN RESOLVED...", "log");
+}
+}
+    addLog(`TARGET: ${letter}`, "log");
+},
+        createKeypad();
+        function clearMapping() {
+    mapping = {};
+    updateDecoded();
+    updateKeypad();
+    addLog("MAPPING CLEARED", "log");
+}
+}
+</script>
+</body>
+</html>
