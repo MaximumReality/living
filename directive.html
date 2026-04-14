@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BRM | DIRECTIVES</title>
+    <style>
+        :root {
+            --green: #00ff41;
+            --red: #ff0055;
+            --cyan: #00ffe7;
+            --bg: #050505;
+            --muted: #444;
+            --font: 'Courier New', Courier, monospace;
+        }
+
+        html, body {
+            position: fixed;
+            overflow: hidden;
+            width: 100%;
+            height: 100dvh;
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            touch-action: none;
+        }
+
+        body {
+            color: var(--green);
+            font-family: var(--font);
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            box-sizing: border-box;
+        }
+
+        /* Scanline overlay */
+        body::before {
+            content: "";
+            display: block;
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(rgba(0,0,0,0) 50%, rgba(0,0,0,0.12) 50%);
+            background-size: 100% 4px;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            flex: 0 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #222;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+        }
+
+        #timer { color: var(--red); font-weight: bold; }
+
+        /* ── DIRECTIVE BOX ── */
+        .directive-box {
+            flex: 0 0 auto;
+            background: rgba(0,255,65,0.04);
+            border-left: 3px solid var(--green);
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .directive-box .meta {
+            font-size: 0.7rem;
+            opacity: 0.6;
+            margin-bottom: 6px;
+        }
+
+        /* Cipher text — clickable letters */
+        #encoded-text {
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            word-break: break-all;
+            line-height: 1.8;
+        }
+
+        span.letter {
+            display: inline-block;
+            min-width: 14px;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 1px solid #333;
+            transition: background 0.1s;
+        }
+
+        span.letter.active {
+            background: var(--green);
+            color: #000;
+        }
+
+        span.letter.mapped {
+            color: #fff;
+            border-bottom-color: #555;
+        }
+
+        /* Decoded text row */
+        #decoded-text {
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            color: #fff;
+            margin-top: 8px;
+            word-break: break-all;
+            min-height: 1.4em;
+        }
+
+        /* ── LOG HISTORY ── */
+        #history {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            margin-bottom: 8px;
+            mask-image: linear-gradient(to top, black 70%, transparent 100%);
+            font-size: 0.75rem;
+        }
+
+        .log  { opacity: 0.65; margin-top: 3px; }
+        .error   { color: var(--red);  margin-top: 3px; }
+        .success { color: #fff;        margin-top: 3px; }
+
+        /* ── KEYPAD ── */
+        #keypad {
+            flex: 0 0 auto;
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            gap: 4px;
+            margin-top: 6px;
+        }
+
+        .key {
+            padding: 9px 0;
+            text-align: center;
+            border: 1px solid #2a2a2a;
+            background: rgba(0,255,65,0.04);
+            color: var(--green);
+            font-family: var(--font);
+            font-size: 13px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.1s, opacity 0.2s;
+        }
+
+        .key:active { background: var(--green); color: #000; }
+
+        .key.used {
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        /* CLEAR button spans full width below keypad */
+        #clear-btn {
+            flex: 0 0 auto;
+            margin-top: 4px;
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #2a2a2a;
+            background: rgba(255,0,85,0.05);
+            color: var(--red);
+            font-family: var(--font);
+            font-size: 12px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #clear-btn:active { background: var(--red); color: #000; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <span>BRM // AGENT: <span id="agent-name">—</span></span>
+    <span>CLEARANCE: <span id="clearance-display">—</span></span>
+    <span id="timer">STABILITY: 30s</span>
+</div>
+
+<div class="directive-box">
+    <div class="meta" id="directive-meta">> INCOMING_FROM: DIRECTOR_VANE &nbsp;|&nbsp; STATUS: MANDATORY_COMPLIANCE</div>
+    <div id="encoded-text">INITIALIZING...</div>
+    <div id="decoded-text"></div>
+</div>
+
+<div id="history"></div>
+
+<div id="keypad"></div>
+<div id="clear-btn" onclick="clearMapping()">[ CLEAR MAPPING ]</div>
+
+<script>
+// ════════════════════════════════════════════
+//  DATABASE
+// ════════════════════════════════════════════
+const database = [
+    { id: "LOG_001", plain: "PROCEED TO FOREST NODE AND SCAN LARGEST TREE",      type: "atbash", clearance: "LEVEL_1" },
+    { id: "LOG_002", plain: "ALIGN FIELD LENS WITH SKY AND CAPTURE SIGNAL",      type: "caesar", clearance: "LEVEL_1" },
+    { id: "LOG_003", plain: "RETURN DATA TO REPO AND AWAIT NEXT DIRECTIVE",      type: "caesar", clearance: "LEVEL_1" },
+    { id: "LOG_004", plain: "LOCATE REFLECTIVE SURFACE AND VERIFY SECOND IMAGE", type: "atbash", clearance: "LEVEL_2" },
+    { id: "LOG_005", plain: "STAND STILL FOR TEN SECONDS AND RECORD AMBIENT AUDIO", type: "caesar", clearance: "LEVEL_2" },
+    { id: "LOG_006", plain: "POINT DEVICE NORTH AND HOLD UNTIL INTERFACE RESPONDS", type: "atbash", clearance: "LEVEL_3" },
+    { id: "LOG_007", plain: "SCAN NEAREST MOVING OBJECT AND TRACK ITS PATH",     type: "caesar", clearance: "LEVEL_3" },
+    { id: "LOG_008", plain: "ENTER DARK ENVIRONMENT AND INITIATE LOW LIGHT MODE", type: "atbash", clearance: "LEVEL_4" },
+    { id: "LOG_009", plain: "FOCUS ON HAND AND VERIFY FINGER COUNT IN DISPLAY",  type: "caesar", clearance: "LEVEL_4" },
+    { id: "LOG_010", plain: "CLOSE ONE EYE AND OBSERVE DIFFERENCE IN OVERLAY",   type: "atbash", clearance: "LEVEL_4" }
+];
+
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+let currentDirective = null;
+let currentCipher    = "";
+let mapping          = {};     // cipherLetter → guessedLetter
+let selectedLetter   = null;
+let directiveSolved  = false;
+let timerInterval    = null;
+let timeLeft         = 30;
+
+// ════════════════════════════════════════════
+//  DOM REFS
+// ════════════════════════════════════════════
+const encodedEl    = document.getElementById('encoded-text');
+const decodedEl    = document.getElementById('decoded-text');
+const historyEl    = document.getElementById('history');
+const timerEl      = document.getElementById('timer');
+const agentNameEl  = document.getElementById('agent-name');
+const clearanceEl  = document.getElementById('clearance-display');
+
+// ════════════════════════════════════════════
+//  AGENT IDENTITY (from localStorage)
+// ════════════════════════════════════════════
+const agentName = localStorage.getItem('BUREAU_AGENT_NAME') || "UNKNOWN_AGENT";
+const clearance = localStorage.getItem('BUREAU_CLEARANCE')  || "LEVEL_1";
+
+agentNameEl.innerText  = agentName;
+clearanceEl.innerText  = clearance;
+
+// ════════════════════════════════════════════
+//  CIPHER FUNCTIONS
+// ════════════════════════════════════════════
+function atbash(str) {
+    const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const rev   = alpha.split("").reverse().join("");
+    return str.replace(/[A-Z]/g, c => rev[alpha.indexOf(c)]);
+}
+
+function caesar(str, shift = 3) {
+    return str.replace(/[A-Z]/g, c =>
+        String.fromCharCode((c.charCodeAt(0) - 65 + shift) % 26 + 65)
+    );
+}
+
+function encryptDirective(data) {
+    if (data.type === "atbash") return atbash(data.plain);
+    if (data.type === "caesar") return caesar(data.plain, 3);
+    return data.plain;
+}
+
+// ════════════════════════════════════════════
+//  SCRAMBLE REVEAL ANIMATION
+// ════════════════════════════════════════════
+function scrambleReveal(finalText, onDone) {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let iter = 0;
+
+    const iv = setInterval(() => {
+        const display = finalText.split("").map((ch, i) => {
+            if (i < iter) return finalText[i];
+            if (/[A-Z]/.test(ch)) return chars[Math.floor(Math.random() * chars.length)];
+            return ch;
+        }).join("");
+
+        encodedEl.innerText = display;
+
+        iter += 0.5;
+        if (iter >= finalText.length) {
+            clearInterval(iv);
+            renderCipher(finalText);
+            if (onDone) onDone();
+        }
+    }, 30);
+}
+
+// ════════════════════════════════════════════
+//  RENDER CIPHER (clickable spans)
+// ════════════════════════════════════════════
+function renderCipher(text) {
+    encodedEl.innerHTML = "";
+    text.split("").forEach(char => {
+        const span = document.createElement("span");
+        if (/[A-Z]/.test(char)) {
+            span.className = "letter";
+            span.innerText = char;
+            span.addEventListener("click", () => selectLetter(char, span));
+        } else {
+            span.innerText = char;
+        }
+        encodedEl.appendChild(span);
+    });
+}
+
+// ════════════════════════════════════════════
+//  SELECT A CIPHER LETTER
+// ════════════════════════════════════════════
+function selectLetter(letter, spanEl) {
+    // Deactivate previous
+    document.querySelectorAll(".letter.active").forEach(el => el.classList.remove("active"));
+
+    selectedLetter = letter;
+    spanEl.classList.add("active");
+    addLog(`TARGETED: ${letter}`, "log");
+}
+
+// ════════════════════════════════════════════
+//  KEYPAD
+// ════════════════════════════════════════════
+function createKeypad() {
+    const keypad = document.getElementById("keypad");
+    keypad.innerHTML = "";
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(letter => {
+        const key = document.createElement("div");
+        key.className = "key";
+        key.innerText = letter;
+        key.dataset.letter = letter;
+        key.addEventListener("click", () => assignLetter(letter));
+        keypad.appendChild(key);
+    });
+}
+
+function assignLetter(plainLetter) {
+    if (!selectedLetter) {
+        addLog("SELECT A CIPHER LETTER FIRST", "error");
+        return;
+    }
+    // Block duplicate plain-letter assignments
+    for (const k in mapping) {
+        if (mapping[k] === plainLetter) {
+            addLog(`${plainLetter} ALREADY ASSIGNED`, "error");
+            return;
+        }
+    }
+    mapping[selectedLetter] = plainLetter;
+    addLog(`${selectedLetter} → ${plainLetter}`, "success");
+
+    updateDecoded();
+    updateKeypad();
+
+    // Deselect
+    document.querySelectorAll(".letter.active").forEach(el => el.classList.remove("active"));
+    selectedLetter = null;
+}
+
+function updateKeypad() {
+    const used = new Set(Object.values(mapping));
+    document.querySelectorAll(".key").forEach(key => {
+        key.classList.toggle("used", used.has(key.dataset.letter));
+    });
+}
+
+function clearMapping() {
+    mapping = {};
+    selectedLetter = null;
+    updateDecoded();
+    updateKeypad();
+    document.querySelectorAll(".letter.active").forEach(el => el.classList.remove("active"));
+    addLog("MAPPING CLEARED", "log");
+}
+
+// ════════════════════════════════════════════
+//  DECODED TEXT + AUTO-SOLVE CHECK
+// ════════════════════════════════════════════
+function updateDecoded() {
+    const solution = currentDirective.plain;
+    const decoded  = currentCipher.split("").map(char => {
+        if (mapping[char]) return mapping[char];
+        if (/[A-Z]/.test(char)) return "_";
+        return char;
+    }).join("");
+
+    decodedEl.innerText = decoded;
+
+    // Refresh mapped styling on cipher spans
+    document.querySelectorAll(".letter").forEach(span => {
+        span.classList.toggle("mapped", !!mapping[span.innerText]);
+    });
+
+    if (!directiveSolved && decoded === solution) {
+        directiveSolved = true;
+        onDirectiveSolved();
+    }
+}
+
+// ════════════════════════════════════════════
+//  TIMER
+// ════════════════════════════════════════════
+function startTimer() {
+    clearInterval(timerInterval);
+    timeLeft = 30;
+    timerEl.innerText = `STABILITY: ${timeLeft}s`;
+
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        timerEl.innerText = `STABILITY: ${timeLeft}s`;
+        if (timeLeft <= 0) failDirective();
+    }, 1000);
+}
+
+// ════════════════════════════════════════════
+//  GLITCH EFFECT
+// ════════════════════════════════════════════
+function glitchScreen() {
+    document.body.style.filter = "hue-rotate(90deg) contrast(2)";
+    setTimeout(() => { document.body.style.filter = "none"; }, 200);
+}
+
+// ════════════════════════════════════════════
+//  DIRECTIVE LIFECYCLE
+// ════════════════════════════════════════════
+function getNextDirective() {
+    // Filter by clearance level
+    const clearanceNum = parseInt(clearance.replace("LEVEL_", "")) || 1;
+    const available = database.filter(d => {
+        const dNum = parseInt(d.clearance.replace("LEVEL_", ""));
+        return dNum <= clearanceNum;
+    });
+
+    let used = JSON.parse(localStorage.getItem("usedDirectives")) || [];
+
+    // Reset cycle if all available have been used
+    const availableIds = available.map(d => d.id);
+    const remaining = available.filter(d => !used.includes(d.id));
+    if (remaining.length === 0) {
+        used = [];
+        localStorage.setItem("usedDirectives", JSON.stringify(used));
+    }
+
+    const pool = available.filter(d => !used.includes(d.id));
+    const selected = pool[Math.floor(Math.random() * pool.length)];
+
+    used.push(selected.id);
+    localStorage.setItem("usedDirectives", JSON.stringify(used));
+    return selected;
+}
+
+function loadDirective() {
+    directiveSolved = false;
+    mapping = {};
+    selectedLetter = null;
+
+    currentDirective = getNextDirective();
+    currentCipher    = encryptDirective(currentDirective);
+
+    decodedEl.innerText = "";
+    updateKeypad();
+
+    addLog(`INCOMING DIRECTIVE: ${currentDirective.id}`, "log");
+    addLog(`CIPHER: ${currentDirective.type.toUpperCase()}`, "log");
+    addLog(getHint(currentDirective.type), "log");
+
+    scrambleReveal(currentCipher, () => startTimer());
+}
+
+function failDirective() {
+    clearInterval(timerInterval);
+    glitchScreen();
+    addLog("STABILITY LOST. RESETTING CHANNEL.", "error");
+    setTimeout(loadDirective, 1200);
+}
+
+function onDirectiveSolved() {
+    clearInterval(timerInterval);
+
+    // Save to completed archive
+    let completed = JSON.parse(localStorage.getItem("completedDirectives")) || [];
+    if (!completed.includes(currentDirective.id)) {
+        completed.push(currentDirective.id);
+        localStorage.setItem("completedDirectives", JSON.stringify(completed));
+    }
+
+    addLog("DECRYPTION COMPLETE", "success");
+
+    setTimeout(() => addLog("UPLINKING TO CENTRAL REPO...", "log"), 600);
+    setTimeout(() => {
+        encodedEl.innerText = "DIRECTIVE ACCEPTED";
+        decodedEl.innerText = "";
+    }, 1400);
+    setTimeout(() => addLog("NEXT DIRECTIVE LOADING...", "log"), 2000);
+    setTimeout(loadDirective, 3000);
+}
+
+// ════════════════════════════════════════════
+//  HINT
+// ════════════════════════════════════════════
+function getHint(type) {
+    if (type === "atbash") return "HINT: ALPHABET IS REVERSED — A↔Z B↔Y C↔X...";
+    if (type === "caesar") return "HINT: EACH LETTER IS SHIFTED BY 3 POSITIONS";
+    return "";
+}
+
+// ════════════════════════════════════════════
+//  LOG HELPER
+// ════════════════════════════════════════════
+function addLog(msg, className) {
+    const div = document.createElement('div');
+    div.className = className;
+    div.innerText = `> ${msg}`;
+    historyEl.prepend(div);
+}
+
+// ════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════
+addLog(`AGENT ${agentName} AUTHENTICATED`, "success");
+addLog(`CLEARANCE: ${clearance}`, "log");
+
+createKeypad();
+loadDirective();
+</script>
+</body>
+</html>
