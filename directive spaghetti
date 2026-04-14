@@ -11,7 +11,7 @@
             --bureau-bg: #050505;
             --terminal-font: 'Courier New', Courier, monospace;
         }
-
+ 
         /* Lock the viewport to prevent the "iPhone bounce" */
         html, body {
             position: fixed;
