@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CIPHER — Wasteland Word Game</title>
+<meta name="description" content="CIPHER is a cyberpunk wasteland word puzzle game by Maximum Reality. Crack encrypted ciphers, manage survival, and explore a glitchy AI-driven world in this experimental browser game.">
+<meta name="keywords" content="cipher game, word puzzle game, cyberpunk game, glitch game, browser game, AI game, indie web game, survival puzzle game, Maximum Reality game">
+<meta name="author" content="Maximum Reality">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://maximumreality.github.io/living/cipher.html">
+<link rel="icon" type="image/jpeg" href="https://maximumreality.github.io/game/cipher-favicon.jpeg">
+<meta property="og:title" content="CIPHER — Wasteland Word Game | Maximum Reality">
+<meta property="og:description" content="Crack ciphers. Survive the wasteland. A glitchy cyberpunk word puzzle experience.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://maximumreality.github.io/living/cipher.html">
+<meta property="og:image" content="https://maximumreality.github.io/game/cipher-favicon.jpeg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CIPHER — Wasteland Word Game">
+<meta name="twitter:description" content="A glitchy cyberpunk word puzzle game by Maximum Reality.">
+<meta name="twitter:image" content="https://maximumreality.github.io/game/cipher-favicon.jpeg">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050508;
+    --surface: #0a0a12;
+    --panel: #0d0d18;
+    --neon-cyan: #00ffe7;
+    --neon-mag: #ff00aa;
+    --neon-amber: #ffaa00;
+    --neon-red: #ff2244;
+    --neon-green: #00ff88;
+    --text: #c8d8e8;
+    --dim: #445566;
+    --glow-c: 0 0 8px #00ffe7, 0 0 20px #00ffe780;
+    --glow-m: 0 0 8px #ff00aa, 0 0 20px #ff00aa80;
+    --glow-a: 0 0 8px #ffaa00, 0 0 20px #ffaa0080;
+    --glow-g: 0 0 8px #00ff88, 0 0 20px #00ff8880;
+    /* Phase colors — change per phase */
+    --phase-color: #00ffe7;
+    --phase-glow: 0 0 8px #00ffe7, 0 0 20px #00ffe780;
+  }
+
+  /* ── PHASE THEMES ── */
+  body.phase-2 {
+    --phase-color: #ff6600;
+    --phase-glow: 0 0 8px #ff6600, 0 0 20px #ff660080;
+    --bg: #080502;
+    --panel: #120a03;
+  }
+  body.phase-3 {
+    --phase-color: #cc00ff;
+    --phase-glow: 0 0 8px #cc00ff, 0 0 20px #cc00ff80;
+    --bg: #06010a;
+    --panel: #0e0314;
+  }
+  body.phase-4 {
+    --phase-color: #ff2244;
+    --phase-glow: 0 0 8px #ff2244, 0 0 20px #ff224480;
+    --bg: #080002;
+    --panel: #130003;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    transition: background 1.5s ease;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.15) 2px,rgba(0,0,0,0.15) 4px);
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.4;
+  }
+
+  /* ── PHASE TRANSITION OVERLAY ── */
+  .phase-flash {
+    position: fixed;
+    inset: 0;
+    background: var(--phase-color);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 998;
+    transition: opacity 0.15s;
+  }
+  .phase-flash.active { opacity: 0.12; }
+
+  /* ── NARRATIVE BANNER ── */
+  .narrative-banner {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: rgba(5,5,8,0.97);
+    border-bottom: 1px solid var(--phase-color);
+    box-shadow: 0 0 20px var(--phase-color);
+    padding: 20px 24px 18px;
+    z-index: 800;
+    transform: translateY(-100%);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    text-align: center;
+  }
+  .narrative-banner.show { transform: translateY(0); }
+  .narrative-phase { font-size: 0.5rem; letter-spacing: 0.35em; color: var(--dim); text-transform: uppercase; margin-bottom: 6px; }
+  .narrative-title { font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 900; letter-spacing: 0.2em; color: var(--phase-color); text-shadow: var(--phase-glow); margin-bottom: 10px; }
+  .narrative-text { font-family: 'VT323', monospace; font-size: 1.05rem; color: var(--text); line-height: 1.5; max-width: 380px; margin: 0 auto 14px; }
+  .btn-narrative-close { background: transparent; border: 1px solid var(--phase-color); color: var(--phase-color); font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; letter-spacing: 0.2em; padding: 8px 20px; border-radius: 3px; cursor: pointer; text-transform: uppercase; }
+  .btn-narrative-close:active { transform: scale(0.97); }
+
+  .game-wrapper {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 16px 12px 40px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    border-bottom: 1px solid #00ffe720;
+    padding-bottom: 10px;
+  }
+  .header-left { display: flex; align-items: center; gap: 10px; }
+  .game-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: var(--neon-cyan);
+    text-shadow: var(--glow-c);
+    letter-spacing: 0.15em;
+  }
+  .game-title span { color: var(--neon-mag); text-shadow: var(--glow-m); }
+  .sound-btn { background: none; border: 1px solid #334; border-radius: 4px; color: var(--dim); font-size: 1rem; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; padding: 0; }
+  .sound-btn.on { border-color: var(--neon-cyan); color: var(--neon-cyan); text-shadow: var(--glow-c); }
+  .sound-btn:active { transform: scale(0.9); }
+  .survival-bar-wrap { text-align: right; }
+  .survival-label { font-size: 0.55rem; color: var(--dim); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 3px; }
+  .survival-bar { width: 110px; height: 8px; background: #111; border: 1px solid var(--dim); border-radius: 2px; overflow: hidden; }
+  .survival-fill { height: 100%; background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan)); box-shadow: var(--glow-g); transition: width 0.6s ease; border-radius: 2px; }
+  .survival-pct { font-size: 0.65rem; color: var(--neon-green); text-shadow: var(--glow-g); text-align: right; margin-top: 2px; }
+
+  /* ── PHASE INDICATOR ── */
+  .phase-indicator {
+    text-align: center;
+    font-size: 0.5rem;
+    letter-spacing: 0.3em;
+    color: var(--phase-color);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    opacity: 0.8;
+    text-shadow: var(--phase-glow);
+  }
+
+  /* ── PROTAGONIST PANEL ── */
+  .protagonist-panel {
+    background: var(--panel);
+    border: 1px solid #00ffe715;
+    border-radius: 8px;
+    padding: 14px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 1s, background 1.5s;
+  }
+  .protagonist-panel::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--phase-color), var(--neon-mag));
+    box-shadow: var(--phase-glow);
+    transition: background 1s;
+  }
+  .figure-wrap { position: relative; flex-shrink: 0; width: 72px; height: 88px; }
+  .figure-svg { width: 72px; height: 88px; }
+  @keyframes cloakPulse { 0%,100%{filter:drop-shadow(0 0 4px #00ffe7) drop-shadow(0 0 10px #ff00aa80)} 50%{filter:drop-shadow(0 0 8px #ff00aa) drop-shadow(0 0 16px #00ffe780)} }
+  .figure-svg { animation: cloakPulse 3s ease-in-out infinite; }
+  @keyframes droneGlitch { 0%,90%,100%{opacity:1;transform:translateX(0) translateY(0) rotate(-2deg)} 92%{opacity:0.6;transform:translateX(-3px) translateY(-5px) rotate(2deg);filter:hue-rotate(90deg)} 94%{opacity:1;transform:translateX(2px) translateY(-3px) rotate(-2deg)} 96%{opacity:0.7;transform:translateX(-1px) translateY(-4px) rotate(1deg);filter:hue-rotate(-45deg)} }
+  .drone-svg { position: absolute; top: -18px; right: -14px; width: 36px; height: 36px; animation: droneGlitch 4s ease-in-out infinite; }
+  .drone-line { position: absolute; top: -2px; right: 8px; width: 1px; height: 22px; background: linear-gradient(180deg, var(--neon-cyan) 0%, transparent 100%); opacity: 0.5; }
+  .protagonist-info { flex: 1; }
+  .protagonist-name { font-family: 'Orbitron', sans-serif; font-size: 0.75rem; font-weight: 700; color: var(--neon-cyan); text-shadow: var(--glow-c); letter-spacing: 0.15em; margin-bottom: 2px; }
+  .protagonist-status { font-family: 'VT323', monospace; font-size: 1rem; color: var(--neon-amber); text-shadow: var(--glow-a); min-height: 1.2em; line-height: 1.2; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .cursor { animation: blink 1s step-end infinite; }
+  .stats-row { display: flex; gap: 10px; margin-top: 8px; }
+  .stat { flex: 1; }
+  .stat-label { font-size: 0.5rem; letter-spacing: 0.2em; color: var(--dim); text-transform: uppercase; margin-bottom: 2px; }
+  .stat-bar { height: 4px; background: #111; border: 1px solid #222; border-radius: 1px; overflow: hidden; }
+  .stat-fill { height: 100%; border-radius: 1px; transition: width 0.6s ease; }
+  .stat-fill.food { background: var(--neon-amber); box-shadow: var(--glow-a); }
+  .stat-fill.water { background: var(--neon-cyan); box-shadow: var(--glow-c); }
+  .stat-fill.tech { background: var(--neon-mag); box-shadow: var(--glow-m); }
+
+  /* ── PUZZLE AREA ── */
+  .puzzle-panel { background: var(--panel); border: 1px solid #00ffe718; border-radius: 8px; padding: 14px; margin-bottom: 12px; position: relative; transition: background 1.5s, border-color 1s; }
+  .puzzle-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .puzzle-tag { font-size: 0.5rem; letter-spacing: 0.25em; color: var(--dim); text-transform: uppercase; border: 1px solid #333; padding: 2px 6px; border-radius: 2px; }
+  .category-badge { font-size: 0.55rem; letter-spacing: 0.15em; padding: 2px 8px; border-radius: 2px; text-transform: uppercase; font-weight: bold; }
+  .cat-food { color: var(--neon-amber); border: 1px solid var(--neon-amber); text-shadow: var(--glow-a); }
+  .cat-water { color: var(--neon-cyan); border: 1px solid var(--neon-cyan); text-shadow: var(--glow-c); }
+  .cat-tech { color: var(--neon-mag); border: 1px solid var(--neon-mag); text-shadow: var(--glow-m); }
+  .cat-void { color: #cc00ff; border: 1px solid #cc00ff; text-shadow: 0 0 8px #cc00ff; }
+  .cat-signal { color: #ff6600; border: 1px solid #ff6600; text-shadow: 0 0 8px #ff6600; }
+  .clue-text { font-family: 'VT323', monospace; font-size: 1.1rem; color: var(--text); margin-bottom: 12px; line-height: 1.3; min-height: 2.6em; }
+  .clue-text em { font-style: normal; color: var(--phase-color); text-shadow: var(--phase-glow); }
+  .scrambled-area { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 14px; min-height: 46px; }
+  .letter-tile { width: 38px; height: 44px; display: flex; align-items: center; justify-content: center; background: #0a0f18; border: 1px solid var(--phase-color); border-radius: 4px; font-family: 'Orbitron', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--phase-color); text-shadow: var(--phase-glow); box-shadow: inset 0 0 8px rgba(0,255,231,0.06); cursor: pointer; transition: all 0.12s; user-select: none; position: relative; overflow: hidden; }
+  .letter-tile:active { transform: scale(0.9); }
+  .letter-tile.used { opacity: 0.2; cursor: default; pointer-events: none; }
+  @keyframes tileGlitch { 0%,100%{transform:none;filter:none} 25%{transform:translateX(-2px);filter:hue-rotate(60deg)} 75%{transform:translateX(2px);filter:hue-rotate(-60deg)} }
+  .letter-tile.glitch { animation: tileGlitch 0.15s ease; }
+  .answer-slots { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-bottom: 14px; min-height: 46px; }
+  .answer-slot { width: 38px; height: 44px; display: flex; align-items: center; justify-content: center; background: #050810; border: 1px solid #334; border-radius: 4px; font-family: 'Orbitron', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--neon-mag); text-shadow: var(--glow-m); cursor: pointer; transition: all 0.12s; user-select: none; }
+  .answer-slot.filled { border-color: #ff00aa60; box-shadow: inset 0 0 8px #ff00aa15; }
+  .answer-slot.filled:active { transform: scale(0.9); }
+  @keyframes slotCorrect { 0%{transform:scale(1)} 30%{transform:scale(1.2)} 60%{transform:scale(0.95)} 100%{transform:scale(1)} }
+  .answer-slot.correct { border-color: var(--neon-green)!important; color: var(--neon-green)!important; text-shadow: var(--glow-g)!important; box-shadow: var(--glow-g), inset 0 0 10px #00ff8820!important; animation: slotCorrect 0.4s ease; }
+  @keyframes slotWrong { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)} 40%{transform:translateX(5px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+  .answer-slot.wrong { border-color: var(--neon-red)!important; color: var(--neon-red)!important; animation: slotWrong 0.4s ease; }
+  .puzzle-controls { display: flex; gap: 8px; }
+  .btn { flex: 1; padding: 10px 8px; border: none; border-radius: 4px; font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; letter-spacing: 0.15em; cursor: pointer; text-transform: uppercase; transition: all 0.15s; }
+  .btn-check { background: #001a10; border: 1px solid var(--neon-green); color: var(--neon-green); text-shadow: var(--glow-g); box-shadow: 0 0 6px #00ff8830; }
+  .btn-check:active { background: #002a18; box-shadow: var(--glow-g); transform: scale(0.97); }
+  .btn-clear { background: #15080a; border: 1px solid #ff224440; color: var(--neon-red); flex: 0.6; }
+  .btn-clear:active { transform: scale(0.97); }
+  .btn-hint { background: #12100a; border: 1px solid #ffaa0040; color: var(--neon-amber); flex: 0.6; font-size: 0.65rem; }
+  .btn-hint:active { transform: scale(0.97); }
+
+  /* ── LOOT POPUP ── */
+  @keyframes lootIn { 0%{transform:translate(-50%,-50%) scale(0.5);opacity:0} 70%{transform:translate(-50%,-50%) scale(1.05);opacity:1} 100%{transform:translate(-50%,-50%) scale(1);opacity:1} }
+  .loot-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 500; background: #05060f; border: 1px solid var(--neon-cyan); box-shadow: var(--glow-c), 0 0 60px #00ffe720, inset 0 0 20px #00ffe705; border-radius: 10px; padding: 28px 32px 22px; text-align: center; min-width: 260px; opacity: 0; pointer-events: none; display: none; }
+  .loot-popup.show { display: block; pointer-events: all; animation: lootIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+  .loot-icon { font-size: 3rem; margin-bottom: 8px; display: block; }
+  .loot-title { font-family: 'Orbitron', sans-serif; font-size: 0.6rem; letter-spacing: 0.3em; color: var(--dim); text-transform: uppercase; margin-bottom: 4px; }
+  .loot-name { font-family: 'VT323', monospace; font-size: 2rem; color: var(--neon-cyan); text-shadow: var(--glow-c); margin-bottom: 8px; line-height: 1; }
+  .loot-desc { font-size: 0.7rem; color: var(--text); line-height: 1.5; margin-bottom: 6px; }
+  .loot-boost { font-family: 'VT323', monospace; font-size: 1.1rem; color: var(--neon-green); text-shadow: var(--glow-g); margin-bottom: 14px; }
+  .btn-continue { background: #001a15; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); text-shadow: var(--glow-c); font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; letter-spacing: 0.2em; padding: 10px 24px; border-radius: 4px; cursor: pointer; text-transform: uppercase; }
+  .btn-continue:active { transform: scale(0.97); }
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 499; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .overlay.show { opacity: 1; pointer-events: all; }
+
+  /* ── INVENTORY ── */
+  .inventory-panel { background: var(--panel); border: 1px solid #ffffff08; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; }
+  .inv-header { font-size: 0.5rem; letter-spacing: 0.25em; color: var(--dim); text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+  .inv-header::after { content: ''; flex: 1; height: 1px; background: #222; }
+  .inventory-grid { display: flex; flex-wrap: wrap; gap: 6px; min-height: 36px; }
+  @keyframes itemDrop { 0%{transform:scale(0) rotate(-20deg);opacity:0} 70%{transform:scale(1.2) rotate(5deg);opacity:1} 100%{transform:scale(1) rotate(0);opacity:1} }
+  .inv-item { font-size: 1.4rem; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: #0a0c15; border: 1px solid #222; border-radius: 4px; animation: itemDrop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; position: relative; cursor: default; }
+  .inv-item:hover .inv-tooltip, .inv-item:focus .inv-tooltip { opacity: 1; }
+  .inv-tooltip { position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); background: #0a0c18; border: 1px solid #333; padding: 3px 7px; border-radius: 3px; font-size: 0.55rem; white-space: nowrap; color: var(--text); opacity: 0; transition: opacity 0.2s; letter-spacing: 0.1em; z-index: 10; pointer-events: none; }
+  .inv-empty { font-size: 0.65rem; color: var(--dim); letter-spacing: 0.15em; font-style: italic; padding: 8px 0; }
+
+  /* ── END SCREEN ── */
+  .end-screen { position: fixed; inset: 0; background: rgba(5,5,8,0.95); z-index: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 32px; opacity: 0; pointer-events: none; transition: opacity 0.5s; }
+  .end-screen.show { opacity: 1; pointer-events: all; }
+  .end-title { font-family: 'Orbitron', sans-serif; font-size: 2rem; font-weight: 900; letter-spacing: 0.15em; margin-bottom: 12px; }
+  .end-title.dead { color: var(--neon-red); text-shadow: 0 0 20px #ff2244, 0 0 40px #ff224480; }
+  .end-title.win { color: var(--neon-cyan); text-shadow: var(--glow-c); }
+  .end-msg { font-family: 'VT323', monospace; font-size: 1.3rem; color: var(--text); margin-bottom: 16px; max-width: 320px; line-height: 1.4; }
+  .score-display { font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; color: var(--dim); letter-spacing: 0.15em; margin-bottom: 4px; }
+  .score-num { font-family: 'Orbitron', sans-serif; font-size: 2.5rem; font-weight: 900; color: var(--neon-cyan); text-shadow: var(--glow-c); margin-bottom: 16px; }
+  .end-actions { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; justify-content: center; }
+  .btn-share { background: #0d0a18; border: 1px solid var(--neon-mag); color: var(--neon-mag); text-shadow: var(--glow-m); font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; padding: 10px 20px; border-radius: 4px; cursor: pointer; text-transform: uppercase; }
+  .btn-share:active { transform: scale(0.97); }
+  .btn-copy { background: #0a0d12; border: 1px solid #334; color: var(--dim); font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; letter-spacing: 0.15em; padding: 10px 20px; border-radius: 4px; cursor: pointer; text-transform: uppercase; }
+  .btn-copy.copied { border-color: var(--neon-green); color: var(--neon-green); text-shadow: var(--glow-g); }
+  .btn-copy:active { transform: scale(0.97); }
+  .btn-restart { background: #001a15; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); text-shadow: var(--glow-c); font-family: 'Orbitron', sans-serif; font-size: 0.7rem; letter-spacing: 0.2em; padding: 12px 32px; border-radius: 4px; cursor: pointer; text-transform: uppercase; }
+  .end-inv { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin-bottom: 16px; max-width: 320px; }
+  .end-inv-item { font-size: 1.2rem; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: #0a0c15; border: 1px solid #222; border-radius: 3px; }
+  .round-info { font-size: 0.55rem; letter-spacing: 0.2em; color: var(--dim); text-align: center; margin-bottom: 10px; text-transform: uppercase; }
+  .round-info span { color: var(--phase-color); text-shadow: var(--phase-glow); }
+  .hint-line { font-size: 0.65rem; color: var(--neon-amber); text-shadow: var(--glow-a); text-align: center; min-height: 1.2em; margin-top: -6px; margin-bottom: 8px; letter-spacing: 0.1em; font-style: italic; }
+  @keyframes wrongFlash { 0%,100%{background:var(--panel)} 50%{background:#200008} }
+  .puzzle-panel.wrong-flash { animation: wrongFlash 0.4s ease; }
+  @keyframes correctFlash { 0%,100%{background:var(--panel)} 50%{background:#001510} }
+  .puzzle-panel.correct-flash { animation: correctFlash 0.4s ease; }
+  .drone-chat { position: absolute; top: -10px; right: 0; background: #050810; border: 1px solid var(--neon-cyan); border-radius: 4px 4px 4px 0; padding: 3px 8px; font-family: 'VT323', monospace; font-size: 0.85rem; color: var(--neon-cyan); text-shadow: var(--glow-c); white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.3s; }
+  .drone-chat.show { opacity: 1; }
+  .attempts-dots { display: flex; gap: 4px; justify-content: center; margin-bottom: 8px; }
+  .attempt-dot { width: 8px; height: 8px; border-radius: 50%; background: #222; border: 1px solid #333; transition: all 0.3s; }
+  .attempt-dot.used { background: var(--neon-red); border-color: var(--neon-red); box-shadow: 0 0 6px #ff2244; }
+  .streak-badge { display: none; font-family: 'VT323', monospace; font-size: 1rem; color: var(--neon-amber); text-shadow: var(--glow-a); text-align: center; margin-bottom: 8px; letter-spacing: 0.1em; }
+  .streak-badge.show { display: block; }
+  @keyframes shareIn { 0%{transform:translate(-50%,-50%) scale(0.8);opacity:0} 100%{transform:translate(-50%,-50%) scale(1);opacity:1} }
+  .share-toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); background: #05060f; border: 1px solid var(--neon-green); box-shadow: var(--glow-g); border-radius: 8px; padding: 16px 24px; text-align: center; z-index: 700; display: none; animation: shareIn 0.3s ease forwards; }
+  .share-toast.show { display: block; }
+  .share-toast p { font-family: 'VT323', monospace; font-size: 1.2rem; color: var(--neon-green); text-shadow: var(--glow-g); }
+
+  /* ── GLITCH LINES (phase 3+) ── */
+  .glitch-line { position: fixed; left: 0; right: 0; height: 2px; background: var(--phase-color); opacity: 0; pointer-events: none; z-index: 997; animation: glitchSweep 0.08s ease forwards; }
+  @keyframes glitchSweep { 0%{opacity:0.4;transform:scaleX(0)} 50%{opacity:0.6;transform:scaleX(1)} 100%{opacity:0;transform:scaleX(1)} }
+</style>
+</head>
+<body>
+
+<div class="phase-flash" id="phaseFlash"></div>
+<div class="overlay" id="overlay"></div>
+<div class="share-toast" id="shareToast"><p>📋 score copied to clipboard!</p></div>
+
+<!-- NARRATIVE BANNER -->
+<div class="narrative-banner" id="narrativeBanner">
+  <div class="narrative-phase" id="narrativePhase">PHASE 1</div>
+  <div class="narrative-title" id="narrativeTitle">THE DEADZONE</div>
+  <div class="narrative-text" id="narrativeText">Loading...</div>
+  <button class="btn-narrative-close" onclick="closeNarrative()">[ ACKNOWLEDGED ]</button>
+</div>
+
+<!-- LOOT POPUP -->
+<div class="loot-popup" id="lootPopup">
+  <span class="loot-icon" id="lootIcon">🔧</span>
+  <div class="loot-title">CIPHER CRACKED — LOOT ACQUIRED</div>
+  <div class="loot-name" id="lootName">SCRAP KNIFE</div>
+  <div class="loot-desc" id="lootDesc">A crude blade fashioned from a turbine fin.</div>
+  <div class="loot-boost" id="lootBoost">▲ SURVIVAL +8%</div>
+  <button class="btn-continue" id="btnContinue">[ NEXT CIPHER ]</button>
+</div>
+
+<!-- END SCREEN -->
+<div class="end-screen" id="endScreen">
+  <div class="end-title" id="endTitle">SIGNAL LOST</div>
+  <div class="end-msg" id="endMsg">The wasteland claims another wanderer.</div>
+  <div class="score-display">ITEMS SALVAGED</div>
+  <div class="score-num" id="endScore">0</div>
+  <div class="end-inv" id="endInv"></div>
+  <div class="end-actions">
+    <button class="btn-share" onclick="shareToX()">[ SHARE ON X ]</button>
+    <button class="btn-copy" id="btnCopy" onclick="copyScore()">[ COPY SCORE ]</button>
+  </div>
+  <button class="btn-restart" onclick="initGame()">[ REINITIALIZE ]</button>
+  <a href="https://maximumreality.github.io/living/Portal.html" style="margin-top:10px;display:inline-block;font-size:0.7rem;letter-spacing:0.2em;padding:10px 24px;border-radius:4px;text-decoration:none;background:#0a0a12;border:1px solid #445566;color:#445566;">[ BUREAU OF REALITY MANAGEMENT ]</a>
+</div>
+
+<div class="game-wrapper">
+  <div class="header">
+    <div class="header-left">
+      <div class="game-title">CI<span>PH</span>ER</div>
+      <a href="https://maximumreality.github.io/living/Portal.html" style="font-size:0.55rem;color:#00ffe7;text-decoration:none;letter-spacing:0.2em;display:block;margin-top:2px;opacity:0.8;">← PORTAL</a>
+      <button class="sound-btn on" id="soundBtn" onclick="toggleSound()" title="Toggle sound">🔊</button>
+    </div>
+    <div class="survival-bar-wrap">
+      <div class="survival-label">Survival %</div>
+      <div class="survival-bar"><div class="survival-fill" id="survivalFill" style="width:60%"></div></div>
+      <div class="survival-pct" id="survivalPct">60%</div>
+    </div>
+  </div>
+
+  <div class="phase-indicator" id="phaseIndicator">◈ PHASE 1 — THE DEADZONE ◈</div>
+
+  <div class="protagonist-panel">
+    <div class="figure-wrap">
+      <svg class="figure-svg" viewBox="0 0 72 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 40 Q8 60 6 88 L66 88 Q64 60 60 40 Q50 28 36 26 Q22 28 12 40Z" fill="#0a0810"/>
+        <path d="M12 40 Q8 60 6 88" stroke="#00ffe7" stroke-width="1.5" stroke-opacity="0.8"/>
+        <path d="M60 40 Q64 60 66 88" stroke="#ff00aa" stroke-width="1.5" stroke-opacity="0.8"/>
+        <path d="M28 55 L28 62 L36 62 L36 70 M44 55 L44 62 L36 62" stroke="#00ffe7" stroke-width="0.8" stroke-opacity="0.5"/>
+        <circle cx="36" cy="62" r="2" fill="#00ffe7" fill-opacity="0.6"/>
+        <circle cx="28" cy="55" r="1.5" fill="#ff00aa" fill-opacity="0.8"/>
+        <circle cx="44" cy="55" r="1.5" fill="#ff00aa" fill-opacity="0.8"/>
+        <path d="M18 36 Q16 20 36 14 Q56 20 54 36 Q50 28 36 26 Q22 28 18 36Z" fill="#0d0a14"/>
+        <path d="M18 36 Q16 20 36 14 Q56 20 54 36" stroke="#ff00aa" stroke-width="1" stroke-opacity="0.7"/>
+        <ellipse cx="36" cy="30" rx="12" ry="10" fill="#060408"/>
+        <ellipse cx="31" cy="30" rx="2.5" ry="1.5" fill="#00ffe7" opacity="0.9"/>
+        <ellipse cx="41" cy="30" rx="2.5" ry="1.5" fill="#00ffe7" opacity="0.9"/>
+        <path d="M22 22 Q36 16 50 22" stroke="#00ffe7" stroke-width="0.8" stroke-opacity="0.4"/>
+        <path d="M18 45 Q10 52 14 62" stroke="#0d0a14" stroke-width="6" stroke-linecap="round"/>
+        <rect x="10" y="60" width="10" height="7" rx="2" fill="#111" stroke="#00ffe7" stroke-width="0.8"/>
+        <rect x="11" y="61" width="8" height="5" rx="1" fill="#00ffe720"/>
+      </svg>
+      <div class="drone-line"></div>
+      <svg class="drone-svg" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="12" y="12" width="12" height="12" rx="3" fill="#080b14" stroke="#00ffe7" stroke-width="1"/>
+        <line x1="12" y1="18" x2="4" y2="14" stroke="#334" stroke-width="1.5"/>
+        <line x1="24" y1="18" x2="32" y2="14" stroke="#334" stroke-width="1.5"/>
+        <line x1="12" y1="18" x2="4" y2="22" stroke="#334" stroke-width="1.5"/>
+        <line x1="24" y1="18" x2="32" y2="22" stroke="#334" stroke-width="1.5"/>
+        <ellipse cx="4" cy="18" rx="4" ry="1.5" fill="none" stroke="#00ffe7" stroke-width="0.8" opacity="0.7"/>
+        <ellipse cx="32" cy="18" rx="4" ry="1.5" fill="none" stroke="#00ffe7" stroke-width="0.8" opacity="0.7"/>
+        <circle cx="18" cy="18" r="3" fill="#ff00aa" opacity="0.8"/>
+        <circle cx="18" cy="18" r="1.5" fill="#fff" opacity="0.9"/>
+        <line x1="12" y1="16" x2="24" y2="16" stroke="#00ffe7" stroke-width="0.5" opacity="0.4"/>
+      </svg>
+      <div class="drone-chat" id="droneChat">BZZt—</div>
+    </div>
+    <div class="protagonist-info">
+      <div class="protagonist-name">// V0ID-WALKER</div>
+      <div class="protagonist-status" id="statusText">scanning sector...</div>
+      <div class="stats-row">
+        <div class="stat"><div class="stat-label">🍖 Food</div><div class="stat-bar"><div class="stat-fill food" id="foodBar" style="width:50%"></div></div></div>
+        <div class="stat"><div class="stat-label">💧 Water</div><div class="stat-bar"><div class="stat-fill water" id="waterBar" style="width:50%"></div></div></div>
+        <div class="stat"><div class="stat-label">⚡ Tech</div><div class="stat-bar"><div class="stat-fill tech" id="techBar" style="width:50%"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="round-info" id="roundInfo">CIPHER <span id="roundNum">1</span> / <span id="roundTotal">20</span></div>
+  <div class="streak-badge" id="streakBadge">🔥 CIPHER STREAK x2</div>
+
+  <div class="puzzle-panel" id="puzzlePanel">
+    <div class="puzzle-header">
+      <div class="puzzle-tag">DECRYPT</div>
+      <div class="category-badge" id="catBadge">FOOD</div>
+    </div>
+    <div class="clue-text" id="clueText">Loading...</div>
+    <div class="scrambled-area" id="scrambledArea"></div>
+    <div class="answer-slots" id="answerSlots"></div>
+    <div class="attempts-dots" id="attemptDots"></div>
+    <div class="hint-line" id="hintLine"></div>
+    <div class="puzzle-controls">
+      <button class="btn btn-check" onclick="checkAnswer()">[ CRACK ]</button>
+      <button class="btn btn-hint" onclick="useHint()">HINT</button>
+      <button class="btn btn-clear" onclick="clearAnswer()">CLR</button>
+    </div>
+  </div>
+
+  <div class="inventory-panel">
+    <div class="inv-header">Salvage pack</div>
+    <div class="inventory-grid" id="inventoryGrid"><div class="inv-empty">— empty —</div></div>
+  </div>
+</div>
+
+<script>
+// ── AUDIO ──────────────────────────────────────────────────────────
+let audioCtx = null, soundOn = true;
+function getCtx() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+function playTone(freq, type, dur, vol=0.18, detune=0) {
+  if (!soundOn) return;
+  try { const ctx=getCtx(),osc=ctx.createOscillator(),gain=ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.type=type; osc.frequency.setValueAtTime(freq,ctx.currentTime); osc.detune.setValueAtTime(detune,ctx.currentTime); gain.gain.setValueAtTime(vol,ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur); osc.start(ctx.currentTime); osc.stop(ctx.currentTime+dur); } catch(e){}
+}
+function playNoise(dur,vol=0.06,hipass=800) {
+  if (!soundOn) return;
+  try { const ctx=getCtx(),bufSize=ctx.sampleRate*dur,buf=ctx.createBuffer(1,bufSize,ctx.sampleRate),data=buf.getChannelData(0); for(let i=0;i<bufSize;i++) data[i]=Math.random()*2-1; const src=ctx.createBufferSource(); src.buffer=buf; const filter=ctx.createBiquadFilter(); filter.type='highpass'; filter.frequency.value=hipass; const gain=ctx.createGain(); gain.gain.setValueAtTime(vol,ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur); src.connect(filter); filter.connect(gain); gain.connect(ctx.destination); src.start(); } catch(e){}
+}
+const SFX = {
+  tap(){playTone(660,'square',0.06,0.1);playNoise(0.04,0.03,1200);},
+  correct(){[440,554,659,880].forEach((f,i)=>setTimeout(()=>playTone(f,'square',0.12,0.14),i*60));setTimeout(()=>playNoise(0.1,0.05,2000),200);},
+  wrong(){playTone(220,'sawtooth',0.15,0.18);playTone(180,'square',0.1,0.1,-50);playNoise(0.1,0.08,200);},
+  loot(){[330,415,523,659].forEach(f=>playTone(f,'triangle',0.5,0.12));setTimeout(()=>[523,659,784].forEach(f=>playTone(f,'square',0.3,0.08)),200);},
+  gameover(){[440,370,311,220].forEach((f,i)=>setTimeout(()=>playTone(f,'sawtooth',0.3,0.15),i*120));setTimeout(()=>playNoise(0.4,0.1,100),400);},
+  win(){[523,659,784,1047,784,1047,1319].forEach((f,i)=>setTimeout(()=>playTone(f,'square',0.15,0.12),i*80));},
+  hint(){playTone(880,'sine',0.08,0.1);playTone(1100,'sine',0.08,0.08);playNoise(0.06,0.03,2000);},
+  clear(){playTone(330,'square',0.06,0.08);playNoise(0.05,0.03,600);},
+  streak(){[659,784,1047,1319].forEach((f,i)=>setTimeout(()=>playTone(f,'square',0.1,0.12),i*50));},
+  phase(){[220,277,330,440].forEach((f,i)=>setTimeout(()=>playTone(f,'triangle',0.4,0.1),i*100));playNoise(0.3,0.05,400);}
+};
+function toggleSound() { soundOn=!soundOn; const btn=document.getElementById('soundBtn'); btn.textContent=soundOn?'🔊':'🔇'; btn.className='sound-btn'+(soundOn?' on':''); if(soundOn&&audioCtx&&audioCtx.state==='suspended') audioCtx.resume(); }
+
+// ── PHASE NARRATIVE DATA ───────────────────────────────────────────
+const PHASES = [
+  {
+    id: 1, name: 'THE DEADZONE', class: '',
+    rounds: [1,5], // rounds 1-5
+    color: '#00ffe7',
+    narrative: `V0ID-WALKER emerges from the collapsed subway, drone flickering overhead. The air tastes of rust and old signals. The dead city stretches in every direction — cracked towers, glitching billboards, silence that hums. The cipher logs are scattered. You have to crack them to survive.`,
+    droneLines: ['BZZt— proximity ping.','signal fragments: 3','glitch in sector 7','thermal spike detected','recalibrating...','404: hope not found','cloak charge: 67%'],
+    statusLines: ['decrypting cache data...','scanning for hostiles...','cloak charge: nominal','reading the ruins...','navigating deadzone...'],
+  },
+  {
+    id: 2, name: 'THE BURN CORRIDOR', class: 'phase-2',
+    rounds: [6,10],
+    color: '#ff6600',
+    narrative: `The drone picks up heat signatures ahead — the Burn Corridor. Cracked pipelines leak ignition gas; the sky is orange with chemical haze. Someone was here recently. Their cipher logs are still warm. V0ID-WALKER adjusts the cloak's thermal filter and moves deeper into the fire.`,
+    droneLines: ['heat signature: 340°C','fuel leak detected','corridor: unstable','thermal cloak: active','fire wall: approaching','route: COMPROMISED','entity scan: hostile'],
+    statusLines: ['thermal scan: active...','fire route: calculating...','cloak: heat mode','corridor breach: 40%','oxygen: minimal'],
+  },
+  {
+    id: 3, name: 'THE VOID SIGNAL', class: 'phase-3',
+    rounds: [11,15],
+    color: '#cc00ff',
+    narrative: `The drone goes silent for eleven seconds. When it comes back, its voice is different — lower, slower, like something is speaking through it. A signal from deep in the dead net: fragmented, encrypted, alive. V0ID-WALKER realizes the ciphers are not random. Someone is leaving them on purpose. Someone wants to be found.`,
+    droneLines: ['signal origin: unknown','entity detected: non-human','memory corruption: 44%','frequency: ANOMALOUS','the cipher knows you','transmission: looping','dead net: breathing'],
+    statusLines: ['signal trace: active...','void frequency: tuning...','drone: partially possessed','origin scan: failed','something is listening'],
+  },
+  {
+    id: 4, name: 'THE LAST CACHE', class: 'phase-4',
+    rounds: [16,20],
+    color: '#ff2244',
+    narrative: `The coordinates from the void signal lead here — a buried pre-collapse research facility. The drone's battery is critical. V0ID-WALKER has five ciphers left before the cloak fails entirely. Whatever is at the center of the dead net left everything here. Crack the final cache. Find out what was hidden before the world ended.`,
+    droneLines: ['battery: 4%','cloak: CRITICAL','final sector: active','the cache is real','five ciphers remain','do not stop now','signal: MAXIMUM CLARITY'],
+    statusLines: ['final approach...','cloak: emergency mode','drone: last flight...','cache: almost cracked','endgame protocol: ON'],
+  },
+];
+
+// ── PUZZLE DATA — 20 PUZZLES ───────────────────────────────────────
+const ALL_PUZZLES = [
+  // ── PHASE 1: THE DEADZONE (puzzles 1-10, pick 5) ──
+  { word:'RATION',  clue:'Compressed survival block. The <em>nomad</em> found one sealed in a crashed supply drone.',              category:'food',   icon:'🍖', boost:'food',  boostAmt:18, desc:'A vacuum-sealed brick of nutrients. Keeps you moving for 48 hours.', phase:1 },
+  { word:'FUNGUS',  clue:'It grows in the dark tunnels of the <em>deadzone</em>. Glows faintly. Edible — mostly.',               category:'food',   icon:'🍄', boost:'food',  boostAmt:12, desc:'Bioluminescent wasteland mushroom. Nutritious if you ignore the color.', phase:1 },
+  { word:'FILTER',  clue:'Without this, the puddle becomes a <em>death sentence</em>. Crack it to survive.',                     category:'water',  icon:'🧪', boost:'water', boostAmt:20, desc:'Carbon mesh water filter. Turns toxic runoff into drinkable grit-water.', phase:1 },
+  { word:'CANTEEN', clue:'Seven letters. Carries the most precious <em>resource</em> in the wasteland.',                         category:'water',  icon:'🫙', boost:'water', boostAmt:16, desc:'Dented alloy canteen with a radiation-resistant seal.', phase:1 },
+  { word:'CIRCUIT', clue:'The drone\'s <em>core processor</em> runs on this. Seven traces on a board.',                          category:'tech',   icon:'⚡', boost:'tech',  boostAmt:18, desc:'Salvaged logic board. Powers the drone\'s navigation routines.', phase:1 },
+  { word:'SIGNAL',  clue:'You\'ve been searching for weeks. Finally — a <em>beacon</em> in the static.',                        category:'tech',   icon:'📡', boost:'tech',  boostAmt:14, desc:'Long-range signal booster. The wasteland gets a little less lonely.', phase:1 },
+  { word:'ROOTS',   clue:'They push through cracked asphalt, searching for water. So does the <em>wanderer</em>.',              category:'food',   icon:'🌿', boost:'food',  boostAmt:8,  desc:'Bitter but caloric. Dig deep enough and the wasteland feeds you.', phase:1 },
+  { word:'PURIFY',  clue:'The drone buzzes: <em>contamination detected.</em> You need to do this first.',                       category:'water',  icon:'⚗️', boost:'water', boostAmt:15, desc:'Chemical purification tabs. Each one clears a litre of grey water.', phase:1 },
+  { word:'BATTERY', clue:'Seven cells. The <em>heartbeat</em> of every scavenged machine.',                                     category:'tech',   icon:'🔋', boost:'tech',  boostAmt:15, desc:'Lithium-polymer cell block. Keeps the cloak lit and the drone airborne.', phase:1 },
+  { word:'ALGAE',   clue:'Green slime coating the <em>dead reservoir</em>. Disgusting. Essential.',                             category:'food',   icon:'🟢', boost:'food',  boostAmt:9,  desc:'Dried algae cake. Rich in protein, zero flavor. Survival first.', phase:1 },
+
+  // ── PHASE 2: THE BURN CORRIDOR (pick 5) ──
+  { word:'EMBER',   clue:'It shouldn\'t still be <em>burning</em>. Nothing should survive this heat. Yet here it glows.',      category:'signal', icon:'🔥', boost:'tech',  boostAmt:14, desc:'Thermal ember core. Somehow still radiating usable heat energy.', phase:2 },
+  { word:'EXHAUST', clue:'Seven letters. The corridor breathes it. <em>V0ID-WALKER</em> learns to breathe it too.',            category:'signal', icon:'💨', boost:'food',  boostAmt:10, desc:'Exhaust capture rig. Reclaims trace nutrients from combustion output.', phase:2 },
+  { word:'FLARE',   clue:'Shot up into the <em>orange sky</em>. Someone is still signaling. Someone is still alive.',          category:'signal', icon:'🚨', boost:'tech',  boostAmt:16, desc:'Emergency flare module. Signals allies — or draws enemies. Your call.', phase:2 },
+  { word:'PLASMA',  clue:'The pipeline cracked and it <em>leaked</em> upward. Bright. Beautiful. Lethal.',                     category:'signal', icon:'☢️', boost:'water', boostAmt:12, desc:'Stabilized plasma cell. Powers the cloak\'s heat deflection layer.', phase:2 },
+  { word:'TORCH',   clue:'Five letters. The oldest <em>technology</em>. Still works when everything else fails.',               category:'signal', icon:'🕯️', boost:'food',  boostAmt:11, desc:'Combustion torch. Simple. Reliable. The corridor fears nothing — except light.', phase:2 },
+  { word:'SMOKE',   clue:'Read it like language. The <em>burn marks</em> tell you which way the survivor ran.',                category:'signal', icon:'🌫️', boost:'water', boostAmt:10, desc:'Smoke reading guide. Interpret burn patterns. Navigate by fire.', phase:2 },
+  { word:'FUSE',    clue:'Four letters. It\'s the difference between <em>control</em> and catastrophe.',                       category:'signal', icon:'💣', boost:'tech',  boostAmt:13, desc:'Precision fuse splice. Reroutes power without triggering the gas lines.', phase:2 },
+  { word:'OXIDE',   clue:'The walls are coated in it. The <em>chemical haze</em> deposits it everywhere. Useful if processed.', category:'signal', icon:'🧱', boost:'food',  boostAmt:9,  desc:'Metal oxide scraping. Processed into a crude mineral supplement.', phase:2 },
+  { word:'HEAT',    clue:'Four letters. The corridor\'s only <em>currency</em>. Everything here runs on it.',                  category:'signal', icon:'♨️', boost:'tech',  boostAmt:12, desc:'Heat harvester patch. Converts ambient thermal energy into charge.', phase:2 },
+  { word:'SOOT',    clue:'It coats the <em>dead screens</em>. Wipe it away and the old message flickers back.',               category:'signal', icon:'🪨', boost:'water', boostAmt:8,  desc:'Soot filter membrane. Cleans the drone optics. Vision restored.', phase:2 },
+
+  // ── PHASE 3: THE VOID SIGNAL (pick 5) ──
+  { word:'CIPHER',  clue:'The language of the <em>dead net</em>. Crack it and the ruins speak.',                              category:'void',   icon:'🔐', boost:'tech',  boostAmt:20, desc:'Quantum cipher key. Unlocks encrypted supply caches across the sector.', phase:3 },
+  { word:'GHOST',   clue:'The drone sees it. The cloak can\'t hide from it. The <em>dead net</em> sent it.',                  category:'void',   icon:'👻', boost:'tech',  boostAmt:15, desc:'Ghost protocol key. Lets V0ID-WALKER move through encrypted space.', phase:3 },
+  { word:'STATIC',  clue:'Six letters. It\'s not silence. Something is <em>broadcasting</em> beneath the noise.',            category:'void',   icon:'📺', boost:'tech',  boostAmt:13, desc:'Static decoder ring. Filters signal from noise. The voice gets clearer.', phase:3 },
+  { word:'MEMORY',  clue:'The drone remembers everything. Even things that <em>never happened</em>.',                        category:'void',   icon:'🧠', boost:'tech',  boostAmt:17, desc:'Memory fragment chip. Recovered drone memories — someone else\'s route map.', phase:3 },
+  { word:'ECHO',    clue:'Four letters. The dead net throws your words back. But the timing is <em>wrong</em>.',             category:'void',   icon:'🔊', boost:'water', boostAmt:12, desc:'Echo locator. Uses signal bounce to map the buried facility below.', phase:3 },
+  { word:'PORTAL',  clue:'Six letters. The signal leads <em>somewhere</em>. The drone found the door.',                     category:'void',   icon:'🌀', boost:'tech',  boostAmt:18, desc:'Portal access chip. Opens the passage to the last cache sector.', phase:3 },
+  { word:'DECODE',  clue:'Six letters. The drone says: <em>you already know how</em>. You\'ve been doing it all along.',    category:'void',   icon:'💾', boost:'tech',  boostAmt:16, desc:'Decode engine upgrade. The cipher language becomes second nature.', phase:3 },
+  { word:'RELAY',   clue:'Five letters. Without it the <em>drone goes dark</em> beyond fifty meters.',                      category:'void',   icon:'📻', boost:'tech',  boostAmt:13, desc:'Comms relay module. Extends drone range and restores glitched telemetry.', phase:3 },
+  { word:'TRACE',   clue:'Five letters. Someone left a <em>path</em> through the dead net. Follow it.',                     category:'void',   icon:'🔍', boost:'food',  boostAmt:11, desc:'Signal trace log. Maps the path left by the entity in the dead net.', phase:3 },
+  { word:'NODE',    clue:'Four letters. Every network has one. This one is still <em>alive</em>.',                          category:'void',   icon:'🕸️', boost:'tech',  boostAmt:14, desc:'Active network node. The dead net\'s last living junction point.', phase:3 },
+
+  // ── PHASE 4: THE LAST CACHE (pick 5) ──
+  { word:'CACHE',   clue:'Five letters. The drone has been pointing here since the beginning. The <em>final answer</em>.',   category:'void',   icon:'📦', boost:'food',  boostAmt:22, desc:'Supply cache — pre-collapse. Everything needed to start again.', phase:4 },
+  { word:'CLOAK',   clue:'Not just fashion. The <em>neon weave</em> bends light and scrambles thermal sensors.',            category:'tech',   icon:'🧥', boost:'tech',  boostAmt:19, desc:'Adaptive cloak module. Repairs frayed neon filaments in the hood lining.', phase:4 },
+  { word:'VAULT',   clue:'Five letters. It hasn\'t been opened since <em>before the silence</em>. Your key fits.',         category:'void',   icon:'🔒', boost:'food',  boostAmt:20, desc:'Vault seal — cracked open. Whoever hid this wanted it found eventually.', phase:4 },
+  { word:'CODEC',   clue:'Intercept an encrypted broadcast. You need this to <em>decode the noise</em>.',                  category:'tech',   icon:'💾', boost:'tech',  boostAmt:12, desc:'Compression codec chip. Decrypts faction comms. Knowledge is survival.', phase:4 },
+  { word:'SOLAR',   clue:'Thin as foil. Folds into a pocket. Unfolds to <em>drink the sun</em>.',                         category:'tech',   icon:'☀️', boost:'tech',  boostAmt:16, desc:'Flexible solar cell array. Passive charge while moving through open zones.', phase:4 },
+  { word:'PROBE',   clue:'Sent ahead into the <em>contaminated zone</em>. Whatever it found, it didn\'t come back.',       category:'tech',   icon:'🛸', boost:'tech',  boostAmt:11, desc:'Recon probe core. Recovered and patched — still transmits partial data.', phase:4 },
+  { word:'NEXUS',   clue:'Five letters. The heart of the <em>dead net</em>. Everything connects here.',                    category:'void',   icon:'⚙️', boost:'tech',  boostAmt:24, desc:'Nexus access key. The final node. The source of the void signal.', phase:4 },
+  { word:'ORIGIN',  clue:'Six letters. Before the wasteland. Before the silence. The <em>drone finally remembers</em>.',   category:'void',   icon:'🌐', boost:'food',  boostAmt:18, desc:'Origin data shard. What really happened. Compressed to six letters.', phase:4 },
+  { word:'BINARY',  clue:'Six letters. It\'s what everything became. <em>Zero or one</em>. Dead or alive.',               category:'void',   icon:'01', boost:'tech',  boostAmt:15, desc:'Binary key sequence. The last lock in the facility. Open it.', phase:4 },
+  { word:'SIGNAL',  clue:'Six letters. It brought V0ID-WALKER here. Now it <em>speaks clearly</em> for the first time.',  category:'void',   icon:'📡', boost:'tech',  boostAmt:20, desc:'The original signal — decoded. A message. A name. A reason.', phase:4 },
+];
+
+const DRONE_LINES_DEFAULT = ['BZZt— proximity ping.','signal fragments: 3','glitch in sector 7','thermal spike detected','recalibrating...','404: hope not found','cloak charge: 67%','route: UNKNOWN','hostile signatures: 0','static on all channels'];
+const STATUS_LINES_DEFAULT = ['decrypting cache data...','scanning for hostiles...','cloak charge: nominal','reading the ruins...','navigating deadzone...','tracing signal source...','drone: semi-functional','sector: contaminated'];
+
+// ── GAME STATE ─────────────────────────────────────────────────────
+let state = {};
+let currentPhase = 1;
+
+function getPhase(roundIndex) {
+  // roundIndex is 0-based
+  if (roundIndex < 5)  return PHASES[0];
+  if (roundIndex < 10) return PHASES[1];
+  if (roundIndex < 15) return PHASES[2];
+  return PHASES[3];
+}
+
+function buildPuzzleSet() {
+  // Pick 5 from each phase, shuffle within phase
+  const result = [];
+  [1,2,3,4].forEach(phase => {
+    const pool = ALL_PUZZLES.filter(p => p.phase === phase);
+    const shuffled = pool.sort(() => Math.random() - 0.5).slice(0, 5);
+    result.push(...shuffled);
+  });
+  return result;
+}
+
+function initGame() {
+  state = {
+    puzzles: buildPuzzleSet(),
+    round: 0,
+    survival: 40,
+    food: 50,
+    water: 50,
+    tech: 50,
+    inventory: [],
+    attempts: 0,
+    maxAttempts: 4,
+    hintUsed: false,
+    selectedLetters: [],
+    scrambled: [],
+    gameOver: false,
+    score: 0,
+    streak: 0,
+    shownPhases: [],
+  };
+  currentPhase = 1;
+  document.body.className = '';
+  document.getElementById('endScreen').classList.remove('show');
+  document.getElementById('streakBadge').classList.remove('show');
+  document.getElementById('roundTotal').textContent = state.puzzles.length;
+  document.getElementById('inventoryGrid').innerHTML = '<div class="inv-empty">— empty —</div>';
+  updateBars();
+  loadPuzzle();
+  startStatusLoop();
+  startDroneLoop();
+  // Show opening narrative
+  showNarrative(PHASES[0]);
+}
+
+function loadPuzzle() {
+  if (state.round >= state.puzzles.length) { endGame(true); return; }
+
+  // Phase transition check
+  const phase = getPhase(state.round);
+  if (phase.id !== currentPhase) {
+    currentPhase = phase.id;
+    transitionPhase(phase);
+    return; // narrative will resume puzzle
+  }
+
+  const p = state.puzzles[state.round];
+  state.attempts = 0;
+  state.hintUsed = false;
+  state.selectedLetters = [];
+
+  let letters = p.word.split('');
+  let scrambled = [...letters].sort(() => Math.random() - 0.5);
+  let tries = 0;
+  while (scrambled.join('') === p.word && tries < 20) { scrambled = [...letters].sort(() => Math.random() - 0.5); tries++; }
+  state.scrambled = scrambled;
+
+  document.getElementById('roundNum').textContent = state.round + 1;
+  document.getElementById('clueText').innerHTML = p.clue;
+  const catEl = document.getElementById('catBadge');
+  catEl.textContent = p.category.toUpperCase();
+  catEl.className = 'category-badge cat-' + p.category;
+  document.getElementById('hintLine').textContent = '';
+  renderTiles();
+  renderSlots();
+  renderAttempts();
+}
+
+function transitionPhase(phase) {
+  SFX.phase();
+  // Flash effect
+  const flash = document.getElementById('phaseFlash');
+  flash.classList.add('active');
+  setTimeout(() => flash.classList.remove('active'), 300);
+
+  // Glitch lines for phase 3+
+  if (phase.id >= 3) spawnGlitchLines();
+
+  // Apply body class
+  setTimeout(() => {
+    document.body.className = phase.class;
+    document.getElementById('phaseIndicator').textContent = `◈ PHASE ${phase.id} — ${phase.name} ◈`;
+    showNarrative(phase);
+  }, 200);
+}
+
+function showNarrative(phase) {
+  document.getElementById('narrativePhase').textContent = `PHASE ${phase.id} OF 4`;
+  document.getElementById('narrativeTitle').textContent = phase.name;
+  document.getElementById('narrativeText').textContent = phase.narrative;
+  // update colors via inline style
+  document.getElementById('narrativeBanner').style.borderBottomColor = phase.color;
+  document.getElementById('narrativeBanner').style.boxShadow = `0 0 20px ${phase.color}`;
+  document.querySelector('.narrative-title').style.color = phase.color;
+  document.querySelector('.btn-narrative-close').style.borderColor = phase.color;
+  document.querySelector('.btn-narrative-close').style.color = phase.color;
+  document.getElementById('narrativeBanner').classList.add('show');
+}
+
+function closeNarrative() {
+  document.getElementById('narrativeBanner').classList.remove('show');
+  // Resume puzzle loading after narrative
+  loadPuzzle();
+}
+
+function spawnGlitchLines() {
+  for (let i = 0; i < 3; i++) {
+    setTimeout(() => {
+      const line = document.createElement('div');
+      line.className = 'glitch-line';
+      line.style.top = Math.random() * 100 + 'vh';
+      document.body.appendChild(line);
+      setTimeout(() => line.remove(), 200);
+    }, i * 80);
+  }
+}
+
+// ── RENDER ─────────────────────────────────────────────────────────
+function renderTiles() {
+  const area = document.getElementById('scrambledArea');
+  area.innerHTML = '';
+  state.scrambled.forEach((letter, i) => {
+    const tile = document.createElement('div');
+    tile.className = 'letter-tile';
+    tile.textContent = letter;
+    tile.dataset.index = i;
+    if (state.selectedLetters.some(s => s.tileIndex === i)) tile.classList.add('used');
+    tile.addEventListener('click', () => { SFX.tap(); selectLetter(i, letter, tile); });
+    area.appendChild(tile);
+  });
+}
+
+function renderSlots() {
+  const area = document.getElementById('answerSlots');
+  area.innerHTML = '';
+  const word = state.puzzles[state.round].word;
+  for (let i = 0; i < word.length; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'answer-slot';
+    const filled = state.selectedLetters[i];
+    if (filled) { slot.textContent = filled.letter; slot.classList.add('filled'); slot.addEventListener('click', () => { SFX.tap(); removeFromSlot(i); }); }
+    area.appendChild(slot);
+  }
+}
+
+function renderAttempts() {
+  const dots = document.getElementById('attemptDots');
+  dots.innerHTML = '';
+  for (let i = 0; i < state.maxAttempts; i++) {
+    const d = document.createElement('div');
+    d.className = 'attempt-dot' + (i < state.attempts ? ' used' : '');
+    dots.appendChild(d);
+  }
+}
+
+function selectLetter(index, letter, tile) {
+  const word = state.puzzles[state.round].word;
+  if (state.selectedLetters.length >= word.length) return;
+  if (state.selectedLetters.some(s => s.tileIndex === index)) return;
+  tile.classList.add('used','glitch');
+  setTimeout(() => tile.classList.remove('glitch'), 200);
+  state.selectedLetters.push({ tileIndex: index, letter });
+  renderSlots();
+}
+
+function removeFromSlot(slotIndex) {
+  if (slotIndex >= state.selectedLetters.length) return;
+  state.selectedLetters.splice(slotIndex, 1);
+  renderTiles(); renderSlots();
+}
+
+function clearAnswer() {
+  SFX.clear();
+  state.selectedLetters = [];
+  renderTiles(); renderSlots();
+  document.getElementById('hintLine').textContent = '';
+}
+
+// ── GAME LOGIC ─────────────────────────────────────────────────────
+function checkAnswer() {
+  const word = state.puzzles[state.round].word;
+  if (state.selectedLetters.length < word.length) { flashDrone('not enough letters!'); return; }
+  const guess = state.selectedLetters.map(s => s.letter).join('');
+  const slots = document.querySelectorAll('.answer-slot');
+
+  if (guess === word) {
+    SFX.correct();
+    slots.forEach(s => s.classList.add('correct'));
+    document.getElementById('puzzlePanel').classList.add('correct-flash');
+    setTimeout(() => document.getElementById('puzzlePanel').classList.remove('correct-flash'), 500);
+    const p = state.puzzles[state.round];
+    state.score++;
+    state.streak++;
+    applySurvivalBoost(p);
+    if (state.streak >= 2) { SFX.streak(); const sb=document.getElementById('streakBadge'); sb.textContent=`🔥 CIPHER STREAK ×${state.streak}`; sb.classList.add('show'); setTimeout(()=>sb.classList.remove('show'),2500); }
+    setTimeout(() => { SFX.loot(); showLoot(p); }, 500);
+    flashDrone('✓ cipher cracked!');
+  } else {
+    SFX.wrong();
+    state.streak = 0;
+    document.getElementById('streakBadge').classList.remove('show');
+    state.attempts++;
+    slots.forEach(s => s.classList.add('wrong'));
+    setTimeout(() => slots.forEach(s => s.classList.remove('wrong')), 450);
+    document.getElementById('puzzlePanel').classList.add('wrong-flash');
+    setTimeout(() => document.getElementById('puzzlePanel').classList.remove('wrong-flash'), 450);
+    renderAttempts();
+    state.survival = Math.max(0, state.survival - 5);
+    updateBars();
+    if (state.attempts >= state.maxAttempts) {
+      flashDrone('cipher FAILED—');
+      setTimeout(() => { if (state.survival <= 0) endGame(false); else { state.round++; loadPuzzle(); } }, 600);
+    } else {
+      flashDrone(`${state.maxAttempts - state.attempts} attempts left`);
+    }
+    clearAnswer();
+  }
+}
+
+function useHint() {
+  if (state.hintUsed) { document.getElementById('hintLine').textContent = 'hint already used'; return; }
+  SFX.hint();
+  state.hintUsed = true;
+  const word = state.puzzles[state.round].word;
+  const firstTwo = word.slice(0,2);
+  document.getElementById('hintLine').textContent = `drone scan: starts with "${firstTwo}..."`;
+  flashDrone(`first letters: ${firstTwo}`);
+  state.survival = Math.max(0, state.survival - 3);
+  updateBars();
+}
+
+function applySurvivalBoost(p) {
+  state[p.boost] = Math.min(100, state[p.boost] + p.boostAmt);
+  state.survival = Math.min(100, Math.round((state.food + state.water + state.tech) / 3));
+  updateBars();
+}
+
+function updateBars() {
+  document.getElementById('survivalFill').style.width = state.survival + '%';
+  document.getElementById('survivalPct').textContent = state.survival + '%';
+  document.getElementById('foodBar').style.width = state.food + '%';
+  document.getElementById('waterBar').style.width = state.water + '%';
+  document.getElementById('techBar').style.width = state.tech + '%';
+  if (state.survival <= 0 && !state.gameOver) endGame(false);
+}
+
+function showLoot(p) {
+  document.getElementById('lootIcon').textContent = p.icon;
+  document.getElementById('lootName').textContent = p.word;
+  document.getElementById('lootDesc').textContent = p.desc;
+  document.getElementById('lootBoost').textContent = `▲ ${p.boost.toUpperCase()} +${p.boostAmt}%  |  SURVIVAL ${state.survival}%`;
+  document.getElementById('lootPopup').classList.add('show');
+  document.getElementById('overlay').classList.add('show');
+}
+
+document.getElementById('btnContinue').addEventListener('click', () => {
+  document.getElementById('lootPopup').classList.remove('show');
+  document.getElementById('overlay').classList.remove('show');
+  addToInventory(state.puzzles[state.round]);
+  state.round++;
+  if (state.round >= state.puzzles.length) endGame(true);
+  else loadPuzzle();
+});
+
+function addToInventory(p) {
+  const grid = document.getElementById('inventoryGrid');
+  const empty = grid.querySelector('.inv-empty');
+  if (empty) empty.remove();
+  const item = document.createElement('div');
+  item.className = 'inv-item';
+  item.textContent = p.icon;
+  const tip = document.createElement('div');
+  tip.className = 'inv-tooltip';
+  tip.textContent = p.word;
+  item.appendChild(tip);
+  item.addEventListener('touchstart', () => { tip.style.opacity='1'; setTimeout(()=>tip.style.opacity='0',1500); }, {passive:true});
+  grid.appendChild(item);
+  state.inventory.push({ word: p.word, icon: p.icon });
+}
+
+// ── END + SHARE ────────────────────────────────────────────────────
+function buildScoreText(won) {
+  const total = state.puzzles.length;
+  let grid = '';
+  state.puzzles.forEach((p, i) => {
+    grid += (i < state.inventory.length) ? p.icon : '💀';
+    if ((i+1) % 5 === 0) grid += '\n';
+  });
+  const result = won ? 'ALL CIPHERS CRACKED' : 'SIGNAL LOST';
+  return `CIPHER — Wasteland Word Game\n${result}\n🔐 ${state.score}/${total} ciphers cracked\n⚡ Survival: ${state.survival}%\n\n${grid.trim()}\n\nCan you beat this?\nhttps://maximumreality.github.io/living/cipher.html`;
+}
+function shareToX() { window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(buildScoreText(state.gameOver))}`, '_blank'); }
+function copyScore() {
+  const text = buildScoreText(state.gameOver);
+  if (navigator.clipboard?.writeText) { navigator.clipboard.writeText(text).then(showCopiedToast); }
+  else { const ta=document.createElement('textarea'); ta.value=text; ta.style.cssText='position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');showCopiedToast();}catch(e){} document.body.removeChild(ta); }
+}
+function showCopiedToast() {
+  const btn = document.getElementById('btnCopy');
+  btn.textContent = '[ ✓ COPIED ]'; btn.classList.add('copied');
+  setTimeout(() => { btn.textContent='[ COPY SCORE ]'; btn.classList.remove('copied'); }, 2000);
+  const toast = document.getElementById('shareToast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+function endGame(won) {
+  state.gameOver = true;
+  won ? SFX.win() : SFX.gameover();
+  const screen = document.getElementById('endScreen');
+  const title = document.getElementById('endTitle');
+  const msg = document.getElementById('endMsg');
+  document.getElementById('endScore').textContent = state.score;
+  const endInv = document.getElementById('endInv');
+  endInv.innerHTML = '';
+  state.inventory.forEach(item => { const el=document.createElement('div'); el.className='end-inv-item'; el.textContent=item.icon; el.title=item.word; endInv.appendChild(el); });
+  if (won) {
+    title.textContent = 'CACHE UNLOCKED';
+    title.className = 'end-title win';
+    msg.textContent = `V0ID-WALKER stands at the center of the dead net. The signal speaks a name. The wasteland was never empty — it was waiting. All ${state.score} ciphers cracked. The truth is yours now.`;
+  } else {
+    title.textContent = 'SIGNAL LOST';
+    title.className = 'end-title dead';
+    msg.textContent = `The neon fades from the cloak. The drone crashes softly. Phase ${currentPhase} claimed you. ${state.score} ciphers cracked before the dark took you.`;
+  }
+  screen.classList.add('show');
+}
+
+// ── AMBIENT ────────────────────────────────────────────────────────
+function flashDrone(msg) {
+  const el = document.getElementById('droneChat');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function startStatusLoop() {
+  const el = document.getElementById('statusText');
+  let idx = 0;
+  function setStatus(text) {
+    el.innerHTML = '';
+    let i = 0;
+    const iv = setInterval(() => {
+      el.textContent = text.slice(0,i) + (i < text.length ? '_' : '');
+      i++;
+      if (i > text.length) { el.innerHTML = text + '<span class="cursor">_</span>'; clearInterval(iv); }
+    }, 40);
+  }
+  setStatus(STATUS_LINES_DEFAULT[0]);
+  setInterval(() => {
+    const phase = getPhase(state.round);
+    const lines = phase.statusLines || STATUS_LINES_DEFAULT;
+    idx = (idx + 1) % lines.length;
+    setStatus(lines[idx]);
+  }, 5000);
+}
+
+function startDroneLoop() {
+  setInterval(() => {
+    if (Math.random() < 0.3) {
+      const phase = getPhase(state.round || 0);
+      const lines = phase.droneLines || DRONE_LINES_DEFAULT;
+      flashDrone(lines[Math.floor(Math.random() * lines.length)]);
+    }
+  }, 6000);
+}
+
+document.addEventListener('touchstart', () => { if (audioCtx && audioCtx.state==='suspended') audioCtx.resume(); }, { once:true, passive:true });
+
+initGame();
+</script>
+</body>
+</html>
