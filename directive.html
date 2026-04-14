@@ -9,6 +9,7 @@
             --green: #00ff41;
             --red: #ff0055;
             --cyan: #00ffe7;
+            --amber: #ffb300;
             --bg: #050505;
             --muted: #444;
             --font: 'Courier New', Courier, monospace;
@@ -58,6 +59,19 @@
             font-size: 0.75rem;
             letter-spacing: 1px;
         }
+
+        .home-btn {
+            color: var(--cyan);
+            font-family: var(--font);
+            font-size: 0.7rem;
+            text-decoration: none;
+            letter-spacing: 1px;
+            border: 1px solid #1a3040;
+            padding: 3px 7px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .home-btn:active { opacity: 1; background: #0a1a24; }
 
         #timer { color: var(--red); font-weight: bold; }
 
@@ -122,9 +136,34 @@
             font-size: 0.75rem;
         }
 
-        .log  { opacity: 0.65; margin-top: 3px; }
-        .error   { color: var(--red);  margin-top: 3px; }
-        .success { color: #fff;        margin-top: 3px; }
+        .log     { opacity: 0.65; margin-top: 3px; }
+        .error   { color: var(--red);   margin-top: 3px; }
+        .success { color: #fff;         margin-top: 3px; }
+        .amber   { color: var(--amber); margin-top: 3px; }
+
+        /* ── FIELD REPORT BUTTON ── */
+        #field-report-btn {
+            display: none;
+            flex: 0 0 auto;
+            margin-bottom: 6px;
+            padding: 10px;
+            text-align: center;
+            border: 1px solid var(--amber);
+            background: rgba(255,179,0,0.06);
+            color: var(--amber);
+            font-family: var(--font);
+            font-size: 11px;
+            letter-spacing: 3px;
+            cursor: pointer;
+            user-select: none;
+            animation: pulse-amber 2s ease-in-out infinite;
+        }
+        #field-report-btn:active { background: var(--amber); color: #000; }
+
+        @keyframes pulse-amber {
+            0%, 100% { box-shadow: 0 0 6px rgba(255,179,0,0.2); }
+            50%       { box-shadow: 0 0 18px rgba(255,179,0,0.5); }
+        }
 
         /* ── KEYPAD ── */
         #keypad {
@@ -155,7 +194,7 @@
             pointer-events: none;
         }
 
-        /* CLEAR button spans full width below keypad */
+        /* CLEAR button */
         #clear-btn {
             flex: 0 0 auto;
             margin-top: 4px;
@@ -177,8 +216,8 @@
 <body>
 
 <div class="header">
-    <span>BRM // AGENT: <span id="agent-name">—</span></span>
-    <span>CLEARANCE: <span id="clearance-display">—</span></span>
+    <a class="home-btn" href="Portal.html">⬡ PORTAL</a>
+    <span>AGENT: <span id="agent-name">—</span> // <span id="clearance-display">—</span></span>
     <span id="timer">STABILITY: 30s</span>
 </div>
 
@@ -190,6 +229,8 @@
 
 <div id="history"></div>
 
+<div id="field-report-btn" onclick="submitFieldReport()">⬡ FIELD REPORT: COMPLETE</div>
+
 <div id="keypad"></div>
 <div id="clear-btn" onclick="clearMapping()">[ CLEAR MAPPING ]</div>
 
@@ -198,16 +239,16 @@
 //  DATABASE
 // ════════════════════════════════════════════
 const database = [
-    { id: "LOG_001", plain: "PROCEED TO FOREST NODE AND SCAN LARGEST TREE",      type: "atbash", clearance: "LEVEL_1" },
-    { id: "LOG_002", plain: "ALIGN FIELD LENS WITH SKY AND CAPTURE SIGNAL",      type: "caesar", clearance: "LEVEL_1" },
-    { id: "LOG_003", plain: "RETURN DATA TO REPO AND AWAIT NEXT DIRECTIVE",      type: "caesar", clearance: "LEVEL_1" },
-    { id: "LOG_004", plain: "LOCATE REFLECTIVE SURFACE AND VERIFY SECOND IMAGE", type: "atbash", clearance: "LEVEL_2" },
+    { id: "LOG_001", plain: "PROCEED TO FOREST NODE AND SCAN LARGEST TREE",         type: "atbash", clearance: "LEVEL_1" },
+    { id: "LOG_002", plain: "ALIGN FIELD LENS WITH SKY AND CAPTURE SIGNAL",         type: "caesar", clearance: "LEVEL_1" },
+    { id: "LOG_003", plain: "RETURN DATA TO REPO AND AWAIT NEXT DIRECTIVE",         type: "caesar", clearance: "LEVEL_1" },
+    { id: "LOG_004", plain: "LOCATE REFLECTIVE SURFACE AND VERIFY SECOND IMAGE",    type: "atbash", clearance: "LEVEL_2" },
     { id: "LOG_005", plain: "STAND STILL FOR TEN SECONDS AND RECORD AMBIENT AUDIO", type: "caesar", clearance: "LEVEL_2" },
     { id: "LOG_006", plain: "POINT DEVICE NORTH AND HOLD UNTIL INTERFACE RESPONDS", type: "atbash", clearance: "LEVEL_3" },
-    { id: "LOG_007", plain: "SCAN NEAREST MOVING OBJECT AND TRACK ITS PATH",     type: "caesar", clearance: "LEVEL_3" },
-    { id: "LOG_008", plain: "ENTER DARK ENVIRONMENT AND INITIATE LOW LIGHT MODE", type: "atbash", clearance: "LEVEL_4" },
-    { id: "LOG_009", plain: "FOCUS ON HAND AND VERIFY FINGER COUNT IN DISPLAY",  type: "caesar", clearance: "LEVEL_4" },
-    { id: "LOG_010", plain: "CLOSE ONE EYE AND OBSERVE DIFFERENCE IN OVERLAY",   type: "atbash", clearance: "LEVEL_4" }
+    { id: "LOG_007", plain: "SCAN NEAREST MOVING OBJECT AND TRACK ITS PATH",        type: "caesar", clearance: "LEVEL_3" },
+    { id: "LOG_008", plain: "ENTER DARK ENVIRONMENT AND INITIATE LOW LIGHT MODE",   type: "atbash", clearance: "LEVEL_4" },
+    { id: "LOG_009", plain: "FOCUS ON HAND AND VERIFY FINGER COUNT IN DISPLAY",     type: "caesar", clearance: "LEVEL_4" },
+    { id: "LOG_010", plain: "CLOSE ONE EYE AND OBSERVE DIFFERENCE IN OVERLAY",      type: "atbash", clearance: "LEVEL_4" }
 ];
 
 // ════════════════════════════════════════════
@@ -215,7 +256,7 @@ const database = [
 // ════════════════════════════════════════════
 let currentDirective = null;
 let currentCipher    = "";
-let mapping          = {};     // cipherLetter → guessedLetter
+let mapping          = {};
 let selectedLetter   = null;
 let directiveSolved  = false;
 let timerInterval    = null;
@@ -224,21 +265,22 @@ let timeLeft         = 30;
 // ════════════════════════════════════════════
 //  DOM REFS
 // ════════════════════════════════════════════
-const encodedEl    = document.getElementById('encoded-text');
-const decodedEl    = document.getElementById('decoded-text');
-const historyEl    = document.getElementById('history');
-const timerEl      = document.getElementById('timer');
-const agentNameEl  = document.getElementById('agent-name');
-const clearanceEl  = document.getElementById('clearance-display');
+const encodedEl       = document.getElementById('encoded-text');
+const decodedEl       = document.getElementById('decoded-text');
+const historyEl       = document.getElementById('history');
+const timerEl         = document.getElementById('timer');
+const agentNameEl     = document.getElementById('agent-name');
+const clearanceEl     = document.getElementById('clearance-display');
+const fieldReportBtn  = document.getElementById('field-report-btn');
 
 // ════════════════════════════════════════════
-//  AGENT IDENTITY (from localStorage)
+//  AGENT IDENTITY
 // ════════════════════════════════════════════
 const agentName = localStorage.getItem('BUREAU_AGENT_NAME') || "UNKNOWN_AGENT";
 const clearance = localStorage.getItem('BUREAU_CLEARANCE')  || "LEVEL_1";
 
-agentNameEl.innerText  = agentName;
-clearanceEl.innerText  = clearance;
+agentNameEl.innerText = agentName;
+clearanceEl.innerText = clearance;
 
 // ════════════════════════════════════════════
 //  CIPHER FUNCTIONS
@@ -262,7 +304,7 @@ function encryptDirective(data) {
 }
 
 // ════════════════════════════════════════════
-//  SCRAMBLE REVEAL ANIMATION
+//  SCRAMBLE REVEAL
 // ════════════════════════════════════════════
 function scrambleReveal(finalText, onDone) {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -308,9 +350,7 @@ function renderCipher(text) {
 //  SELECT A CIPHER LETTER
 // ════════════════════════════════════════════
 function selectLetter(letter, spanEl) {
-    // Deactivate previous
     document.querySelectorAll(".letter.active").forEach(el => el.classList.remove("active"));
-
     selectedLetter = letter;
     spanEl.classList.add("active");
     addLog(`TARGETED: ${letter}`, "log");
@@ -337,7 +377,6 @@ function assignLetter(plainLetter) {
         addLog("SELECT A CIPHER LETTER FIRST", "error");
         return;
     }
-    // Block duplicate plain-letter assignments
     for (const k in mapping) {
         if (mapping[k] === plainLetter) {
             addLog(`${plainLetter} ALREADY ASSIGNED`, "error");
@@ -346,11 +385,8 @@ function assignLetter(plainLetter) {
     }
     mapping[selectedLetter] = plainLetter;
     addLog(`${selectedLetter} → ${plainLetter}`, "success");
-
     updateDecoded();
     updateKeypad();
-
-    // Deselect
     document.querySelectorAll(".letter.active").forEach(el => el.classList.remove("active"));
     selectedLetter = null;
 }
@@ -384,7 +420,6 @@ function updateDecoded() {
 
     decodedEl.innerText = decoded;
 
-    // Refresh mapped styling on cipher spans
     document.querySelectorAll(".letter").forEach(span => {
         span.classList.toggle("mapped", !!mapping[span.innerText]);
     });
@@ -419,10 +454,44 @@ function glitchScreen() {
 }
 
 // ════════════════════════════════════════════
+//  PORTAL SYNC — write active directive
+// ════════════════════════════════════════════
+function syncToPortal(directive) {
+    localStorage.setItem('BUREAU_ACTIVE_DIRECTIVE',    directive.plain);
+    localStorage.setItem('BUREAU_ACTIVE_DIRECTIVE_ID', directive.id);
+    localStorage.setItem('BUREAU_DIRECTIVE_SOLVED_AT', new Date().toISOString());
+    localStorage.setItem('BUREAU_DIRECTIVE_STATUS',    'ACTIVE');
+}
+
+// ════════════════════════════════════════════
+//  FIELD REPORT — agent marks mission done
+// ════════════════════════════════════════════
+function submitFieldReport() {
+    const directiveId = localStorage.getItem('BUREAU_ACTIVE_DIRECTIVE_ID') || '—';
+
+    // Increment field report count
+    const count = parseInt(localStorage.getItem('BUREAU_FIELD_REPORTS') || '0') + 1;
+    localStorage.setItem('BUREAU_FIELD_REPORTS', String(count));
+
+    // Mark directive as filed (not just solved)
+    localStorage.setItem('BUREAU_DIRECTIVE_STATUS',        'FILED');
+    localStorage.setItem('BUREAU_LAST_FIELD_REPORT',       new Date().toISOString());
+    localStorage.setItem('BUREAU_LAST_FIELD_DIRECTIVE_ID', directiveId);
+
+    // Clear the active directive so portal shows no pending assignment
+    localStorage.removeItem('BUREAU_ACTIVE_DIRECTIVE');
+    localStorage.removeItem('BUREAU_ACTIVE_DIRECTIVE_ID');
+
+    fieldReportBtn.style.display = 'none';
+    addLog(`FIELD REPORT #${count} FILED — DIRECTIVE ${directiveId}`, "amber");
+    addLog("BUREAU ARCHIVE UPDATED", "success");
+    addLog("AWAITING NEXT ASSIGNMENT...", "log");
+}
+
+// ════════════════════════════════════════════
 //  DIRECTIVE LIFECYCLE
 // ════════════════════════════════════════════
 function getNextDirective() {
-    // Filter by clearance level
     const clearanceNum = parseInt(clearance.replace("LEVEL_", "")) || 1;
     const available = database.filter(d => {
         const dNum = parseInt(d.clearance.replace("LEVEL_", ""));
@@ -430,10 +499,8 @@ function getNextDirective() {
     });
 
     let used = JSON.parse(localStorage.getItem("usedDirectives")) || [];
-
-    // Reset cycle if all available have been used
-    const availableIds = available.map(d => d.id);
     const remaining = available.filter(d => !used.includes(d.id));
+
     if (remaining.length === 0) {
         used = [];
         localStorage.setItem("usedDirectives", JSON.stringify(used));
@@ -451,6 +518,7 @@ function loadDirective() {
     directiveSolved = false;
     mapping = {};
     selectedLetter = null;
+    fieldReportBtn.style.display = 'none';
 
     currentDirective = getNextDirective();
     currentCipher    = encryptDirective(currentDirective);
@@ -482,6 +550,9 @@ function onDirectiveSolved() {
         localStorage.setItem("completedDirectives", JSON.stringify(completed));
     }
 
+    // Sync active directive to portal
+    syncToPortal(currentDirective);
+
     addLog("DECRYPTION COMPLETE", "success");
 
     setTimeout(() => addLog("UPLINKING TO CENTRAL REPO...", "log"), 600);
@@ -489,8 +560,12 @@ function onDirectiveSolved() {
         encodedEl.innerText = "DIRECTIVE ACCEPTED";
         decodedEl.innerText = "";
     }, 1400);
-    setTimeout(() => addLog("NEXT DIRECTIVE LOADING...", "log"), 2000);
-    setTimeout(loadDirective, 3000);
+    setTimeout(() => {
+        addLog("ASSIGNMENT ACTIVE — DEPLOY FIELD LENS", "amber");
+        fieldReportBtn.style.display = 'block'; // show field report button
+    }, 2000);
+    setTimeout(() => addLog("NEXT CIPHER LOADING IN 3s...", "log"), 2200);
+    setTimeout(loadDirective, 5000); // slightly longer pause so agent can tap field report
 }
 
 // ════════════════════════════════════════════
