@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BRM | DIRECTIVES</title>
+    <style>
+        :root {
+            --bureau-green: #00ff41;
+            --bureau-red: #ff0055;
+            --bureau-bg: #050505;
+            --terminal-font: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bureau-bg);
+            color: var(--bureau-green);
+            font-family: var(--terminal-font);
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* Scanline Overlay */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        #terminal {
+            flex-grow: 1;
+            border: 1px solid #333;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .directive-box {
+            background: rgba(0, 255, 65, 0.05);
+            padding: 15px;
+            border-left: 3px solid var(--bureau-green);
+            margin-bottom: 20px;
+        }
+
+        #encoded-text {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            word-break: break-all;
+        }
+
+        .input-area {
+            display: flex;
+            align-items: center;
+            margin-top: auto;
+            padding-bottom: 20px;
+        }
+
+        .prompt { margin-right: 10px; }
+
+        input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--bureau-green);
+            color: #fff;
+            font-family: var(--terminal-font);
+            font-size: 1rem;
+            width: 100%;
+            outline: none;
+            text-transform: uppercase;
+        }
+
+        #timer {
+            color: var(--bureau-red);
+            font-weight: bold;
+        }
+
+        .log { font-size: 0.8rem; margin-top: 5px; opacity: 0.7; }
+        .error { color: var(--bureau-red); }
+        .success { color: white; }
+
+    </style>
+</head>
+<body>
+
+<div id="terminal">
+    <div class="header">
+        <span>BUREAU OF REALITY MANAGEMENT // V.2026</span>
+        <span id="timer">STABILITY: 30s</span>
+    </div>
+
+    <div class="directive-box">
+        <div class="log">> INCOMING_FROM: DIRECTOR_VANE</div>
+        <div class="log">> STATUS: MANDATORY_COMPLIANCE</div>
+        <p id="encoded-text">INITIALIZING...</p>
+    </div>
+
+    <div id="history"></div>
+
+    <div class="input-area">
+        <span class="prompt">BRM@LIVING_REPO:~$</span>
+        <input type="text" id="user-input" 
+               inputmode="text" 
+               autocapitalize="none" 
+               autocomplete="off" 
+               autofocus>
+    </div>
+</div>
+
+<script>
+    const database = [
+        { id: "LOG_001", encrypted: "GZPV_NVHG_XLEV_GSV_EZE", shift: 0, solution: "THEY MUST CODE THE EYE", type: "atbash" },
+        { id: "LOG_002", encrypted: "IBU_IB_SFBMJUZ", shift: 1, solution: "HACK HA REALITY", type: "caesar" },
+        { id: "LOG_003", encrypted: "VANE IS THE REPO", shift: 0, solution: "VANE IS THE REPO", type: "plain" }
+    ];
+
+    let currentIdx = 0;
+    let timeLeft = 30;
+    let timerInterval;
+
+    const display = document.getElementById('encoded-text');
+    const input = document.getElementById('user-input');
+    const history = document.getElementById('history');
+    const timerDisplay = document.getElementById('timer');
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        timeLeft = 30;
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerDisplay.innerText = `STABILITY: ${timeLeft}s`;
+            if (timeLeft <= 0) {
+                failDirective();
+            }
+        }, 1000);
+    }
+
+    function loadDirective() {
+        const data = database[currentIdx];
+        display.innerText = data.encrypted;
+        addLog(`FILE_LOADED: ${data.id}`, "log");
+        startTimer();
+    }
+
+    function addLog(msg, className) {
+        const div = document.createElement('div');
+        div.className = className;
+        div.innerText = `> ${msg}`;
+        history.prepend(div);
+    }
+
+    function failDirective() {
+        addLog("TIME EXPIRED. SYSTEM RESET.", "error");
+        input.value = "";
+        loadDirective(); // Resets the current puzzle
+    }
+
+    input.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            const guess = input.value.toUpperCase().trim();
+            const solution = database[currentIdx].solution;
+
+            if (guess === solution) {
+                addLog("DECRYPTION SUCCESSFUL. COMMITTING...", "success");
+                currentIdx++;
+                input.value = "";
+                
+                if (currentIdx < database.length) {
+                    setTimeout(loadDirective, 1000);
+                } else {
+                    clearInterval(timerInterval);
+                    display.innerText = "REPO SYNCED. ALL REALITIES STABLE.";
+                    addLog("DIRECTIVE STREAM COMPLETE.", "success");
+                }
+            } else {
+                addLog("INVALID INPUT. TRY AGAIN.", "error");
+                input.value = "";
+            }
+        }
+    });
+
+    // Initialize the first load
+    window.onload = loadDirective;
+
+</script>
+</body>
+</html>
