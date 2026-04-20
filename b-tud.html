@@ -1882,8 +1882,9 @@ const diagLabels = {
   m002: 'BREAKER PANEL CROSS-SECTION: DESIGNER-READY DESCRIPTION AVAILABLE'
 };
 
-    // If Module 001, insert the actual image
+    // Diagram slot
 if (mod.id === 'm001') {
+  // Module 001 diagram
   html += `
     <div class="diagram-slot">
       <img src="assets/diagrams/module001-toilet.PNG"
@@ -1892,8 +1893,18 @@ if (mod.id === 'm001') {
            style="max-width: 85%; height: auto; display: block; margin: 0 auto;">
     </div>
   `;
+} else if (mod.id === 'm002') {
+  // Module 002 diagram
+  html += `
+    <div class="diagram-slot">
+      <img src="assets/diagrams/module002-breakerbox.PNG"
+           class="diagram-image"
+           alt="Module 002 Breaker Box Cross-Section"
+           style="max-width: 85%; height: auto; display: block; margin: 0 auto;">
+    </div>
+  `;
 } else {
-  // Otherwise show placeholder
+  // Placeholder for all other modules
   html += `
     <div class="diagram-slot">
       <div class="diagram-placeholder-icon">⬡</div>
@@ -1905,6 +1916,7 @@ if (mod.id === 'm001') {
     </div>
   `;
 }
+
 
 
   // Interactive sim slot — route by module
