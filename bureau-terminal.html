@@ -1759,10 +1759,14 @@ function renderModule(mod) {
 
   // Diagram slot
   html += `
-    <div class="diagram-slot">
-      <img src="assets/diagrams/module001-toilet.PNG" class="diagram-image" alt="Module 001 Toilet Cross-Section">
-    </div>
-  `;
+  <div class="diagram-slot">
+    <img src="assets/diagrams/module001-toilet.PNG"
+         class="diagram-image"
+         alt="Module 001 Toilet Cross-Section"
+         style="max-width: 100%; height: auto; display: block; margin: 0 auto;">
+  </div>
+`;
+
 
   // Interactive sim slot
   html += buildToiletSim();
