@@ -1876,10 +1876,24 @@ function renderModule(mod) {
   });
 
   // Diagram slot
-  const diagLabels = {
-    m001: 'TOILET CROSS-SECTION: DESIGNER-READY DESCRIPTION AVAILABLE',
-    m002: 'BREAKER PANEL CROSS-SECTION: DESIGNER-READY DESCRIPTION AVAILABLE'
-  };
+  // Diagram slot labels
+const diagLabels = {
+  m001: 'TOILET CROSS-SECTION: VISUAL ASSET LOADED',
+  m002: 'BREAKER PANEL CROSS-SECTION: DESIGNER-READY DESCRIPTION AVAILABLE'
+};
+
+    // If Module 001, insert the actual image
+if (mod.id === 'm001') {
+  html += `
+    <div class="diagram-slot">
+      <img src="assets/diagrams/module001-toilet.PNG"
+           class="diagram-image"
+           alt="Module 001 Toilet Cross-Section"
+           style="max-width: 85%; height: auto; display: block; margin: 0 auto;">
+    </div>
+  `;
+} else {
+  // Otherwise show placeholder
   html += `
     <div class="diagram-slot">
       <div class="diagram-placeholder-icon">⬡</div>
@@ -1890,6 +1904,8 @@ function renderModule(mod) {
       </div>
     </div>
   `;
+}
+
 
   // Interactive sim slot — route by module
   if (mod.num === 'MODULE 001') html += buildToiletSim();
