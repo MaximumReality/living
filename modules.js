@@ -227,7 +227,7 @@ const MODULES = {
     clearance: 'CLEARANCE: CIVILIAN',
     diagram: 'assets/diagrams/m003-ptrap-gaswall.PNG',
     diagramLabel: 'P-TRAP CROSS-SECTION — GAS WALL',
-    sim: null,
+    sim: 'ptrap',
     flavor: `Under every sink, behind every shower drain, and beneath every toilet in your home, there is a curved section of pipe holding a small amount of standing water. That water is not there by accident. It is the only thing standing between you and the sewer system. Remove it, and your home fills with hydrogen sulfide, methane, and every pathogen living in the municipal waste line. The P-trap is not plumbing trivia. It is a life-safety device.`,
     sections: [
       {
