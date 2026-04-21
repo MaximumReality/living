@@ -329,7 +329,7 @@ const MODULES = {
     clearance: 'CLEARANCE: CIVILIAN',
     diagram: 'assets/diagrams/m004-engineoil-circuit.PNG',
     diagramLabel: 'ENGINE OIL CIRCUIT — LUBRICATION SYSTEM',
-    sim: null,
+    sim: 'oil',
     flavor: `Your engine contains hundreds of metal parts moving at thousands of cycles per minute, separated from each other by a film of oil measured in thousandths of an inch. That film is the only thing preventing direct metal-on-metal contact that would destroy your engine in minutes. Most people change their oil when reminded by a sticker. Almost none of them know what the oil is actually doing — or what happens when it fails.`,
     sections: [
       {
