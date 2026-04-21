@@ -1677,6 +1677,7 @@ function renderModule(mod) {
   if (mod.sim === 'toilet') html += buildToiletSim();
   else if (mod.sim === 'breaker') html += buildBreakerSim();
   else if (mod.sim === 'ptrap') html += buildPtrapSim();
+  else if (mod.sim === 'oil') html += buildOilSim();
 
   content.innerHTML = html;
   content.scrollTop = 0;
@@ -1688,6 +1689,9 @@ function renderModule(mod) {
       gasLevel:0, blockage:0, state:'SEALED', climate:'temperate',
       drainEvent:false, loop:null };
     initPtrapSim();
+  }
+  if (mod.sim === 'oil') {
+    initOilSim();
   }
 }
 
@@ -2569,6 +2573,504 @@ function ptrapLog(msg) {
 function initPtrapSim() {
   startPtrapLoop();
   updatePtrapUI();
+}
+
+
+
+// ============================================================
+// ENGINE OIL — LIQUID ARMOR SIMULATOR
+// ============================================================
+
+const OIL_CLAMP = (v,lo,hi) => Math.max(lo, Math.min(hi, v));
+
+let oil = {
+  running: false,
+  failed: false,
+  pressure: 0,
+  temp: 72,
+  viscosity: 100,
+  contamination: 0,
+  level: 95,
+  state: 'OFF',
+  failureTimer: 0,
+  failureCause: '',
+  mode: 'idle',   // idle | rev | drive
+  contRate: 0.04,
+  loop: null
+};
+
+// ---- BUILD SIM HTML ----
+function buildOilSim() {
+  return `
+    <div class="sim-slot" id="oil-slot">
+      <div class="sim-header">
+        <div class="sim-title">LIQUID ARMOR SIMULATOR</div>
+        <div class="sim-status" id="oil-badge">● ENGINE OFF</div>
+      </div>
+      <div class="sim-body">
+        <div class="oil-layout">
+
+          <!-- LEFT: ENGINE DIAGRAM -->
+          <div class="oil-diagram">
+            <svg id="oil-svg" viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:220px;">
+              <defs>
+                <marker id="oarrow" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto">
+                  <path d="M0,0 L0,5 L5,2.5 z" fill="#ffb000" id="arrow-head"/>
+                </marker>
+                <filter id="glow-red">
+                  <feGaussianBlur stdDeviation="3" result="blur"/>
+                  <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                </filter>
+              </defs>
+
+              <!-- ENGINE BLOCK -->
+              <rect x="30" y="40" width="140" height="160" rx="4" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+              <text x="100" y="58" fill="#333" font-size="8" text-anchor="middle" font-family="monospace">ENGINE BLOCK</text>
+
+              <!-- CRANKSHAFT BEARING -->
+              <ellipse cx="100" cy="130" rx="22" ry="10" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1.5"/>
+              <ellipse id="oil-crank-film" cx="100" cy="130" rx="19" ry="7" fill="#003355" opacity="0.8"/>
+              <text x="100" y="134" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">CRANK</text>
+
+              <!-- CAMSHAFT -->
+              <rect x="48" y="72" width="60" height="14" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1.5"/>
+              <rect id="oil-cam-film" x="50" y="74" width="56" height="10" rx="2" fill="#003355" opacity="0.8"/>
+              <text x="78" y="82" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">CAMSHAFT</text>
+
+              <!-- PISTONS -->
+              <rect x="118" y="72" width="34" height="50" rx="2" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1.5"/>
+              <rect id="oil-piston-film" x="120" y="74" width="30" height="14" rx="1" fill="#003355" opacity="0.7"/>
+              <text x="135" y="98" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">PISTON</text>
+              <text x="135" y="108" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">WALLS</text>
+
+              <!-- OIL FILTER (side) -->
+              <rect x="172" y="100" width="20" height="40" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1.5"/>
+              <rect id="oil-filter-fill" x="174" y="102" width="16" height="36" rx="2" fill="#003322" opacity="0.9"/>
+              <text x="182" y="124" fill="#555" font-size="6" text-anchor="middle" font-family="monospace" transform="rotate(90,182,124)">FILTER</text>
+
+              <!-- OIL PUMP -->
+              <ellipse cx="60" cy="195" rx="18" ry="14" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1.5"/>
+              <ellipse id="oil-pump-spin" cx="60" cy="195" rx="10" ry="10" fill="none" stroke="#ffb000" stroke-width="1.5" stroke-dasharray="8,6"/>
+              <text x="60" y="199" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">PUMP</text>
+
+              <!-- OIL SUMP (pan) -->
+              <rect x="30" y="220" width="140" height="45" rx="3" fill="#0f1a0f" stroke="#1a2a1a" stroke-width="1.5"/>
+              <rect id="oil-sump-level" x="32" y="240" width="136" height="23" fill="#1a3300" opacity="0.9"/>
+              <text x="100" y="257" fill="#336600" font-size="7" text-anchor="middle" font-family="monospace">OIL SUMP</text>
+
+              <!-- FLOW PATHS — pickup to pump -->
+              <line id="flow-pickup" x1="80" y1="240" x2="78" y2="209" stroke="#ffb000" stroke-width="2" opacity="0.4" marker-end="url(#oarrow)"/>
+              <!-- pump to filter -->
+              <line id="flow-pump-filter" x1="78" y1="190" x2="170" y2="130" stroke="#ffb000" stroke-width="2" opacity="0.4" marker-end="url(#oarrow)"/>
+              <!-- filter to galleries -->
+              <line id="flow-gallery" x1="172" y1="108" x2="150" y2="80" stroke="#ffb000" stroke-width="1.5" opacity="0.4" marker-end="url(#oarrow)"/>
+              <line id="flow-crank" x1="150" y1="120" x2="122" y2="128" stroke="#ffb000" stroke-width="1.5" opacity="0.4" marker-end="url(#oarrow)"/>
+              <!-- return drain -->
+              <line id="flow-return" x1="40" y1="200" x2="40" y2="222" stroke="#7a5500" stroke-width="1.5" opacity="0.3" marker-end="url(#oarrow)"/>
+
+              <!-- TEMP GAUGE -->
+              <rect x="6" y="40" width="16" height="80" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+              <rect id="oil-temp-bar" x="8" y="100" width="12" height="18" fill="#00aaff"/>
+              <text x="14" y="132" fill="#555" font-size="5" text-anchor="middle" font-family="monospace">°F</text>
+              <line x1="6" y1="67" x2="22" y2="67" stroke="#ff3333" stroke-width="0.5" stroke-dasharray="2,2"/>
+              <text x="4" y="65" fill="#ff3333" font-size="5" font-family="monospace" text-anchor="end">260</text>
+
+              <!-- PRESSURE GAUGE -->
+              <rect x="178" y="155" width="16" height="60" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+              <rect id="oil-psi-bar" x="180" y="190" width="12" height="23" fill="#00ff88"/>
+              <text x="186" y="225" fill="#555" font-size="5" text-anchor="middle" font-family="monospace">PSI</text>
+              <line x1="178" y1="175" x2="194" y2="175" stroke="#ff3333" stroke-width="0.5" stroke-dasharray="2,2"/>
+              <text x="196" y="173" fill="#ff3333" font-size="5" font-family="monospace">MIN</text>
+
+              <!-- STATE LABEL -->
+              <rect x="30" y="12" width="140" height="20" rx="2" fill="#0a0a0a" stroke="#2a2a2a" stroke-width="1"/>
+              <text id="oil-state-svg" x="100" y="25" fill="#ffb000" font-size="9" text-anchor="middle" font-family="monospace">ENGINE OFF</text>
+
+              <!-- FAILURE OVERLAY -->
+              <g id="oil-failure-overlay" opacity="0">
+                <rect x="30" y="40" width="140" height="160" rx="4" fill="rgba(255,0,0,0.12)"/>
+                <text x="100" y="160" fill="#ff3333" font-size="11" text-anchor="middle" font-family="monospace" font-weight="bold">SEIZED</text>
+              </g>
+
+            </svg>
+          </div>
+
+          <!-- RIGHT: CONTROLS -->
+          <div class="oil-controls">
+
+            <div class="sim-section-label">ENGINE CONTROLS</div>
+            <button class="sim-btn" id="oil-btn-start" onclick="oilAction('start')">▶ START ENGINE</button>
+            <button class="sim-btn" id="oil-btn-rev"   onclick="oilAction('rev')"   disabled>⚡ REV ENGINE</button>
+            <button class="sim-btn" id="oil-btn-drive" onclick="oilAction('drive')" disabled>🔥 DRIVE HARD</button>
+            <button class="sim-btn" id="oil-btn-idle"  onclick="oilAction('idle')"  disabled>〜 LET IDLE</button>
+            <button class="sim-btn" id="oil-btn-stop"  onclick="oilAction('stop')"  disabled>■ STOP ENGINE</button>
+
+            <div class="sim-section-label" style="margin-top:12px">MAINTENANCE</div>
+            <button class="sim-btn" onclick="oilAction('changeoil')">🔧 CHANGE OIL</button>
+            <button class="sim-btn" onclick="oilAction('filter')">🔩 REPLACE FILTER</button>
+            <button class="sim-btn" onclick="oilAction('drain')" id="oil-btn-drain">💧 DRAIN 2QT (SIMULATE LEAK)</button>
+            <button class="sim-btn" onclick="oilAction('reset')" style="margin-top:4px">↺ RESET</button>
+
+            <div class="sim-readout" id="oil-readout" style="margin-top:12px;">
+              <div class="readout-line"><span class="readout-tag">STATE</span><span class="readout-val" id="ol-rd-state">ENGINE OFF</span></div>
+              <div class="readout-line"><span class="readout-tag">PRESSURE</span><span class="readout-val" id="ol-rd-psi">0 PSI</span></div>
+              <div class="readout-line"><span class="readout-tag">TEMP</span><span class="readout-val" id="ol-rd-temp">72 °F</span></div>
+              <div class="readout-line"><span class="readout-tag">VISCOSITY</span><span class="readout-val" id="ol-rd-visc">100% — COLD</span></div>
+              <div class="readout-line"><span class="readout-tag">CONTAMINATION</span><span class="readout-val" id="ol-rd-cont">0%</span></div>
+              <div class="readout-line"><span class="readout-tag">OIL LEVEL</span><span class="readout-val" id="ol-rd-level">95%</span></div>
+            </div>
+
+            <div class="sim-readout" id="oil-log" style="margin-top:8px;min-height:52px;font-size:10px;line-height:1.8;">
+              <span style="color:var(--amber-dim)">SYSTEM LOG</span><br>
+              <span id="oil-log-line" style="color:var(--text-dim)">Engine cold. All systems ready. Start engine to begin.</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+      .oil-layout { display:grid; grid-template-columns:220px 1fr; gap:16px; align-items:start; }
+      @media(max-width:600px){ .oil-layout{ grid-template-columns:1fr; } }
+      .oil-diagram { display:flex; justify-content:center; background:var(--bg2); border:1px solid var(--border); padding:12px; }
+      .oil-controls {}
+      @keyframes pump-spin { from { stroke-dashoffset:0; } to { stroke-dashoffset:-28; } }
+      @keyframes oil-flash-red { 0%,100%{opacity:0.12} 50%{opacity:0.35} }
+      @keyframes flow-pulse { 0%,100%{opacity:0.4} 50%{opacity:0.9} }
+      .pump-running { animation: pump-spin 0.6s linear infinite; }
+      .flow-active  { animation: flow-pulse 0.8s ease infinite; }
+      .failure-flash { animation: oil-flash-red 0.4s ease infinite; }
+    </style>
+  `;
+}
+
+// ---- OIL SIM ENGINE ----
+
+function oilTick() {
+  const o = oil;
+  if (!o.running || o.failed) return;
+
+  const dt = 1; // seconds per tick
+  const modeRates = { idle: 1, rev: 3, drive: 2 };
+  const rate = modeRates[o.mode] || 1;
+
+  // Temperature rise/fall by mode
+  const targetTemps = { idle: 190, rev: 250, drive: 235 };
+  const target = targetTemps[o.mode] || 190;
+  o.temp += (target - o.temp) * 0.06 * rate;
+  o.temp = OIL_CLAMP(o.temp, 70, 310);
+
+  // Viscosity inversely tracks temp
+  o.viscosity = OIL_CLAMP(100 - (o.temp - 100) * 0.28, 0, 100);
+
+  // Contamination rises with runtime
+  o.contamination += dt * o.contRate * rate;
+  o.contamination = OIL_CLAMP(o.contamination, 0, 100);
+
+  // Pressure formula from spec
+  o.pressure = OIL_CLAMP(
+    (o.level * 0.6) + (o.viscosity * 0.4) - (o.contamination * 0.3),
+    0, 100
+  );
+
+  // Overheat penalty
+  if (o.temp > 260) {
+    o.pressure -= (o.temp - 260) * 0.15;
+    o.pressure = OIL_CLAMP(o.pressure, 0, 100);
+  }
+
+  // Failure timer: sustained zero pressure
+  if (o.pressure <= 2) {
+    o.failureTimer += dt;
+    if (o.failureTimer >= 5) {
+      triggerOilFailure('OIL STARVATION — BEARING SEIZURE');
+      return;
+    }
+  } else {
+    o.failureTimer = 0;
+  }
+
+  // Hard failure thresholds
+  if (o.temp >= 305) { triggerOilFailure('THERMAL RUNAWAY — ENGINE DESTROYED'); return; }
+  if (o.contamination >= 100) { triggerOilFailure('SLUDGE SEIZURE — OIL COMPLETELY DEGRADED'); return; }
+
+  // Determine state
+  if (o.pressure < 30 && o.temp <= 260 && o.contamination <= 70) o.state = 'LOW PRESSURE';
+  else if (o.temp > 260) o.state = 'OVERHEATED';
+  else if (o.contamination > 70) o.state = 'DIRTY FILTER';
+  else o.state = 'NORMAL';
+
+  updateOilUI();
+}
+
+function triggerOilFailure(cause) {
+  oil.failed = true;
+  oil.running = false;
+  oil.state = 'ENGINE FAILURE';
+  oil.failureCause = cause;
+  oil.pressure = 0;
+  clearInterval(oil.loop);
+  oil.loop = null;
+
+  // Failure animations
+  const overlay = document.getElementById('oil-failure-overlay');
+  if (overlay) { overlay.style.opacity = '1'; overlay.classList.add('failure-flash'); }
+  stopFlowAnims();
+
+  const badge = document.getElementById('oil-badge');
+  if (badge) { badge.textContent = '💀 ENGINE FAILURE'; badge.style.color = 'var(--red)'; }
+  const svgState = document.getElementById('oil-state-svg');
+  if (svgState) { svgState.textContent = 'FAILURE'; svgState.setAttribute('fill', '#ff3333'); }
+
+  setOilBtns(false);
+  oilLog(`💀 ENGINE FAILURE — ${cause}. Rebuild or replacement required. Cost: $3,000–$8,000+.`);
+  updateOilReadout();
+}
+
+function oilAction(action) {
+  const o = oil;
+
+  if (action === 'start') {
+    if (o.failed) { oilLog('Engine has failed. Reset to continue.'); return; }
+    o.running = true;
+    o.mode = 'idle';
+    o.state = 'NORMAL';
+    o.failureTimer = 0;
+    setOilBtns(true);
+    startOilLoop();
+    startFlowAnims();
+    oilLog('Engine started. Oil pump pressurizing. Allow warm-up before driving.');
+    updateOilUI();
+  }
+
+  else if (action === 'rev') {
+    if (!o.running) return;
+    o.mode = 'rev';
+    oilLog('Revving engine. RPM rising. Temperature climbing rapidly. Pressure spiking.');
+    setTimeout(() => { if (o.running && o.mode === 'rev') { o.mode = 'idle'; oilLog('RPM returning to idle.'); }}, 4000);
+  }
+
+  else if (action === 'drive') {
+    if (!o.running) return;
+    o.mode = 'drive';
+    oilLog('Driving hard. Sustained load. Temperature rising. Contamination accumulating faster.');
+  }
+
+  else if (action === 'idle') {
+    if (!o.running) return;
+    o.mode = 'idle';
+    oilLog('Idling. Temperature stabilizing. Pressure normalizing.');
+  }
+
+  else if (action === 'stop') {
+    o.running = false;
+    o.mode = 'idle';
+    o.state = 'OFF';
+    o.failureTimer = 0;
+    clearInterval(o.loop); o.loop = null;
+    stopFlowAnims();
+    const badge = document.getElementById('oil-badge');
+    if (badge) { badge.textContent = '● ENGINE OFF'; badge.style.color = 'var(--text-dim)'; }
+    const svgState = document.getElementById('oil-state-svg');
+    if (svgState) { svgState.textContent = 'ENGINE OFF'; svgState.setAttribute('fill', '#ffb000'); }
+    setOilBtns(false);
+    oilLog('Engine stopped. Oil draining to sump.');
+    updateOilReadout();
+  }
+
+  else if (action === 'changeoil') {
+    o.level = 100;
+    o.contamination = 0;
+    o.viscosity = 100;
+    const wasRunning = o.running;
+    if (wasRunning) { o.temp = Math.max(o.temp - 40, 72); }
+    else { o.temp = 72; }
+    o.failureTimer = 0;
+    if (o.failed) {
+      oilLog('Oil changed. But engine has seized — oil change cannot fix mechanical failure.');
+    } else {
+      oilLog('Oil changed. Contamination cleared. Viscosity restored. Filter should also be replaced.');
+    }
+    updateOilUI();
+  }
+
+  else if (action === 'filter') {
+    o.contamination = OIL_CLAMP(o.contamination - 40, 0, 100);
+    oilLog(`Filter replaced. Contamination reduced to ${Math.round(o.contamination)}%. Oil flow improved.`);
+    updateOilUI();
+  }
+
+  else if (action === 'drain') {
+    o.level = OIL_CLAMP(o.level - 22, 0, 100);
+    if (o.level < 25) {
+      oilLog(`⚠ CRITICAL — Oil level ${Math.round(o.level)}%. Pressure collapse imminent. STOP ENGINE.`);
+    } else {
+      oilLog(`Oil level dropped to ${Math.round(o.level)}%. Pressure affected. Check dipstick.`);
+    }
+    updateOilUI();
+  }
+
+  else if (action === 'reset') {
+    clearInterval(oil.loop);
+    oil = { running:false, failed:false, pressure:0, temp:72, viscosity:100,
+      contamination:0, level:95, state:'OFF', failureTimer:0, failureCause:'',
+      mode:'idle', contRate:0.04, loop:null };
+    stopFlowAnims();
+    const overlay = document.getElementById('oil-failure-overlay');
+    if (overlay) { overlay.style.opacity = '0'; overlay.classList.remove('failure-flash'); }
+    const badge = document.getElementById('oil-badge');
+    if (badge) { badge.textContent = '● ENGINE OFF'; badge.style.color = 'var(--text-dim)'; }
+    const svgState = document.getElementById('oil-state-svg');
+    if (svgState) { svgState.textContent = 'ENGINE OFF'; svgState.setAttribute('fill', '#ffb000'); }
+    setOilBtns(false);
+    oilLog('System reset. Engine cold. All conditions nominal.');
+    updateOilUI();
+  }
+}
+
+function setOilBtns(engineOn) {
+  const ids = ['oil-btn-rev','oil-btn-drive','oil-btn-idle','oil-btn-stop'];
+  ids.forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.disabled = !engineOn;
+  });
+  const startBtn = document.getElementById('oil-btn-start');
+  if (startBtn) startBtn.disabled = engineOn;
+}
+
+function startOilLoop() {
+  if (oil.loop) clearInterval(oil.loop);
+  oil.loop = setInterval(oilTick, 1000);
+}
+
+function startFlowAnims() {
+  ['flow-pickup','flow-pump-filter','flow-gallery','flow-crank','flow-return'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('flow-active');
+  });
+  const pump = document.getElementById('oil-pump-spin');
+  if (pump) pump.classList.add('pump-running');
+}
+
+function stopFlowAnims() {
+  ['flow-pickup','flow-pump-filter','flow-gallery','flow-crank','flow-return'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('flow-active');
+  });
+  const pump = document.getElementById('oil-pump-spin');
+  if (pump) pump.classList.remove('pump-running');
+}
+
+function updateOilUI() {
+  const o = oil;
+
+  // Temp bar: maps 72–310 °F to 80px bar height
+  const tempBar = document.getElementById('oil-temp-bar');
+  if (tempBar) {
+    const pct = (o.temp - 72) / (310 - 72);
+    const h = Math.round(pct * 78);
+    tempBar.setAttribute('y', 120 - h);
+    tempBar.setAttribute('height', h);
+    tempBar.setAttribute('fill', o.temp > 260 ? '#ff3333' : o.temp > 220 ? '#ffb000' : '#00aaff');
+  }
+
+  // Pressure bar: maps 0–100 to 50px height
+  const psiBar = document.getElementById('oil-psi-bar');
+  if (psiBar) {
+    const h = Math.round((o.pressure / 100) * 58);
+    psiBar.setAttribute('y', 213 - h);
+    psiBar.setAttribute('height', h);
+    psiBar.setAttribute('fill', o.pressure < 30 ? '#ff3333' : o.pressure < 50 ? '#ffb000' : '#00ff88');
+  }
+
+  // Sump level
+  const sump = document.getElementById('oil-sump-level');
+  if (sump) {
+    const h = Math.round((o.level / 100) * 23);
+    sump.setAttribute('y', 263 - h);
+    sump.setAttribute('height', h);
+    sump.setAttribute('fill', o.level < 25 ? '#330000' : o.level < 50 ? '#332200' : '#1a3300');
+  }
+
+  // Oil film color on bearing surfaces
+  const filmColor = o.pressure < 20 ? '#330000' : o.temp > 260 ? '#441100' : o.pressure < 50 ? '#002244' : '#003355';
+  ['oil-crank-film','oil-cam-film','oil-piston-film'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.setAttribute('fill', filmColor);
+  });
+
+  // Filter color
+  const filter = document.getElementById('oil-filter-fill');
+  if (filter) filter.setAttribute('fill', o.contamination > 70 ? '#330a00' : o.contamination > 40 ? '#332200' : '#003322');
+
+  // Flow arrow colors
+  const flowColor = o.pressure < 30 ? '#ff3333' : o.temp > 260 ? '#ff6600' : '#ffb000';
+  const arrowHead = document.getElementById('arrow-head');
+  if (arrowHead) arrowHead.setAttribute('fill', flowColor);
+  ['flow-pickup','flow-pump-filter','flow-gallery','flow-crank'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.setAttribute('stroke', flowColor);
+  });
+
+  // State SVG label
+  const svgState = document.getElementById('oil-state-svg');
+  if (svgState && !o.failed) {
+    const stateColor = { NORMAL:'#00ff88', 'LOW PRESSURE':'#ffb000', OVERHEATED:'#ff6600', 'DIRTY FILTER':'#ffb000', OFF:'#ffb000' };
+    svgState.textContent = o.state;
+    svgState.setAttribute('fill', stateColor[o.state] || '#ffb000');
+  }
+
+  // Badge
+  const badge = document.getElementById('oil-badge');
+  if (badge && !o.failed) {
+    const msgs = { NORMAL:'● RUNNING — NOMINAL', 'LOW PRESSURE':'⚠ LOW PRESSURE', OVERHEATED:'⚠ OVERHEATED', 'DIRTY FILTER':'⚠ DIRTY FILTER', OFF:'● ENGINE OFF' };
+    badge.textContent = msgs[o.state] || o.state;
+    badge.style.color = o.state === 'NORMAL' ? 'var(--green)' : o.state === 'OFF' ? 'var(--text-dim)' : 'var(--red)';
+  }
+
+  updateOilReadout();
+}
+
+function updateOilReadout() {
+  const o = oil;
+
+  const psiPct = Math.round(o.pressure);
+  const psiLabel = psiPct < 15 ? 'CRITICAL' : psiPct < 30 ? 'LOW' : psiPct < 50 ? 'MARGINAL' : 'NOMINAL';
+  const psiClass = psiPct < 30 ? 'warn' : 'ok';
+
+  const tempLabel = o.temp > 260 ? 'DANGER' : o.temp > 220 ? 'HIGH' : o.temp > 180 ? 'NORMAL' : 'COLD';
+  const tempClass = o.temp > 260 ? 'warn' : 'ok';
+
+  const viscLabel = o.viscosity < 20 ? 'BREAKDOWN' : o.viscosity < 40 ? 'THIN' : o.viscosity < 60 ? 'NORMAL' : 'COLD/THICK';
+  const contLabel = o.contamination > 70 ? 'CHANGE NOW' : o.contamination > 40 ? 'DEGRADED' : 'CLEAN';
+  const contClass = o.contamination > 70 ? 'warn' : 'ok';
+  const levelLabel = o.level < 25 ? 'CRITICAL' : o.level < 50 ? 'LOW' : 'OK';
+  const levelClass = o.level < 50 ? 'warn' : 'ok';
+
+  const set = (id, text, cls) => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = text; el.className = 'readout-val ' + (cls || ''); }
+  };
+
+  set('ol-rd-state', o.state, o.state === 'NORMAL' ? 'ok' : o.state === 'OFF' ? '' : 'warn');
+  set('ol-rd-psi',   `${psiPct} PSI — ${psiLabel}`, psiClass);
+  set('ol-rd-temp',  `${Math.round(o.temp)} °F — ${tempLabel}`, tempClass);
+  set('ol-rd-visc',  `${Math.round(o.viscosity)}% — ${viscLabel}`, o.viscosity < 30 ? 'warn' : '');
+  set('ol-rd-cont',  `${Math.round(o.contamination)}% — ${contLabel}`, contClass);
+  set('ol-rd-level', `${Math.round(o.level)}% — ${levelLabel}`, levelClass);
+}
+
+function oilLog(msg) {
+  const el = document.getElementById('oil-log-line');
+  if (el) el.textContent = msg;
+}
+
+function initOilSim() {
+  oil = { running:false, failed:false, pressure:0, temp:72, viscosity:100,
+    contamination:0, level:95, state:'OFF', failureTimer:0, failureCause:'',
+    mode:'idle', contRate:0.04, loop:null };
+  setOilBtns(false);
+  updateOilUI();
 }
 
 
