@@ -1,0 +1,2300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BUREAU TERMINAL — REALITY MANAGEMENT DIVISION</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ============================================================
+   BUREAU TERMINAL — CORE VARIABLES
+   ============================================================ */
+:root {
+  --bg:         #0a0a0a;
+  --bg2:        #0f0f0f;
+  --bg3:        #141414;
+  --bg4:        #1a1a1a;
+  --panel:      #111111;
+  --border:     #1f1f1f;
+  --border2:    #2a2a2a;
+  --text:       #c8c8c8;
+  --text-dim:   #555;
+  --text-faint: #333;
+  --amber:      #ffb000;
+  --amber-dim:  #7a5500;
+  --amber-glow: rgba(255,176,0,0.08);
+  --red:        #ff3333;
+  --red-dim:    #661111;
+  --green:      #00ff88;
+  --green-dim:  #004422;
+  --blue:       #00aaff;
+  --blue-dim:   #003355;
+  --white:      #e8e8e8;
+  --mono:       'Share Tech Mono', monospace;
+  --display:    'Rajdhani', sans-serif;
+  --body:       'IBM Plex Mono', monospace;
+  --nav-width:  260px;
+  --header-h:   64px;
+  --footer-h:   36px;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 13px;
+  line-height: 1.6;
+  overflow: hidden;
+}
+
+/* Scanline overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.15) 2px,
+    rgba(0,0,0,0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Vignette */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* ============================================================
+   GLITCH ANIMATIONS
+   ============================================================ */
+@keyframes flicker {
+  0%,100% { opacity: 1; }
+  92% { opacity: 1; }
+  93% { opacity: 0.4; }
+  94% { opacity: 1; }
+  96% { opacity: 0.7; }
+  97% { opacity: 1; }
+}
+
+@keyframes glitch-text {
+  0%,100% { text-shadow: 0 0 4px var(--amber); clip-path: none; transform: none; }
+  20% { text-shadow: -2px 0 var(--red), 2px 0 var(--blue); transform: translate(-1px, 0); }
+  21% { text-shadow: 2px 0 var(--red), -2px 0 var(--blue); transform: translate(1px, 0); }
+  22% { text-shadow: 0 0 4px var(--amber); transform: none; }
+  60% { clip-path: inset(30% 0 40% 0); transform: translate(3px, 0); }
+  61% { clip-path: none; transform: none; }
+}
+
+@keyframes scanDown {
+  0% { top: -100%; }
+  100% { top: 100%; }
+}
+
+@keyframes decrypt {
+  0% { opacity: 0; letter-spacing: 8px; filter: blur(4px); }
+  60% { opacity: 0.6; letter-spacing: 2px; filter: blur(1px); }
+  100% { opacity: 1; letter-spacing: normal; filter: blur(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-amber {
+  0%,100% { box-shadow: 0 0 0 rgba(255,176,0,0); }
+  50% { box-shadow: 0 0 12px rgba(255,176,0,0.2); }
+}
+
+@keyframes progressFill {
+  from { width: 0%; }
+}
+
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes redactReveal {
+  0% { background: var(--amber); color: transparent; letter-spacing: 0; }
+  40% { background: var(--amber-dim); color: transparent; }
+  100% { background: transparent; color: var(--amber); letter-spacing: normal; }
+}
+
+/* ============================================================
+   LAYOUT SHELL
+   ============================================================ */
+#app {
+  display: grid;
+  grid-template-rows: var(--header-h) 1fr var(--footer-h);
+  grid-template-columns: var(--nav-width) 1fr;
+  grid-template-areas:
+    "header header"
+    "nav    main"
+    "footer footer";
+  height: 100vh;
+  animation: flicker 8s infinite;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+#bureau-header {
+  grid-area: header;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: relative;
+  overflow: hidden;
+  z-index: 100;
+}
+
+#bureau-header::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, var(--amber), transparent);
+  animation: pulse-amber 3s infinite;
+}
+
+/* Scan line across header */
+#bureau-header::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,176,0,0.3), transparent);
+  animation: scanDown 4s linear infinite;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.bureau-logo {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--amber-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.bureau-logo::before {
+  content: '⬡';
+  color: var(--amber);
+  font-size: 18px;
+  animation: glitch-text 6s infinite;
+}
+
+.bureau-title-block { line-height: 1.2; }
+
+.bureau-title {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  animation: glitch-text 7s infinite;
+}
+
+.bureau-subtitle {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-stat {
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+.header-stat span {
+  display: block;
+  color: var(--amber);
+  font-size: 11px;
+}
+
+.nav-toggle {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--amber-dim);
+  padding: 6px 10px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 11px;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+
+.nav-toggle:hover {
+  border-color: var(--amber-dim);
+  color: var(--amber);
+  background: var(--amber-glow);
+}
+
+/* ============================================================
+   LEFT NAV PANEL
+   ============================================================ */
+#nav-panel {
+  grid-area: nav;
+  background: var(--panel);
+  border-right: 1px solid var(--border2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width 0.3s ease, opacity 0.3s ease;
+  position: relative;
+  z-index: 50;
+}
+
+#nav-panel.collapsed {
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav-section-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-faint);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 14px 16px 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Module list */
+#module-list {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+
+#module-list::-webkit-scrollbar { width: 3px; }
+#module-list::-webkit-scrollbar-track { background: transparent; }
+#module-list::-webkit-scrollbar-thumb { background: var(--border2); }
+
+.module-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.module-item::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--amber);
+  transform: scaleY(0);
+  transition: transform 0.2s;
+}
+
+.module-item:hover { background: var(--bg3); }
+
+.module-item:hover::before,
+.module-item.active::before { transform: scaleY(1); }
+
+.module-item.active {
+  background: var(--amber-glow);
+}
+
+.module-num {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--amber-dim);
+  letter-spacing: 2px;
+  margin-bottom: 2px;
+}
+
+.module-name {
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 1px;
+  line-height: 1.3;
+}
+
+.module-item.active .module-name { color: var(--amber); }
+
+.module-status {
+  font-family: var(--mono);
+  font-size: 9px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--text-faint);
+}
+
+.status-dot.complete { background: var(--green); box-shadow: 0 0 4px var(--green); }
+.status-dot.active   { background: var(--amber); box-shadow: 0 0 4px var(--amber); animation: blink 1.5s infinite; }
+.status-dot.locked   { background: var(--red-dim); }
+
+.status-text { color: var(--text-dim); letter-spacing: 1px; }
+
+/* Coming soon modules */
+.module-item.locked {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.module-item.locked:hover { background: transparent; }
+
+/* Progress section */
+.nav-progress {
+  padding: 14px 16px;
+  border-top: 1px solid var(--border2);
+}
+
+.progress-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.progress-track {
+  height: 3px;
+  background: var(--border2);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--amber-dim), var(--amber));
+  transition: width 0.8s ease;
+  animation: progressFill 1s ease forwards;
+}
+
+/* Nav settings */
+.nav-settings {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.nav-btn {
+  width: 100%;
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+  padding: 7px 12px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-align: left;
+  transition: all 0.2s;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-btn:hover {
+  border-color: var(--amber-dim);
+  color: var(--amber);
+  background: var(--amber-glow);
+}
+
+.nav-btn-icon { font-size: 12px; }
+
+/* ============================================================
+   MAIN CONTENT PANEL
+   ============================================================ */
+#main-panel {
+  grid-area: main;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+  background: var(--bg);
+  position: relative;
+}
+
+#main-panel::-webkit-scrollbar { width: 4px; }
+#main-panel::-webkit-scrollbar-track { background: transparent; }
+#main-panel::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* Loading state */
+#decrypt-screen {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  transition: opacity 0.5s;
+}
+
+#decrypt-screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.decrypt-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--amber-dim);
+  letter-spacing: 4px;
+  margin-bottom: 20px;
+}
+
+.decrypt-bar-track {
+  width: 280px;
+  height: 2px;
+  background: var(--border2);
+  position: relative;
+  overflow: hidden;
+}
+
+.decrypt-bar-fill {
+  height: 100%;
+  background: var(--amber);
+  width: 0%;
+  transition: width 0.05s linear;
+}
+
+.decrypt-status {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-faint);
+  margin-top: 10px;
+  letter-spacing: 2px;
+  min-height: 16px;
+}
+
+/* Module content wrapper */
+#module-content {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 32px 28px 60px;
+  animation: fadeInUp 0.4s ease;
+}
+
+/* Welcome screen */
+#welcome-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - var(--header-h) - var(--footer-h));
+  text-align: center;
+  padding: 40px;
+}
+
+.welcome-seal {
+  width: 80px;
+  height: 80px;
+  border: 1px solid var(--amber-dim);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  position: relative;
+  animation: pulse-amber 3s infinite;
+}
+
+.welcome-seal::before {
+  content: '⬡';
+  font-size: 36px;
+  color: var(--amber);
+  animation: glitch-text 5s infinite;
+}
+
+.welcome-title {
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  animation: decrypt 1.2s ease forwards;
+}
+
+.welcome-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 4px;
+  margin-bottom: 32px;
+}
+
+.welcome-body {
+  font-family: var(--body);
+  font-size: 13px;
+  color: var(--text-dim);
+  max-width: 480px;
+  line-height: 1.8;
+  margin-bottom: 32px;
+}
+
+.welcome-body em {
+  color: var(--text);
+  font-style: normal;
+}
+
+.btn-primary {
+  background: none;
+  border: 1px solid var(--amber-dim);
+  color: var(--amber);
+  padding: 12px 28px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  left: -100%; top: 0; bottom: 0;
+  width: 100%;
+  background: var(--amber-glow);
+  transition: left 0.3s;
+}
+
+.btn-primary:hover::before { left: 0; }
+.btn-primary:hover {
+  border-color: var(--amber);
+  box-shadow: 0 0 16px rgba(255,176,0,0.15);
+}
+
+/* ============================================================
+   MODULE CONTENT STYLES
+   ============================================================ */
+
+/* Bureau header block */
+.module-bureau-header {
+  border: 1px solid var(--amber-dim);
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  position: relative;
+  background: linear-gradient(135deg, rgba(255,176,0,0.03), transparent);
+  animation: decrypt 0.8s ease forwards;
+}
+
+.module-bureau-header::before {
+  content: attr(data-clearance);
+  position: absolute;
+  top: -1px; right: 16px;
+  background: var(--bg);
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--amber-dim);
+  letter-spacing: 3px;
+  padding: 0 8px;
+}
+
+.bureau-module-num {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--amber-dim);
+  letter-spacing: 4px;
+  margin-bottom: 8px;
+}
+
+.bureau-module-title {
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  animation: glitch-text 8s infinite;
+}
+
+.bureau-flavor {
+  font-family: var(--body);
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.8;
+  font-style: italic;
+  border-left: 2px solid var(--amber-dim);
+  padding-left: 12px;
+  margin-top: 10px;
+}
+
+/* Content sections */
+.content-section {
+  margin-bottom: 28px;
+  animation: fadeInUp 0.5s ease forwards;
+  opacity: 0;
+}
+
+.content-section:nth-child(1) { animation-delay: 0.1s; }
+.content-section:nth-child(2) { animation-delay: 0.2s; }
+.content-section:nth-child(3) { animation-delay: 0.3s; }
+.content-section:nth-child(4) { animation-delay: 0.4s; }
+.content-section:nth-child(5) { animation-delay: 0.5s; }
+.content-section:nth-child(6) { animation-delay: 0.6s; }
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--amber-dim);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border2), transparent);
+}
+
+.section-title {
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--white);
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.section-body {
+  font-family: var(--body);
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.85;
+}
+
+.section-body p { margin-bottom: 10px; }
+.section-body strong { color: var(--white); font-weight: 500; }
+
+/* Components table */
+.components-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.components-table th {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--amber-dim);
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border2);
+  text-transform: uppercase;
+}
+
+.components-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.components-table td:first-child {
+  color: var(--amber);
+  font-family: var(--mono);
+  font-size: 11px;
+  white-space: nowrap;
+  width: 200px;
+}
+
+.components-table td:last-child {
+  color: var(--text-dim);
+}
+
+.components-table tr:hover td { background: var(--bg3); }
+
+/* Step flow */
+.flow-step {
+  display: flex;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+.flow-step:last-child { border-bottom: none; }
+
+.step-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--amber);
+  background: var(--amber-glow);
+  border: 1px solid var(--amber-dim);
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.step-body {}
+.step-title {
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--white);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.step-text {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+.step-text strong { color: var(--text); }
+
+/* Callout box */
+.callout {
+  border: 1px solid var(--border2);
+  padding: 14px 16px;
+  margin: 12px 0;
+  background: var(--bg3);
+  position: relative;
+}
+
+.callout.warning {
+  border-color: var(--red-dim);
+  background: rgba(255,51,51,0.04);
+}
+
+.callout.info {
+  border-color: var(--amber-dim);
+  background: var(--amber-glow);
+}
+
+.callout.success {
+  border-color: var(--green-dim);
+  background: rgba(0,255,136,0.03);
+}
+
+.callout-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.callout.warning .callout-tag { color: var(--red); }
+.callout.info .callout-tag { color: var(--amber); }
+.callout.success .callout-tag { color: var(--green); }
+
+.callout-body {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+/* Troubleshooting flowchart */
+.flowchart {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  padding: 16px 20px;
+  line-height: 2;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.flowchart .q { color: var(--amber); }
+.flowchart .a { color: var(--green); }
+.flowchart .fix { color: var(--blue); }
+
+/* ============================================================
+   DIAGRAM SLOT
+   ============================================================ */
+.diagram-slot {
+  border: 1px dashed var(--border2);
+  min-height: 240px;
+  padding: 24px;
+  position: relative;
+  background: var(--bg3);
+  margin-bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.diagram-slot::before {
+  content: 'DIAGRAM SLOT';
+  position: absolute;
+  top: -1px; left: 16px;
+  background: var(--bg3);
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--amber-dim);
+  letter-spacing: 3px;
+  padding: 0 8px;
+}
+
+.diagram-placeholder-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  opacity: 0.2;
+}
+
+.diagram-placeholder-text {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-faint);
+  letter-spacing: 2px;
+  line-height: 1.8;
+}
+
+/* ============================================================
+   INTERACTIVE MODULE SLOT
+   ============================================================ */
+.sim-slot {
+  border: 1px solid var(--border2);
+  padding: 0;
+  margin-bottom: 28px;
+  position: relative;
+  background: var(--bg3);
+  overflow: hidden;
+}
+
+.sim-slot::before {
+  content: 'INTERACTIVE MODULE';
+  position: absolute;
+  top: -1px; left: 16px;
+  background: var(--bg3);
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--amber-dim);
+  letter-spacing: 3px;
+  padding: 0 8px;
+  z-index: 1;
+}
+
+.sim-header {
+  padding: 14px 20px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.sim-title {
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+  letter-spacing: 2px;
+}
+
+.sim-status {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--green);
+  letter-spacing: 2px;
+  animation: blink 2s infinite;
+}
+
+.sim-body { padding: 20px; }
+
+/* The toilet simulator */
+.toilet-sim {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 600px) {
+  .toilet-sim { grid-template-columns: 1fr; }
+}
+
+.sim-visual {
+  position: relative;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* SVG toilet diagram */
+.toilet-svg {
+  width: 100%;
+  max-width: 200px;
+}
+
+.sim-controls {}
+
+.sim-section-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--amber-dim);
+  letter-spacing: 3px;
+  margin-bottom: 8px;
+  margin-top: 14px;
+}
+
+.sim-section-label:first-child { margin-top: 0; }
+
+.sim-btn {
+  display: block;
+  width: 100%;
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+  padding: 9px 14px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-align: left;
+  transition: all 0.15s;
+  margin-bottom: 5px;
+}
+
+.sim-btn:hover {
+  border-color: var(--amber-dim);
+  color: var(--amber);
+  background: var(--amber-glow);
+}
+
+.sim-btn.active {
+  border-color: var(--amber);
+  color: var(--amber);
+  background: var(--amber-glow);
+}
+
+.sim-btn.fault {
+  border-color: var(--red-dim);
+  color: var(--red);
+  background: rgba(255,51,51,0.05);
+}
+
+.sim-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.sim-slider-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  min-width: 80px;
+}
+
+.sim-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 3px;
+  background: var(--border2);
+  outline: none;
+  cursor: pointer;
+}
+
+.sim-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px; height: 12px;
+  background: var(--amber);
+  cursor: pointer;
+}
+
+.sim-value {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--amber);
+  min-width: 32px;
+  text-align: right;
+}
+
+/* Status readout */
+.sim-readout {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.8;
+  margin-top: 12px;
+  min-height: 60px;
+}
+
+.readout-line { display: flex; gap: 8px; align-items: flex-start; }
+.readout-tag { color: var(--amber-dim); flex-shrink: 0; }
+.readout-val { color: var(--text); }
+.readout-val.warn { color: var(--red); }
+.readout-val.ok { color: var(--green); }
+
+/* Toilet SVG animations */
+@keyframes waterFlow {
+  0% { opacity: 0; transform: translateY(-10px); }
+  50% { opacity: 0.8; }
+  100% { opacity: 0; transform: translateY(10px); }
+}
+
+@keyframes waterRipple {
+  0% { r: 4; opacity: 0.8; }
+  100% { r: 14; opacity: 0; }
+}
+
+.water-drop {
+  animation: waterFlow 0.4s ease forwards;
+}
+
+.flushing .tank-water { fill: #004466; transition: height 1.5s; }
+.flushing .rim-jet { stroke: var(--blue); animation: waterFlow 0.3s infinite; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+#bureau-footer {
+  grid-area: footer;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-faint);
+  letter-spacing: 2px;
+  z-index: 100;
+}
+
+.footer-left { display: flex; gap: 20px; align-items: center; }
+.footer-right { display: flex; gap: 20px; align-items: center; }
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-dot-sm {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 4px var(--green);
+  animation: blink 3s infinite;
+}
+
+.footer-time { color: var(--amber-dim); }
+
+/* ============================================================
+   SETTINGS MODAL
+   ============================================================ */
+#settings-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+}
+
+#settings-modal.open { display: flex; }
+
+.modal-box {
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  width: 400px;
+  max-width: 90vw;
+  padding: 0;
+  animation: fadeInUp 0.2s ease;
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--amber);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.modal-close:hover { color: var(--amber); }
+
+.modal-body { padding: 20px; }
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.setting-row:last-child { border-bottom: none; }
+
+.setting-name {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+}
+
+.setting-value {
+  display: flex;
+  gap: 6px;
+}
+
+.setting-opt {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text-faint);
+  padding: 4px 10px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  transition: all 0.15s;
+}
+
+.setting-opt.active {
+  border-color: var(--amber-dim);
+  color: var(--amber);
+  background: var(--amber-glow);
+}
+
+.setting-opt:hover {
+  border-color: var(--amber-dim);
+  color: var(--amber);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 700px) {
+  :root { --nav-width: 240px; }
+
+  #app {
+    grid-template-columns: 0 1fr;
+  }
+
+  #nav-panel {
+    position: fixed;
+    left: 0; top: var(--header-h);
+    bottom: var(--footer-h);
+    width: var(--nav-width);
+    z-index: 300;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  #nav-panel.mobile-open {
+    transform: translateX(0);
+  }
+
+  #module-content {
+    padding: 20px 16px 40px;
+  }
+
+  .bureau-module-title { font-size: 19px; }
+  .toilet-sim { grid-template-columns: 1fr; }
+  .header-stat { display: none; }
+}
+
+/* High contrast mode */
+body.high-contrast {
+  --text: #ffffff;
+  --text-dim: #aaaaaa;
+  --border: #333;
+  --border2: #444;
+}
+
+/* Large text mode */
+body.large-text {
+  font-size: 15px;
+}
+
+body.large-text .section-body { font-size: 15px; }
+body.large-text .step-text { font-size: 14px; }
+
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===================== HEADER ===================== -->
+  <header id="bureau-header">
+    <div class="header-left">
+      <button class="nav-toggle" onclick="toggleNav()" aria-label="Toggle navigation">☰ NAV</button>
+      <div class="bureau-logo" aria-hidden="true"></div>
+      <div class="bureau-title-block">
+        <div class="bureau-title">BUREAU TERMINAL</div>
+        <div class="bureau-subtitle">REALITY MANAGEMENT DIVISION — TRAINING SYSTEM v2.1</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-stat">
+        MODULES UNLOCKED
+        <span id="header-progress">4 / 12</span>
+      </div>
+      <div class="header-stat">
+        CLEARANCE
+        <span>CIVILIAN</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== NAV PANEL ===================== -->
+  <nav id="nav-panel" aria-label="Module navigation">
+
+    <div class="nav-section-label">TRAINING FILES</div>
+
+    <div id="module-list" role="list">
+
+      <div class="module-item active" role="listitem" onclick="loadModule('m001')" data-module="m001">
+        <div class="module-num">MODULE 001</div>
+        <div class="module-name">THE TOILET — THE SIPHON ENGINE</div>
+        <div class="module-status">
+          <span class="status-dot active"></span>
+          <span class="status-text">IN PROGRESS</span>
+        </div>
+      </div>
+
+      <div class="module-item" role="listitem" onclick="loadModule('m002')" data-module="m002">
+        <div class="module-num">MODULE 002</div>
+        <div class="module-name">THE BREAKER BOX — THE OVERLOAD GATE</div>
+        <div class="module-status">
+          <span class="status-dot active"></span>
+          <span class="status-text">UNLOCKED</span>
+        </div>
+      </div>
+
+      <div class="module-item" role="listitem" onclick="loadModule('m003')" data-module="m003">
+        <div class="module-num">MODULE 003</div>
+        <div class="module-name">THE P-TRAP — THE GAS WALL</div>
+        <div class="module-status">
+          <span class="status-dot active"></span>
+          <span class="status-text">UNLOCKED</span>
+        </div>
+      </div>
+
+      <div class="module-item" role="listitem" onclick="loadModule('m004')" data-module="m004">
+        <div class="module-num">MODULE 004</div>
+        <div class="module-name">ENGINE OIL — LIQUID ARMOR</div>
+        <div class="module-status">
+          <span class="status-dot active"></span>
+          <span class="status-text">UNLOCKED</span>
+        </div>
+      </div>
+
+      <div class="module-item locked" role="listitem" aria-disabled="true">
+        <div class="module-num">MODULE 005</div>
+        <div class="module-name">THE WATER HEATER — PRESSURE CHAMBER</div>
+        <div class="module-status">
+          <span class="status-dot locked"></span>
+          <span class="status-text">CLASSIFIED</span>
+        </div>
+      </div>
+
+      <div class="module-item locked" role="listitem" aria-disabled="true">
+        <div class="module-num">MODULE 006</div>
+        <div class="module-name">THE HVAC FILTER — AIRBORNE</div>
+        <div class="module-status">
+          <span class="status-dot locked"></span>
+          <span class="status-text">CLASSIFIED</span>
+        </div>
+      </div>
+
+      <div class="module-item locked" role="listitem" aria-disabled="true">
+        <div class="module-num">MODULE 007</div>
+        <div class="module-name">ELECTRICAL GROUNDING — SAFETY SINK</div>
+        <div class="module-status">
+          <span class="status-dot locked"></span>
+          <span class="status-text">CLASSIFIED</span>
+        </div>
+      </div>
+
+      <div class="module-item locked" role="listitem" aria-disabled="true">
+        <div class="module-num">MODULE 008</div>
+        <div class="module-name">THE DRAIN SYSTEM — GRAVITY NETWORK</div>
+        <div class="module-status">
+          <span class="status-dot locked"></span>
+          <span class="status-text">CLASSIFIED</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="nav-progress">
+      <div class="progress-label">
+        <span>SYSTEMS KNOWLEDGE</span>
+        <span id="progress-pct">8%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width: 33%"></div>
+      </div>
+    </div>
+
+    <div class="nav-settings">
+      <button class="nav-btn" onclick="openSettings()">
+        <span class="nav-btn-icon">⚙</span>
+        <span>SETTINGS</span>
+      </button>
+      <button class="nav-btn" onclick="showWelcome()">
+        <span class="nav-btn-icon">⬡</span>
+        <span>RETURN TO TERMINAL</span>
+      </button>
+    </div>
+
+  </nav>
+
+  <!-- ===================== MAIN PANEL ===================== -->
+  <main id="main-panel" role="main">
+
+    <!-- Decrypt animation overlay -->
+    <div id="decrypt-screen" class="hidden">
+      <div class="decrypt-label">DECRYPTING TRAINING FILE</div>
+      <div class="decrypt-bar-track">
+        <div class="decrypt-bar-fill" id="decrypt-fill"></div>
+      </div>
+      <div class="decrypt-status" id="decrypt-status">INITIALIZING...</div>
+    </div>
+
+    <!-- Welcome screen -->
+    <div id="welcome-screen">
+      <div class="welcome-seal" aria-hidden="true"></div>
+      <div class="welcome-title">BUREAU TERMINAL</div>
+      <div class="welcome-sub">REALITY MANAGEMENT DIVISION — TRAINING SYSTEM</div>
+      <p class="welcome-body">
+        You were never taught how your world works.<br><br>
+        The plumbing. The wiring. The engines. The infrastructure.<br>
+        <em>Everything around you is a system. Nothing is magic.</em><br><br>
+        This terminal exists to change that.
+      </p>
+      <button class="btn-primary" onclick="loadModule('m001')">
+        ACCESS TRAINING FILES
+      </button>
+    </div>
+
+    <!-- Module content area (hidden until module loads) -->
+    <div id="module-content" style="display:none;"></div>
+
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer id="bureau-footer">
+    <div class="footer-left">
+      <div class="status-indicator">
+        <div class="status-dot-sm"></div>
+        <span>SYSTEM STATUS: ONLINE</span>
+      </div>
+      <span id="footer-module">MODULE — STANDBY</span>
+    </div>
+    <div class="footer-right">
+      <span class="footer-time" id="footer-time">--:--:--</span>
+      <span>BUREAU TERMINAL v2.1</span>
+    </div>
+  </footer>
+
+</div>
+
+<!-- ===================== SETTINGS MODAL ===================== -->
+<div id="settings-modal" role="dialog" aria-modal="true" aria-label="Terminal Settings">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">TERMINAL SETTINGS</div>
+      <button class="modal-close" onclick="closeSettings()" aria-label="Close settings">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="setting-row">
+        <span class="setting-name">TEXT SIZE</span>
+        <div class="setting-value">
+          <button class="setting-opt active" onclick="setTextSize('normal', this)">NORMAL</button>
+          <button class="setting-opt" onclick="setTextSize('large', this)">LARGE</button>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <span class="setting-name">CONTRAST</span>
+        <div class="setting-value">
+          <button class="setting-opt active" onclick="setContrast('normal', this)">NORMAL</button>
+          <button class="setting-opt" onclick="setContrast('high', this)">HIGH</button>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <span class="setting-name">ANIMATIONS</span>
+        <div class="setting-value">
+          <button class="setting-opt active" onclick="setAnim('on', this)">ON</button>
+          <button class="setting-opt" onclick="setAnim('off', this)">OFF</button>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <span class="setting-name">NAV PANEL</span>
+        <div class="setting-value">
+          <button class="setting-opt active" onclick="setNav('expanded', this)">EXPANDED</button>
+          <button class="setting-opt" onclick="setNav('collapsed', this)">COLLAPSED</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ===================== MODULE DATA ===================== -->
+<script src="modules.js"></script>
+<script>
+// Engine — module data loaded from modules.js
+
+// ============================================================
+// MODULE LOADER
+// ============================================================
+let currentModule = null;
+let navOpen = true;
+
+function loadModule(id) {
+  const mod = MODULES[id];
+  if (!mod) return;
+
+  // Mobile: close nav after selection
+  if (window.innerWidth <= 700) {
+    document.getElementById('nav-panel').classList.remove('mobile-open');
+  }
+
+  // Mark active in nav
+  document.querySelectorAll('.module-item').forEach(el => el.classList.remove('active'));
+  const navItem = document.querySelector(`[data-module="${id}"]`);
+  if (navItem) navItem.classList.add('active');
+
+  // Update footer
+  document.getElementById('footer-module').textContent = mod.num + ' — ' + mod.title.split(' — ')[0];
+
+  // Show decrypt animation
+  runDecrypt(() => renderModule(mod));
+}
+
+function runDecrypt(callback) {
+  const screen = document.getElementById('decrypt-screen');
+  const fill = document.getElementById('decrypt-fill');
+  const status = document.getElementById('decrypt-status');
+
+  const messages = [
+    'LOCATING FILE...',
+    'VERIFYING CLEARANCE...',
+    'REMOVING REDACTIONS...',
+    'DECRYPTING CONTENT...',
+    'ACCESS GRANTED'
+  ];
+
+  screen.classList.remove('hidden');
+  document.getElementById('welcome-screen').style.display = 'none';
+  document.getElementById('module-content').style.display = 'none';
+
+  let pct = 0;
+  let msgIdx = 0;
+
+  const interval = setInterval(() => {
+    pct += Math.random() * 18 + 4;
+    if (pct > 100) pct = 100;
+    fill.style.width = pct + '%';
+
+    if (msgIdx < messages.length && pct > (msgIdx + 1) * 20) {
+      status.textContent = messages[msgIdx];
+      msgIdx++;
+    }
+
+    if (pct >= 100) {
+      clearInterval(interval);
+      setTimeout(() => {
+        screen.classList.add('hidden');
+        callback();
+      }, 400);
+    }
+  }, 60);
+}
+
+function renderModule(mod) {
+  const content = document.getElementById('module-content');
+  content.style.display = 'block';
+
+  let html = '';
+
+  // Bureau header
+  html += `
+    <div class="module-bureau-header" data-clearance="${mod.clearance}">
+      <div class="bureau-module-num">${mod.num} — DECLASSIFIED TRAINING FILE</div>
+      <div class="bureau-module-title">${mod.title}</div>
+      <div class="bureau-flavor">${mod.flavor}</div>
+    </div>
+  `;
+
+  // Content sections
+  mod.sections.forEach((sec, i) => {
+    html += `<div class="content-section">`;
+    html += `<div class="section-label">${sec.label}</div>`;
+    html += `<div class="section-title">${sec.title}</div>`;
+
+    if (sec.isFlow) {
+      sec.steps.forEach(step => {
+        html += `
+          <div class="flow-step">
+            <div class="step-num">${step.num}</div>
+            <div class="step-body">
+              <div class="step-title">${step.title}</div>
+              <div class="step-text">${step.text}</div>
+            </div>
+          </div>
+        `;
+      });
+    } else if (sec.isFlowchart) {
+      html += `<pre class="flowchart">${sec.chart}</pre>`;
+    } else {
+      html += `<div class="section-body">${sec.body}</div>`;
+    }
+
+    html += `</div>`;
+  });
+
+  // Diagram slot
+  // Diagram slot — show image if available, else placeholder
+  if (mod.diagram) {
+    html += `
+      <div class="diagram-slot" style="padding:0;min-height:auto;">
+        <img src="${mod.diagram}" alt="${mod.diagramLabel}" style="width:100%;display:block;border:none;">
+      </div>
+    `;
+  } else {
+    html += `
+      <div class="diagram-slot">
+        <div class="diagram-placeholder-icon">⬡</div>
+        <div class="diagram-placeholder-text">
+          DIAGRAM SLOT — ${mod.num}<br>
+          ${mod.diagramLabel || 'DIAGRAM DESCRIPTION AVAILABLE'}<br>
+          VISUAL ASSET: PENDING UPLOAD
+        </div>
+      </div>
+    `;
+  }
+
+  // Interactive sim slot — route by mod.sim property
+  if (mod.sim === 'toilet') html += buildToiletSim();
+  else if (mod.sim === 'breaker') html += buildBreakerSim();
+
+  content.innerHTML = html;
+  content.scrollTop = 0;
+}
+
+// ============================================================
+// TOILET SIMULATOR
+// ============================================================
+let simState = {
+  tankLevel: 85,
+  flushing: false,
+  faults: { flapper: false, chain: false, rimJets: false, drySeal: false },
+  diagnosing: false
+};
+
+function buildToiletSim() {
+  return `
+    <div class="sim-slot">
+      <div class="sim-header">
+        <div class="sim-title">SIPHON ENGINE SIMULATOR</div>
+        <div class="sim-status">● SYSTEM READY</div>
+      </div>
+      <div class="sim-body">
+        <div class="toilet-sim">
+
+          <div class="sim-visual" id="sim-visual">
+            <svg class="toilet-svg" viewBox="0 0 180 260" xmlns="http://www.w3.org/2000/svg">
+              <!-- Tank -->
+              <rect x="30" y="10" width="100" height="70" rx="3" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+              <!-- Tank water -->
+              <rect id="svg-tank-water" x="33" y="30" width="94" height="47" fill="#003355" opacity="0.9"/>
+              <!-- Tank water level label -->
+              <text x="80" y="58" fill="#00aaff" font-size="8" text-anchor="middle" font-family="monospace">WATER</text>
+              <!-- Flapper -->
+              <ellipse id="svg-flapper" cx="80" cy="80" rx="14" ry="4" fill="#ffb000" opacity="0.9"/>
+              <!-- Float -->
+              <circle id="svg-float" cx="120" cy="38" r="7" fill="#555" stroke="#888" stroke-width="1"/>
+              <line x1="120" y1="45" x2="105" y2="56" stroke="#888" stroke-width="1"/>
+              <!-- Overflow tube -->
+              <rect x="72" y="20" width="4" height="60" fill="none" stroke="#333" stroke-width="1"/>
+              <text x="66" y="18" fill="#333" font-size="7" font-family="monospace">OVF</text>
+              <!-- Handle -->
+              <rect x="20" y="30" width="18" height="6" rx="2" fill="#1f1f1f" stroke="#555" stroke-width="1"/>
+              <line x1="38" y1="33" x2="62" y2="76" stroke="#555" stroke-width="1" id="svg-chain"/>
+
+              <!-- Bowl -->
+              <ellipse cx="80" cy="105" rx="50" ry="14" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+              <rect x="30" y="105" width="100" height="80" fill="#141414" stroke="none"/>
+              <path d="M30 105 Q15 160 40 200 Q60 230 80 235 Q100 230 120 200 Q145 160 130 105" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+              <!-- Bowl water seal -->
+              <ellipse id="svg-bowl-water" cx="80" cy="185" rx="30" ry="8" fill="#003355" opacity="0.8"/>
+              <text x="80" y="188" fill="#00aaff" font-size="7" text-anchor="middle" font-family="monospace">SEAL</text>
+              <!-- Rim jets -->
+              <circle cx="45" cy="115" r="2" fill="#004466" id="jet-l"/>
+              <circle cx="115" cy="115" r="2" fill="#004466" id="jet-r"/>
+              <!-- Siphon jet -->
+              <rect x="68" y="215" width="24" height="5" rx="1" fill="#004466" id="svg-siphon-jet"/>
+              <text x="80" y="219" fill="#00aaff" font-size="6" text-anchor="middle" font-family="monospace">JET</text>
+
+              <!-- Trapway (S-curve) -->
+              <path d="M80 230 Q80 248 65 252 Q50 256 50 248 Q50 240 65 240 Q78 240 78 255" fill="none" stroke="#2a2a2a" stroke-width="6"/>
+              <text x="42" y="255" fill="#333" font-size="7" font-family="monospace">TRAP</text>
+
+              <!-- Drain -->
+              <line x1="78" y1="255" x2="78" y2="270" stroke="#1f1f1f" stroke-width="6"/>
+              <text x="84" y="268" fill="#333" font-size="7" font-family="monospace">DRAIN</text>
+
+              <!-- Flow arrows (hidden by default) -->
+              <g id="svg-flow-arrows" opacity="0">
+                <path d="M80 82 L80 108" stroke="#00aaff" stroke-width="2" marker-end="url(#arrow)"/>
+                <path d="M47 117 L47 130" stroke="#00aaff" stroke-width="1.5" marker-end="url(#arrow)"/>
+                <path d="M113 117 L113 130" stroke="#00aaff" stroke-width="1.5" marker-end="url(#arrow)"/>
+              </g>
+
+              <!-- Sewer gas warning (hidden) -->
+              <g id="svg-gas-warning" opacity="0">
+                <circle cx="80" cy="200" r="18" fill="rgba(255,51,51,0.15)" stroke="#ff3333" stroke-width="1"/>
+                <text x="80" y="197" fill="#ff3333" font-size="8" text-anchor="middle" font-family="monospace">GAS</text>
+                <text x="80" y="207" fill="#ff3333" font-size="8" text-anchor="middle" font-family="monospace">RISK</text>
+              </g>
+
+              <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                  <path d="M0,0 L0,6 L6,3 z" fill="#00aaff"/>
+                </marker>
+              </defs>
+            </svg>
+          </div>
+
+          <div class="sim-controls">
+            <div class="sim-section-label">CONTROLS</div>
+
+            <div class="sim-slider-row">
+              <span class="sim-slider-label">TANK LEVEL</span>
+              <input type="range" class="sim-slider" id="tank-slider" min="20" max="100" value="85" oninput="setTankLevel(this.value)">
+              <span class="sim-value" id="tank-val">85%</span>
+            </div>
+
+            <button class="sim-btn" id="btn-flush" onclick="doFlush()">▶ FLUSH</button>
+            <button class="sim-btn" onclick="resetSim()">↺ RESET</button>
+
+            <div class="sim-section-label" style="margin-top:16px">INJECT FAULT</div>
+
+            <button class="sim-btn" id="fault-flapper" onclick="toggleFault('flapper')">⚠ WORN FLAPPER</button>
+            <button class="sim-btn" id="fault-chain" onclick="toggleFault('chain')">⚠ BROKEN CHAIN</button>
+            <button class="sim-btn" id="fault-rim" onclick="toggleFault('rimJets')">⚠ CLOGGED RIM JETS</button>
+            <button class="sim-btn" id="fault-seal" onclick="toggleFault('drySeal')">⚠ DRY TRAP SEAL</button>
+
+            <div class="sim-readout" id="sim-readout">
+              <div class="readout-line"><span class="readout-tag">STATUS</span><span class="readout-val ok" id="rd-status">STANDBY — ALL SYSTEMS NOMINAL</span></div>
+              <div class="readout-line"><span class="readout-tag">TANK</span><span class="readout-val" id="rd-tank">85% — READY TO FLUSH</span></div>
+              <div class="readout-line"><span class="readout-tag">SEAL</span><span class="readout-val ok" id="rd-seal">INTACT — SEWER GAS BLOCKED</span></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// SIMULATOR LOGIC
+// ============================================================
+function setTankLevel(val) {
+  simState.tankLevel = parseInt(val);
+  document.getElementById('tank-val').textContent = val + '%';
+
+  const waterEl = document.getElementById('svg-tank-water');
+  const floatEl = document.getElementById('svg-float');
+  if (waterEl) {
+    const h = Math.round(47 * val / 100);
+    waterEl.setAttribute('height', h);
+    waterEl.setAttribute('y', 80 - h);
+  }
+  if (floatEl) {
+    const floatY = 38 - Math.round(12 * (val - 50) / 50);
+    floatEl.setAttribute('cy', floatY);
+  }
+
+  const rdTank = document.getElementById('rd-tank');
+  if (rdTank) {
+    if (val >= 80) {
+      rdTank.textContent = val + '% — READY TO FLUSH';
+      rdTank.className = 'readout-val ok';
+    } else if (val >= 50) {
+      rdTank.textContent = val + '% — LOW — WEAK FLUSH POSSIBLE';
+      rdTank.className = 'readout-val';
+    } else {
+      rdTank.textContent = val + '% — CRITICALLY LOW — SIPHON MAY FAIL';
+      rdTank.className = 'readout-val warn';
+    }
+  }
+}
+
+function doFlush() {
+  if (simState.flushing) return;
+
+  if (simState.faults.chain) {
+    updateReadout('FAULT DETECTED — CHAIN DISCONNECTED', 'warn', 'NO FLUSH POSSIBLE — REATTACH CHAIN');
+    return;
+  }
+
+  simState.flushing = true;
+  const btn = document.getElementById('btn-flush');
+  if (btn) { btn.textContent = '⏳ FLUSHING...'; btn.disabled = true; }
+
+  const arrows = document.getElementById('svg-flow-arrows');
+  if (arrows) arrows.style.opacity = '1';
+
+  // Stage 1
+  updateReadout('FLUSH INITIATED — FLAPPER OPEN', null, null);
+  setTimeout(() => {
+    if (simState.faults.rimJets) {
+      updateReadout('⚠ RIM JETS BLOCKED — PARTIAL COVERAGE', 'warn', null);
+    } else {
+      updateReadout('RIM JETS ACTIVE — BOWL COVERAGE NOMINAL', null, null);
+    }
+  }, 600);
+
+  setTimeout(() => {
+    updateReadout('SIPHON JET FIRING — TRAPWAY FILLING', null, null);
+  }, 1200);
+
+  setTimeout(() => {
+    if (simState.tankLevel < 50) {
+      updateReadout('⚠ SIPHON FAILURE — INSUFFICIENT WATER VOLUME', 'warn', 'INCREASE TANK LEVEL TO FLUSH EFFECTIVELY');
+    } else if (simState.faults.rimJets) {
+      updateReadout('⚠ PARTIAL SIPHON — INCOMPLETE EVACUATION', 'warn', 'CLEAR RIM JETS TO RESTORE FULL FLUSH');
+    } else {
+      updateReadout('SIPHON ESTABLISHED — ATMOSPHERIC PRESSURE ACTIVE', null, null);
+    }
+  }, 1800);
+
+  setTimeout(() => {
+    if (arrows) arrows.style.opacity = '0';
+    if (simState.faults.flapper) {
+      updateReadout('⚠ FLAPPER FAULT — WATER LEAKING INTO BOWL', 'warn', 'REPLACE FLAPPER — WATER WASTING CONTINUOUSLY');
+    } else {
+      updateReadout('SIPHON BROKEN — BOWL REFILLING', null, null);
+    }
+  }, 2600);
+
+  setTimeout(() => {
+    simState.flushing = false;
+    if (btn) { btn.textContent = '▶ FLUSH'; btn.disabled = false; }
+    if (!simState.faults.flapper) {
+      updateReadout('CYCLE COMPLETE — SYSTEM RESET TO STANDBY', 'ok', null);
+    }
+  }, 3800);
+}
+
+function toggleFault(fault) {
+  simState.faults[fault] = !simState.faults[fault];
+  const on = simState.faults[fault];
+
+  const ids = { flapper: 'fault-flapper', chain: 'fault-chain', rimJets: 'fault-rim', drySeal: 'fault-seal' };
+  const btn = document.getElementById(ids[fault]);
+  if (btn) btn.classList.toggle('fault', on);
+
+  const labels = { flapper: 'WORN FLAPPER', chain: 'BROKEN CHAIN', rimJets: 'CLOGGED RIM JETS', drySeal: 'DRY TRAP SEAL' };
+
+  if (fault === 'drySeal') {
+    const gasWarn = document.getElementById('svg-gas-warning');
+    const sealEl = document.getElementById('svg-bowl-water');
+    if (gasWarn) gasWarn.style.opacity = on ? '1' : '0';
+    if (sealEl) sealEl.setAttribute('fill', on ? '#220000' : '#003355');
+    const rdSeal = document.getElementById('rd-seal');
+    if (rdSeal) {
+      rdSeal.textContent = on ? 'DRY — SEWER GAS PATHWAY OPEN' : 'INTACT — SEWER GAS BLOCKED';
+      rdSeal.className = on ? 'readout-val warn' : 'readout-val ok';
+    }
+  }
+
+  if (fault === 'flapper' && on) {
+    updateReadout('FAULT ACTIVE — FLAPPER LEAKING — WATER RUNNING', 'warn', null);
+  }
+
+  if (!on) {
+    updateReadout('FAULT CLEARED — SYSTEM NOMINAL', 'ok', null);
+  }
+}
+
+function updateReadout(statusText, statusClass, tankText) {
+  const rdStatus = document.getElementById('rd-status');
+  if (rdStatus) {
+    rdStatus.textContent = statusText;
+    rdStatus.className = 'readout-val' + (statusClass ? ' ' + statusClass : '');
+  }
+  if (tankText) {
+    const rdTank = document.getElementById('rd-tank');
+    if (rdTank) {
+      rdTank.textContent = tankText;
+      rdTank.className = 'readout-val' + (statusClass ? ' ' + statusClass : '');
+    }
+  }
+}
+
+function resetSim() {
+  simState = { tankLevel: 85, flushing: false, faults: { flapper: false, chain: false, rimJets: false, drySeal: false }, diagnosing: false };
+
+  const slider = document.getElementById('tank-slider');
+  if (slider) { slider.value = 85; setTankLevel(85); }
+
+  ['fault-flapper','fault-chain','fault-rim','fault-seal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('fault');
+  });
+
+  const gasWarn = document.getElementById('svg-gas-warning');
+  if (gasWarn) gasWarn.style.opacity = '0';
+
+  const sealEl = document.getElementById('svg-bowl-water');
+  if (sealEl) sealEl.setAttribute('fill', '#003355');
+
+  const rdSeal = document.getElementById('rd-seal');
+  if (rdSeal) { rdSeal.textContent = 'INTACT — SEWER GAS BLOCKED'; rdSeal.className = 'readout-val ok'; }
+
+  updateReadout('RESET COMPLETE — ALL SYSTEMS NOMINAL', 'ok', '85% — READY TO FLUSH');
+}
+
+// ============================================================
+// BREAKER PANEL SIMULATOR
+// ============================================================
+const CIRCUITS = [
+  { id:'c1',  label:'KITCHEN',      rated:20, load:0 },
+  { id:'c2',  label:'LIVING ROOM',  rated:15, load:0 },
+  { id:'c3',  label:'BEDROOM 1',    rated:15, load:0 },
+  { id:'c4',  label:'BATHROOM',     rated:20, load:0 },
+  { id:'c5',  label:'DRYER (240V)', rated:30, load:0, double:true },
+  { id:'c6',  label:'GARAGE',       rated:20, load:0 },
+];
+
+let breakerState = {};
+
+function initBreakerState() {
+  breakerState = {};
+  CIRCUITS.forEach(c => {
+    breakerState[c.id] = { on: true, tripped: false, load: 0 };
+  });
+}
+initBreakerState();
+
+function buildBreakerSim() {
+  let circuitRows = CIRCUITS.map(c => `
+    <div class="bc-row" id="bcrow-${c.id}">
+      <div class="bc-label">${c.label}</div>
+      <div class="bc-rated">${c.rated}A</div>
+      <div class="bc-slider-wrap">
+        <input type="range" class="sim-slider" min="0" max="${Math.round(c.rated*1.4)}"
+          value="0" oninput="setBreakerLoad('${c.id}', this.value, ${c.rated})"
+          aria-label="${c.label} load">
+        <span class="bc-load-val" id="bcload-${c.id}">0A</span>
+      </div>
+      <div class="bc-switch-wrap">
+        <button class="bc-switch" id="bcsw-${c.id}" onclick="toggleBreaker('${c.id}')">ON</button>
+      </div>
+      <div class="bc-bar-wrap">
+        <div class="bc-bar-track">
+          <div class="bc-bar-fill" id="bcbar-${c.id}" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="sim-slot">
+      <div class="sim-header">
+        <div class="sim-title">OVERLOAD GATE SIMULATOR</div>
+        <div class="sim-status">● PANEL ONLINE</div>
+      </div>
+      <div class="sim-body">
+        <div class="bc-layout">
+          <div class="bc-panel">
+            <div class="bc-panel-header">
+              <span class="bc-panel-title">LOAD CENTER</span>
+              <button class="bc-main-btn" id="bc-main" onclick="toggleMain()">MAIN ● ON</button>
+            </div>
+            <div class="bc-circuits">
+              <div class="bc-col-labels">
+                <span>CIRCUIT</span><span>RATED</span><span>LOAD SLIDER</span><span>STATE</span><span>LOAD %</span>
+              </div>
+              ${circuitRows}
+            </div>
+          </div>
+          <div class="bc-readout-panel">
+            <div class="sim-section-label">PANEL STATUS</div>
+            <div class="sim-readout" id="bc-readout" style="min-height:80px">
+              <div class="readout-line"><span class="readout-tag">MAIN</span><span class="readout-val ok" id="bc-rd-main">ON — POWER FLOWING</span></div>
+              <div class="readout-line"><span class="readout-tag">ALERT</span><span class="readout-val" id="bc-rd-alert">ALL CIRCUITS NOMINAL</span></div>
+              <div class="readout-line"><span class="readout-tag">TOTAL</span><span class="readout-val" id="bc-rd-total">0A / 200A CAPACITY</span></div>
+            </div>
+            <div class="sim-section-label" style="margin-top:14px">INJECT FAULT</div>
+            <button class="sim-btn" onclick="injectShort()">⚡ SHORT CIRCUIT</button>
+            <button class="sim-btn" onclick="injectOverload()">🔥 SUSTAINED OVERLOAD</button>
+            <button class="sim-btn" onclick="resetBreakers()">↺ RESET ALL</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+      .bc-layout { display:grid; grid-template-columns:1fr 220px; gap:16px; }
+      @media(max-width:600px){ .bc-layout{ grid-template-columns:1fr; } }
+      .bc-panel { background:var(--bg2); border:1px solid var(--border); padding:14px; }
+      .bc-panel-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+      .bc-panel-title { font-family:var(--mono); font-size:9px; letter-spacing:3px; color:var(--amber-dim); }
+      .bc-main-btn { background:none; border:1px solid var(--green-dim); color:var(--green); font-family:var(--mono); font-size:9px; letter-spacing:2px; padding:5px 10px; cursor:pointer; transition:all 0.2s; }
+      .bc-main-btn.off { border-color:var(--red-dim); color:var(--red); }
+      .bc-col-labels { display:grid; grid-template-columns:110px 40px 1fr 60px 80px; gap:6px; font-family:var(--mono); font-size:8px; color:var(--text-faint); letter-spacing:1px; padding:0 0 6px; border-bottom:1px solid var(--border); margin-bottom:6px; }
+      .bc-row { display:grid; grid-template-columns:110px 40px 1fr 60px 80px; gap:6px; align-items:center; padding:5px 0; border-bottom:1px solid var(--border); transition:background 0.2s; }
+      .bc-row.tripped { background:rgba(255,51,51,0.07); }
+      .bc-label { font-family:var(--mono); font-size:10px; color:var(--text); letter-spacing:1px; }
+      .bc-rated { font-family:var(--mono); font-size:10px; color:var(--text-dim); }
+      .bc-slider-wrap { display:flex; align-items:center; gap:6px; }
+      .bc-load-val { font-family:var(--mono); font-size:9px; color:var(--amber); min-width:28px; text-align:right; }
+      .bc-switch-wrap { text-align:center; }
+      .bc-switch { background:none; border:1px solid var(--green-dim); color:var(--green); font-family:var(--mono); font-size:9px; letter-spacing:1px; padding:3px 8px; cursor:pointer; transition:all 0.15s; width:52px; }
+      .bc-switch.off { border-color:var(--border2); color:var(--text-faint); }
+      .bc-switch.tripped { border-color:var(--red-dim); color:var(--red); }
+      .bc-bar-track { height:6px; background:var(--border2); width:100%; }
+      .bc-bar-fill { height:100%; background:var(--green); transition:width 0.3s, background 0.3s; }
+      .bc-bar-fill.warn { background:var(--amber); }
+      .bc-bar-fill.over { background:var(--red); }
+    </style>
+  `;
+}
+
+let mainOn = true;
+
+function toggleMain() {
+  mainOn = !mainOn;
+  const btn = document.getElementById('bc-main');
+  const rdMain = document.getElementById('bc-rd-main');
+  if (btn) { btn.textContent = mainOn ? 'MAIN ● ON' : 'MAIN ○ OFF'; btn.classList.toggle('off', !mainOn); }
+  if (rdMain) { rdMain.textContent = mainOn ? 'ON — POWER FLOWING' : 'OFF — ALL CIRCUITS DEAD'; rdMain.className = mainOn ? 'readout-val ok' : 'readout-val warn'; }
+  // Visually grey out all switches when main is off
+  CIRCUITS.forEach(c => {
+    const sw = document.getElementById(`bcsw-${c.id}`);
+    if (sw && !breakerState[c.id].tripped) {
+      sw.style.opacity = mainOn ? '1' : '0.3';
+    }
+  });
+  updateBreakerAlert();
+}
+
+function setBreakerLoad(id, val, rated) {
+  val = parseInt(val);
+  breakerState[id].load = val;
+  const loadEl = document.getElementById(`bcload-${id}`);
+  const barEl = document.getElementById(`bcbar-${id}`);
+  const rowEl = document.getElementById(`bcrow-${id}`);
+  const sw = document.getElementById(`bcsw-${id}`);
+
+  if (loadEl) loadEl.textContent = val + 'A';
+
+  const pct = Math.min(100, Math.round(val / (rated * 1.4) * 100));
+  if (barEl) {
+    barEl.style.width = pct + '%';
+    barEl.className = 'bc-bar-fill' + (val > rated ? ' over' : val > rated * 0.8 ? ' warn' : '');
+  }
+
+  // Auto-trip on overload
+  if (val > rated && breakerState[id].on && !breakerState[id].tripped) {
+    setTimeout(() => tripBreaker(id), 800 + Math.random() * 400);
+  }
+
+  updateBreakerAlert();
+}
+
+function tripBreaker(id) {
+  if (!breakerState[id]) return;
+  breakerState[id].tripped = true;
+  breakerState[id].on = false;
+  const sw = document.getElementById(`bcsw-${id}`);
+  const row = document.getElementById(`bcrow-${id}`);
+  if (sw) { sw.textContent = 'TRIP'; sw.className = 'bc-switch tripped'; }
+  if (row) row.classList.add('tripped');
+  const alert = document.getElementById('bc-rd-alert');
+  const c = CIRCUITS.find(x => x.id === id);
+  if (alert && c) { alert.textContent = `⚠ ${c.label} TRIPPED — OVERLOAD`; alert.className = 'readout-val warn'; }
+}
+
+function toggleBreaker(id) {
+  if (!mainOn) return;
+  const state = breakerState[id];
+  if (state.tripped) {
+    // Reset: must go OFF first (simulate two-step)
+    state.tripped = false;
+    state.on = false;
+    const sw = document.getElementById(`bcsw-${id}`);
+    const row = document.getElementById(`bcrow-${id}`);
+    if (sw) { sw.textContent = 'OFF'; sw.className = 'bc-switch off'; }
+    if (row) row.classList.remove('tripped');
+    const alert = document.getElementById('bc-rd-alert');
+    if (alert) { alert.textContent = 'BREAKER RESET TO OFF — PUSH ON TO RESTORE'; alert.className = 'readout-val'; }
+  } else if (!state.on) {
+    state.on = true;
+    const sw = document.getElementById(`bcsw-${id}`);
+    if (sw) { sw.textContent = 'ON'; sw.className = 'bc-switch'; }
+    updateBreakerAlert();
+  } else {
+    state.on = false;
+    const sw = document.getElementById(`bcsw-${id}`);
+    if (sw) { sw.textContent = 'OFF'; sw.className = 'bc-switch off'; }
+    updateBreakerAlert();
+  }
+}
+
+function updateBreakerAlert() {
+  const totalLoad = CIRCUITS.reduce((sum, c) => sum + (breakerState[c.id].on ? breakerState[c.id].load : 0), 0);
+  const totalEl = document.getElementById('bc-rd-total');
+  if (totalEl) totalEl.textContent = totalLoad + 'A / 200A CAPACITY';
+  if (!mainOn) return;
+  const tripped = CIRCUITS.filter(c => breakerState[c.id].tripped);
+  const overloaded = CIRCUITS.filter(c => breakerState[c.id].on && breakerState[c.id].load > CIRCUITS.find(x=>x.id===c.id).rated);
+  const alert = document.getElementById('bc-rd-alert');
+  if (!alert) return;
+  if (tripped.length > 0) {
+    alert.textContent = `⚠ ${tripped.length} CIRCUIT(S) TRIPPED`;
+    alert.className = 'readout-val warn';
+  } else if (overloaded.length > 0) {
+    alert.textContent = `⚠ ${overloaded.length} CIRCUIT(S) NEAR LIMIT`;
+    alert.className = 'readout-val warn';
+  } else {
+    alert.textContent = 'ALL CIRCUITS NOMINAL';
+    alert.className = 'readout-val ok';
+  }
+}
+
+function injectShort() {
+  // Pick a random on circuit and trip it instantly
+  const onCircuits = CIRCUITS.filter(c => breakerState[c.id].on && !breakerState[c.id].tripped);
+  if (!onCircuits.length) { updateBreakerAlertMsg('NO ACTIVE CIRCUITS TO FAULT'); return; }
+  const target = onCircuits[Math.floor(Math.random() * onCircuits.length)];
+  tripBreaker(target.id);
+  const alert = document.getElementById('bc-rd-alert');
+  if (alert) { alert.textContent = `⚡ SHORT CIRCUIT — ${target.label} — MAGNETIC TRIP`; alert.className = 'readout-val warn'; }
+}
+
+function injectOverload() {
+  const onCircuits = CIRCUITS.filter(c => breakerState[c.id].on && !breakerState[c.id].tripped);
+  if (!onCircuits.length) return;
+  const target = onCircuits[Math.floor(Math.random() * onCircuits.length)];
+  const c = CIRCUITS.find(x => x.id === target.id);
+  const overAmt = c.rated + Math.round(c.rated * 0.3);
+  breakerState[target.id].load = overAmt;
+  const loadEl = document.getElementById(`bcload-${target.id}`);
+  const barEl = document.getElementById(`bcbar-${target.id}`);
+  const slider = document.querySelector(`#bcrow-${target.id} input`);
+  if (loadEl) loadEl.textContent = overAmt + 'A';
+  if (barEl) { barEl.style.width = '100%'; barEl.className = 'bc-bar-fill over'; }
+  if (slider) slider.value = overAmt;
+  const alert = document.getElementById('bc-rd-alert');
+  if (alert) { alert.textContent = `🔥 OVERLOAD — ${target.label} — THERMAL TRIP PENDING`; alert.className = 'readout-val warn'; }
+  setTimeout(() => tripBreaker(target.id), 1200);
+}
+
+function resetBreakers() {
+  initBreakerState();
+  mainOn = true;
+  const mainBtn = document.getElementById('bc-main');
+  if (mainBtn) { mainBtn.textContent = 'MAIN ● ON'; mainBtn.classList.remove('off'); }
+  CIRCUITS.forEach(c => {
+    const sw = document.getElementById(`bcsw-${c.id}`);
+    const bar = document.getElementById(`bcbar-${c.id}`);
+    const load = document.getElementById(`bcload-${c.id}`);
+    const row = document.getElementById(`bcrow-${c.id}`);
+    const slider = document.querySelector(`#bcrow-${c.id} input`);
+    if (sw) { sw.textContent = 'ON'; sw.className = 'bc-switch'; sw.style.opacity = '1'; }
+    if (bar) { bar.style.width = '0%'; bar.className = 'bc-bar-fill'; }
+    if (load) load.textContent = '0A';
+    if (row) row.classList.remove('tripped');
+    if (slider) slider.value = 0;
+  });
+  const rdMain = document.getElementById('bc-rd-main');
+  const rdAlert = document.getElementById('bc-rd-alert');
+  const rdTotal = document.getElementById('bc-rd-total');
+  if (rdMain) { rdMain.textContent = 'ON — POWER FLOWING'; rdMain.className = 'readout-val ok'; }
+  if (rdAlert) { rdAlert.textContent = 'ALL CIRCUITS NOMINAL'; rdAlert.className = 'readout-val ok'; }
+  if (rdTotal) rdTotal.textContent = '0A / 200A CAPACITY';
+}
+function toggleNav() {
+  const nav = document.getElementById('nav-panel');
+  if (window.innerWidth <= 700) {
+    nav.classList.toggle('mobile-open');
+  } else {
+    navOpen = !navOpen;
+    nav.classList.toggle('collapsed', !navOpen);
+  }
+}
+
+// ============================================================
+// WELCOME
+// ============================================================
+function showWelcome() {
+  document.getElementById('welcome-screen').style.display = 'flex';
+  document.getElementById('module-content').style.display = 'none';
+  document.getElementById('decrypt-screen').classList.add('hidden');
+  document.getElementById('footer-module').textContent = 'MODULE — STANDBY';
+  document.querySelectorAll('.module-item').forEach(el => el.classList.remove('active'));
+  if (window.innerWidth <= 700) {
+    document.getElementById('nav-panel').classList.remove('mobile-open');
+  }
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function openSettings() { document.getElementById('settings-modal').classList.add('open'); }
+function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+
+function setTextSize(size, btn) {
+  document.querySelectorAll('#settings-modal .setting-row:nth-child(1) .setting-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.body.classList.toggle('large-text', size === 'large');
+}
+
+function setContrast(mode, btn) {
+  document.querySelectorAll('#settings-modal .setting-row:nth-child(2) .setting-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.body.classList.toggle('high-contrast', mode === 'high');
+}
+
+function setAnim(mode, btn) {
+  document.querySelectorAll('#settings-modal .setting-row:nth-child(3) .setting-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.body.style.setProperty('animation', mode === 'off' ? 'none' : '');
+  if (mode === 'off') {
+    document.querySelectorAll('*').forEach(el => {
+      el.style.animationDuration = '0s';
+      el.style.transitionDuration = '0s';
+    });
+  }
+}
+
+function setNav(state, btn) {
+  document.querySelectorAll('#settings-modal .setting-row:nth-child(4) .setting-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const nav = document.getElementById('nav-panel');
+  nav.classList.toggle('collapsed', state === 'collapsed');
+  navOpen = state === 'expanded';
+}
+
+// Close modal on backdrop click
+document.getElementById('settings-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeSettings();
+});
+
+// ============================================================
+// FOOTER CLOCK
+// ============================================================
+function updateClock() {
+  const now = new Date();
+  const t = now.toTimeString().slice(0, 8);
+  document.getElementById('footer-time').textContent = t;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+</script>
+</body>
+</html>
