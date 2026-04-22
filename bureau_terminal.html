@@ -1,0 +1,3745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BUREAU TERMINAL — REALITY MANAGEMENT DIVISION</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ============================================================
+   BUREAU TERMINAL — CORE VARIABLES
+   ============================================================ */
+:root {
+  --bg:         #0a0a0a;
+  --bg2:        #0f0f0f;
+  --bg3:        #141414;
+  --bg4:        #1a1a1a;
+  --panel:      #111111;
+  --border:     #1f1f1f;
+  --border2:    #2a2a2a;
+  --text:       #c8c8c8;
+  --text-dim:   #555;
+  --text-faint: #333;
+  --amber:      #ffb000;
+  --amber-dim:  #7a5500;
+  --amber-glow: rgba(255,176,0,0.08);
+  --red:        #ff3333;
+  --red-dim:    #661111;
+  --green:      #00ff88;
+  --green-dim:  #004422;
+  --blue:       #00aaff;
+  --blue-dim:   #003355;
+  --white:      #e8e8e8;
+  --mono:       'Share Tech Mono', monospace;
+  --display:    'Rajdhani', sans-serif;
+  --body:       'IBM Plex Mono', monospace;
+  --nav-width:  260px;
+  --header-h:   64px;
+  --footer-h:   36px;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 13px;
+  line-height: 1.6;
+  overflow: hidden;
+}
+
+/* Scanline overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.15) 2px,
+    rgba(0,0,0,0.15) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Vignette */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.7) 100%);
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* ============================================================
+   GLITCH ANIMATIONS
+   ============================================================ */
+@keyframes flicker {
+  0%,100% { opacity: 1; }
+  92% { opacity: 1; }
+  93% { opacity: 0.4; }
+  94% { opacity: 1; }
+  96% { opacity: 0.7; }
+  97% { opacity: 1; }
+}
+
+@keyframes glitch-text {
+  0%,100% { text-shadow: 0 0 4px var(--amber); clip-path: none; transform: none; }
+  20% { text-shadow: -2px 0 var(--red), 2px 0 var(--blue); transform: translate(-1px, 0); }
+  21% { text-shadow: 2px 0 var(--red), -2px 0 var(--blue); transform: translate(1px, 0); }
+  22% { text-shadow: 0 0 4px var(--amber); transform: none; }
+  60% { clip-path: inset(30% 0 40% 0); transform: translate(3px, 0); }
+  61% { clip-path: none; transform: none; }
+}
+
+@keyframes scanDown {
+  0% { top: -100%; }
+  100% { top: 100%; }
+}
+
+@keyframes decrypt {
+  0% { opacity: 0; letter-spacing: 8px; filter: blur(4px); }
+  60% { opacity: 0.6; letter-spacing: 2px; filter: blur(1px); }
+  100% { opacity: 1; letter-spacing: normal; filter: blur(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-amber {
+  0%,100% { box-shadow: 0 0 0 rgba(255,176,0,0); }
+  50% { box-shadow: 0 0 12px rgba(255,176,0,0.2); }
+}
+
+@keyframes progressFill {
+  from { width: 0%; }
+}
+
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes redactReveal {
+  0% { background: var(--amber); color: transparent; letter-spacing: 0; }
+  40% { background: var(--amber-dim); color: transparent; }
+  100% { background: transparent; color: var(--amber); letter-spacing: normal; }
+}
+
+/* ============================================================
+   LAYOUT SHELL
+   ============================================================ */
+#app {
+  display: grid;
+  grid-template-rows: var(--header-h) 1fr var(--footer-h);
+  grid-template-columns: var(--nav-width) 1fr;
+  grid-template-areas:
+    "header header"
+    "nav    main"
+    "footer footer";
+  height: 100vh;
+  animation: flicker 8s infinite;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+#bureau-header {
+  grid-area: header;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  position: relative;
+  overflow: hidden;
+  z-index: 100;
+}
+
+#bureau-header::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, var(--amber), transparent);
+  animation: pulse-amber 3s infinite;
+}
+
+/* Scan line across header */
+#bureau-header::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,176,0,0.3), transparent);
+  animation: scanDown 4s linear infinite;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.bureau-logo {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--amber-dim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.bureau-logo::before {
+  content: '⬡';
+  color: var(--amber);
+  font-size: 18px;
+  animation: glitch-text 6s infinite;
+}
+
+.bureau-title-block { line-height: 1.2; }
+
+.bureau-title {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  animation: glitch-text 7s infinite;
+}
+
+.bureau-subtitle {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.header-stat {
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+.header-stat span {
+  display: block;
+  color: var(--amber);
+  font-size: 11px;
+}
+
+.nav-toggle {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--amber-dim);
+  padding: 6px 10px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 11px;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+
+.nav-toggle:hover {
+  border-color: var(--amber-dim);
+  color: var(--amber);
+  background: var(--amber-glow);
+}
+
+/* ============================================================
+   LEFT NAV PANEL
+   ============================================================ */
+#nav-panel {
+  grid-area: nav;
+  background: var(--panel);
+  border-right: 1px solid var(--border2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width 0.3s ease, opacity 0.3s ease;
+  position: relative;
+  z-index: 50;
+}
+
+#nav-panel.collapsed {
+  width: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav-section-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-faint);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 14px 16px 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Module list */
+#module-list {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+
+#module-list::-webkit-scrollbar { width: 3px; }
+#module-list::-webkit-scrollbar-track { background: transparent; }
+#module-list::-webkit-scrollbar-thumb { background: var(--border2); }
+
+.module-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: all 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.module-item::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--amber);
+  transform: scaleY(0);
+  transition: transform 0.2s;
+}
+
+.module-item:hover { background: var(--bg3); }
+
+.module-item:hover::before,
+.module-item.active::before { transform: scaleY(1); }
+
+.module-item.active {
+  background: var(--amber-glow);
+}
+
+.module-num {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--amber-dim);
+  letter-spacing: 2px;
+  margin-bottom: 2px;
+}
+
+.module-name {
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: 1px;
+  line-height: 1.3;
+}
+
+.module-item.active .module-name { color: var(--amber); }
+
+.module-status {
+  font-family: var(--mono);
+  font-size: 9px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--text-faint);
+}
+
+.status-dot.complete { background: var(--green); box-shadow: 0 0 4px var(--green); }
+.status-dot.active   { background: var(--amber); box-shadow: 0 0 4px var(--amber); animation: blink 1.5s infinite; }
+.status-dot.locked   { background: var(--red-dim); }
+
+.status-text { color: var(--text-dim); letter-spacing: 1px; }
+
+/* Coming soon modules */
+.module-item.locked {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.module-item.locked:hover { background: transparent; }
+
+/* Progress section */
+.nav-progress {
+  padding: 14px 16px;
+  border-top: 1px solid var(--border2);
+}
+
+.progress-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.progress-track {
+  height: 3px;
+  background: var(--border2);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--amber-dim), var(--amber));
+  transition: width 0.8s ease;
+  animation: progressFill 1s ease forwards;
+}
+
+/* Nav settings */
+.nav-settings {
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+}
+
+.nav-btn {
+  width: 100%;
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+  padding: 7px 12px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-align: left;
+  transition: all 0.2s;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-btn:hover {
+  border-color: var(--amber-dim);
+  color: var(--amber);
+  background: var(--amber-glow);
+}
+
+.nav-btn-icon { font-size: 12px; }
+
+/* ============================================================
+   MAIN CONTENT PANEL
+   ============================================================ */
+#main-panel {
+  grid-area: main;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+  background: var(--bg);
+  position: relative;
+}
+
+#main-panel::-webkit-scrollbar { width: 4px; }
+#main-panel::-webkit-scrollbar-track { background: transparent; }
+#main-panel::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* Loading state */
+#decrypt-screen {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  transition: opacity 0.5s;
+}
+
+#decrypt-screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.decrypt-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--amber-dim);
+  letter-spacing: 4px;
+  margin-bottom: 20px;
+}
+
+.decrypt-bar-track {
+  width: 280px;
+  height: 2px;
+  background: var(--border2);
+  position: relative;
+  overflow: hidden;
+}
+
+.decrypt-bar-fill {
+  height: 100%;
+  background: var(--amber);
+  width: 0%;
+  transition: width 0.05s linear;
+}
+
+.decrypt-status {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-faint);
+  margin-top: 10px;
+  letter-spacing: 2px;
+  min-height: 16px;
+}
+
+/* Module content wrapper */
+#module-content {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 32px 28px 60px;
+  animation: fadeInUp 0.4s ease;
+}
+
+/* Welcome screen */
+#welcome-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - var(--header-h) - var(--footer-h));
+  text-align: center;
+  padding: 40px;
+}
+
+.welcome-seal {
+  width: 80px;
+  height: 80px;
+  border: 1px solid var(--amber-dim);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  position: relative;
+  animation: pulse-amber 3s infinite;
+}
+
+.welcome-seal::before {
+  content: '⬡';
+  font-size: 36px;
+  color: var(--amber);
+  animation: glitch-text 5s infinite;
+}
+
+.welcome-title {
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  animation: decrypt 1.2s ease forwards;
+}
+
+.welcome-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 4px;
+  margin-bottom: 32px;
+}
+
+.welcome-body {
+  font-family: var(--body);
+  font-size: 13px;
+  color: var(--text-dim);
+  max-width: 480px;
+  line-height: 1.8;
+  margin-bottom: 32px;
+}
+
+.welcome-body em {
+  color: var(--text);
+  font-style: normal;
+}
+
+.btn-primary {
+  background: none;
+  border: 1px solid var(--amber-dim);
+  color: var(--amber);
+  padding: 12px 28px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  left: -100%; top: 0; bottom: 0;
+  width: 100%;
+  background: var(--amber-glow);
+  transition: left 0.3s;
+}
+
+.btn-primary:hover::before { left: 0; }
+.btn-primary:hover {
+  border-color: var(--amber);
+  box-shadow: 0 0 16px rgba(255,176,0,0.15);
+}
+
+/* ============================================================
+   MODULE CONTENT STYLES
+   ============================================================ */
+
+/* Bureau header block */
+.module-bureau-header {
+  border: 1px solid var(--amber-dim);
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  position: relative;
+  background: linear-gradient(135deg, rgba(255,176,0,0.03), transparent);
+  animation: decrypt 0.8s ease forwards;
+}
+
+.module-bureau-header::before {
+  content: attr(data-clearance);
+  position: absolute;
+  top: -1px; right: 16px;
+  background: var(--bg);
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--amber-dim);
+  letter-spacing: 3px;
+  padding: 0 8px;
+}
+
+.bureau-module-num {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--amber-dim);
+  letter-spacing: 4px;
+  margin-bottom: 8px;
+}
+
+.bureau-module-title {
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  animation: glitch-text 8s infinite;
+}
+
+.bureau-flavor {
+  font-family: var(--body);
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.8;
+  font-style: italic;
+  border-left: 2px solid var(--amber-dim);
+  padding-left: 12px;
+  margin-top: 10px;
+}
+
+/* Content sections */
+.content-section {
+  margin-bottom: 28px;
+  animation: fadeInUp 0.5s ease forwards;
+  opacity: 0;
+}
+
+.content-section:nth-child(1) { animation-delay: 0.1s; }
+.content-section:nth-child(2) { animation-delay: 0.2s; }
+.content-section:nth-child(3) { animation-delay: 0.3s; }
+.content-section:nth-child(4) { animation-delay: 0.4s; }
+.content-section:nth-child(5) { animation-delay: 0.5s; }
+.content-section:nth-child(6) { animation-delay: 0.6s; }
+
+.section-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--amber-dim);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border2), transparent);
+}
+
+.section-title {
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--white);
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.section-body {
+  font-family: var(--body);
+  font-size: 13px;
+  color: var(--text);
+  line-height: 1.85;
+}
+
+.section-body p { margin-bottom: 10px; }
+.section-body strong { color: var(--white); font-weight: 500; }
+
+/* Components table */
+.components-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.components-table th {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--amber-dim);
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border2);
+  text-transform: uppercase;
+}
+
+.components-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.components-table td:first-child {
+  color: var(--amber);
+  font-family: var(--mono);
+  font-size: 11px;
+  white-space: nowrap;
+  width: 200px;
+}
+
+.components-table td:last-child {
+  color: var(--text-dim);
+}
+
+.components-table tr:hover td { background: var(--bg3); }
+
+/* Step flow */
+.flow-step {
+  display: flex;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+
+.flow-step:last-child { border-bottom: none; }
+
+.step-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--amber);
+  background: var(--amber-glow);
+  border: 1px solid var(--amber-dim);
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.step-body {}
+.step-title {
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--white);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.step-text {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+.step-text strong { color: var(--text); }
+
+/* Callout box */
+.callout {
+  border: 1px solid var(--border2);
+  padding: 14px 16px;
+  margin: 12px 0;
+  background: var(--bg3);
+  position: relative;
+}
+
+.callout.warning {
+  border-color: var(--red-dim);
+  background: rgba(255,51,51,0.04);
+}
+
+.callout.info {
+  border-color: var(--amber-dim);
+  background: var(--amber-glow);
+}
+
+.callout.success {
+  border-color: var(--green-dim);
+  background: rgba(0,255,136,0.03);
+}
+
+.callout-tag {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 3px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.callout.warning .callout-tag { color: var(--red); }
+.callout.info .callout-tag { color: var(--amber); }
+.callout.success .callout-tag { color: var(--green); }
+
+.callout-body {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+
+/* Troubleshooting flowchart */
+.flowchart {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  padding: 16px 20px;
+  line-height: 2;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.flowchart .q { color: var(--amber); }
+.flowchart .a { color: var(--green); }
+.flowchart .fix { color: var(--blue); }
+
+/* ============================================================
+   DIAGRAM SLOT
+   ============================================================ */
+.diagram-slot {
+  border: 1px dashed var(--border2);
+  min-height: 240px;
+  padding: 24px;
+  position: relative;
+  background: var(--bg3);
+  margin-bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.diagram-slot::before {
+  content: 'DIAGRAM SLOT';
+  position: absolute;
+  top: -1px; left: 16px;
+  background: var(--bg3);
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--amber-dim);
+  letter-spacing: 3px;
+  padding: 0 8px;
+}
+
+.diagram-placeholder-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  opacity: 0.2;
+}
+
+.diagram-placeholder-text {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-faint);
+  letter-spacing: 2px;
+  line-height: 1.8;
+}
+
+/* ============================================================
+   INTERACTIVE MODULE SLOT
+   ============================================================ */
+.sim-slot {
+  border: 1px solid var(--border2);
+  padding: 0;
+  margin-bottom: 28px;
+  position: relative;
+  background: var(--bg3);
+  overflow: hidden;
+}
+
+.sim-slot::before {
+  content: 'INTERACTIVE MODULE';
+  position: absolute;
+  top: -1px; left: 16px;
+  background: var(--bg3);
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--amber-dim);
+  letter-spacing: 3px;
+  padding: 0 8px;
+  z-index: 1;
+}
+
+.sim-header {
+  padding: 14px 20px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.sim-title {
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+  letter-spacing: 2px;
+}
+
+.sim-status {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--green);
+  letter-spacing: 2px;
+  animation: blink 2s infinite;
+}
+
+.sim-body { padding: 20px; }
+
+/* The toilet simulator */
+.toilet-sim {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 600px) {
+  .toilet-sim { grid-template-columns: 1fr; }
+}
+
+.sim-visual {
+  position: relative;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* SVG toilet diagram */
+.toilet-svg {
+  width: 100%;
+  max-width: 200px;
+}
+
+.sim-controls {}
+
+.sim-section-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--amber-dim);
+  letter-spacing: 3px;
+  margin-bottom: 8px;
+  margin-top: 14px;
+}
+
+.sim-section-label:first-child { margin-top: 0; }
+
+.sim-btn {
+  display: block;
+  width: 100%;
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+  padding: 9px 14px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-align: left;
+  transition: all 0.15s;
+  margin-bottom: 5px;
+}
+
+.sim-btn:hover {
+  border-color: var(--amber-dim);
+  color: var(--amber);
+  background: var(--amber-glow);
+}
+
+.sim-btn.active {
+  border-color: var(--amber);
+  color: var(--amber);
+  background: var(--amber-glow);
+}
+
+.sim-btn.fault {
+  border-color: var(--red-dim);
+  color: var(--red);
+  background: rgba(255,51,51,0.05);
+}
+
+.sim-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.sim-slider-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  min-width: 80px;
+}
+
+.sim-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 3px;
+  background: var(--border2);
+  outline: none;
+  cursor: pointer;
+}
+
+.sim-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px; height: 12px;
+  background: var(--amber);
+  cursor: pointer;
+}
+
+.sim-value {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--amber);
+  min-width: 32px;
+  text-align: right;
+}
+
+/* Status readout */
+.sim-readout {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.8;
+  margin-top: 12px;
+  min-height: 60px;
+}
+
+.readout-line { display: flex; gap: 8px; align-items: flex-start; }
+.readout-tag { color: var(--amber-dim); flex-shrink: 0; }
+.readout-val { color: var(--text); }
+.readout-val.warn { color: var(--red); }
+.readout-val.ok { color: var(--green); }
+
+/* Toilet SVG animations */
+@keyframes waterFlow {
+  0% { opacity: 0; transform: translateY(-10px); }
+  50% { opacity: 0.8; }
+  100% { opacity: 0; transform: translateY(10px); }
+}
+
+@keyframes waterRipple {
+  0% { r: 4; opacity: 0.8; }
+  100% { r: 14; opacity: 0; }
+}
+
+.water-drop {
+  animation: waterFlow 0.4s ease forwards;
+}
+
+.flushing .tank-water { fill: #004466; transition: height 1.5s; }
+.flushing .rim-jet { stroke: var(--blue); animation: waterFlow 0.3s infinite; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+#bureau-footer {
+  grid-area: footer;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-faint);
+  letter-spacing: 2px;
+  z-index: 100;
+}
+
+.footer-left { display: flex; gap: 20px; align-items: center; }
+.footer-right { display: flex; gap: 20px; align-items: center; }
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-dot-sm {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 4px var(--green);
+  animation: blink 3s infinite;
+}
+
+.footer-time { color: var(--amber-dim); }
+
+/* ============================================================
+   SETTINGS MODAL
+   ============================================================ */
+#settings-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+}
+
+#settings-modal.open { display: flex; }
+
+.modal-box {
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  width: 400px;
+  max-width: 90vw;
+  padding: 0;
+  animation: fadeInUp 0.2s ease;
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--amber);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.modal-close:hover { color: var(--amber); }
+
+.modal-body { padding: 20px; }
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.setting-row:last-child { border-bottom: none; }
+
+.setting-name {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+}
+
+.setting-value {
+  display: flex;
+  gap: 6px;
+}
+
+.setting-opt {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--text-faint);
+  padding: 4px 10px;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  transition: all 0.15s;
+}
+
+.setting-opt.active {
+  border-color: var(--amber-dim);
+  color: var(--amber);
+  background: var(--amber-glow);
+}
+
+.setting-opt:hover {
+  border-color: var(--amber-dim);
+  color: var(--amber);
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 700px) {
+  :root { --nav-width: 240px; }
+
+  #app {
+    grid-template-columns: 0 1fr;
+  }
+
+  #nav-panel {
+    position: fixed;
+    left: 0; top: var(--header-h);
+    bottom: var(--footer-h);
+    width: var(--nav-width);
+    z-index: 300;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  #nav-panel.mobile-open {
+    transform: translateX(0);
+  }
+
+  #module-content {
+    padding: 20px 16px 40px;
+  }
+
+  .bureau-module-title { font-size: 19px; }
+  .toilet-sim { grid-template-columns: 1fr; }
+  .header-stat { display: none; }
+}
+
+/* High contrast mode */
+body.high-contrast {
+  --text: #ffffff;
+  --text-dim: #aaaaaa;
+  --border: #333;
+  --border2: #444;
+}
+
+/* Large text mode */
+body.large-text {
+  font-size: 15px;
+}
+
+body.large-text .section-body { font-size: 15px; }
+body.large-text .step-text { font-size: 14px; }
+
+
+/* Shared sim layout */
+.two-col-sim { display:grid; grid-template-columns:200px 1fr; gap:16px; align-items:start; }
+@media(max-width:600px){ .two-col-sim{ grid-template-columns:1fr; } }
+
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===================== HEADER ===================== -->
+  <header id="bureau-header">
+    <div class="header-left">
+      <button class="nav-toggle" onclick="toggleNav()" aria-label="Toggle navigation">☰ NAV</button>
+      <div class="bureau-logo" aria-hidden="true"></div>
+      <div class="bureau-title-block">
+        <div class="bureau-title">BUREAU TERMINAL</div>
+        <div class="bureau-subtitle">REALITY MANAGEMENT DIVISION — TRAINING SYSTEM v2.1</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-stat">
+        MODULES UNLOCKED
+        <span id="header-progress">8 / 12</span>
+      </div>
+      <div class="header-stat">
+        CLEARANCE
+        <span>CIVILIAN</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== NAV PANEL ===================== -->
+  <nav id="nav-panel" aria-label="Module navigation">
+
+    <div class="nav-section-label">TRAINING FILES</div>
+
+    <div id="module-list" role="list">
+
+      <div class="module-item active" role="listitem" onclick="loadModule('m001')" data-module="m001">
+        <div class="module-num">MODULE 001</div>
+        <div class="module-name">THE TOILET — THE SIPHON ENGINE</div>
+        <div class="module-status">
+          <span class="status-dot active"></span>
+          <span class="status-text">IN PROGRESS</span>
+        </div>
+      </div>
+
+      <div class="module-item" role="listitem" onclick="loadModule('m002')" data-module="m002">
+        <div class="module-num">MODULE 002</div>
+        <div class="module-name">THE BREAKER BOX — THE OVERLOAD GATE</div>
+        <div class="module-status">
+          <span class="status-dot active"></span>
+          <span class="status-text">UNLOCKED</span>
+        </div>
+      </div>
+
+      <div class="module-item" role="listitem" onclick="loadModule('m003')" data-module="m003">
+        <div class="module-num">MODULE 003</div>
+        <div class="module-name">THE P-TRAP — THE GAS WALL</div>
+        <div class="module-status">
+          <span class="status-dot active"></span>
+          <span class="status-text">UNLOCKED</span>
+        </div>
+      </div>
+
+      <div class="module-item" role="listitem" onclick="loadModule('m004')" data-module="m004">
+        <div class="module-num">MODULE 004</div>
+        <div class="module-name">ENGINE OIL — LIQUID ARMOR</div>
+        <div class="module-status">
+          <span class="status-dot active"></span>
+          <span class="status-text">UNLOCKED</span>
+        </div>
+      </div>
+
+      <div class="module-item" role="listitem" onclick="loadModule('m005')" data-module="m005">
+        <div class="module-num">MODULE 005</div>
+        <div class="module-name">THE WATER HEATER — PRESSURE CHAMBER</div>
+        <div class="module-status">
+          <span class="status-dot active"></span>
+          <span class="status-text">UNLOCKED</span>
+        </div>
+      </div>
+
+      <div class="module-item" role="listitem" onclick="loadModule('m006')" data-module="m006">
+        <div class="module-num">MODULE 006</div>
+        <div class="module-name">THE HVAC FILTER — THE AIRBORNE</div>
+        <div class="module-status">
+          <span class="status-dot active"></span>
+          <span class="status-text">UNLOCKED</span>
+        </div>
+      </div>
+
+      <div class="module-item" role="listitem" onclick="loadModule('m007')" data-module="m007">
+        <div class="module-num">MODULE 007</div>
+        <div class="module-name">ELECTRICAL GROUNDING — THE SAFETY SINK</div>
+        <div class="module-status">
+          <span class="status-dot active"></span>
+          <span class="status-text">UNLOCKED</span>
+        </div>
+      </div>
+
+      <div class="module-item" role="listitem" onclick="loadModule('m008')" data-module="m008">
+        <div class="module-num">MODULE 008</div>
+        <div class="module-name">THE DRAIN SYSTEM — GRAVITY NETWORK</div>
+        <div class="module-status">
+          <span class="status-dot active"></span>
+          <span class="status-text">UNLOCKED</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="nav-progress">
+      <div class="progress-label">
+        <span>SYSTEMS KNOWLEDGE</span>
+        <span id="progress-pct">8%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width: 66%"></div>
+      </div>
+    </div>
+
+    <div class="nav-settings">
+      <button class="nav-btn" onclick="openSettings()">
+        <span class="nav-btn-icon">⚙</span>
+        <span>SETTINGS</span>
+      </button>
+      <button class="nav-btn" onclick="showWelcome()">
+        <span class="nav-btn-icon">⬡</span>
+        <span>RETURN TO TERMINAL</span>
+      </button>
+    </div>
+
+  </nav>
+
+  <!-- ===================== MAIN PANEL ===================== -->
+  <main id="main-panel" role="main">
+
+    <!-- Decrypt animation overlay -->
+    <div id="decrypt-screen" class="hidden">
+      <div class="decrypt-label">DECRYPTING TRAINING FILE</div>
+      <div class="decrypt-bar-track">
+        <div class="decrypt-bar-fill" id="decrypt-fill"></div>
+      </div>
+      <div class="decrypt-status" id="decrypt-status">INITIALIZING...</div>
+    </div>
+
+    <!-- Welcome screen -->
+    <div id="welcome-screen">
+      <div class="welcome-seal" aria-hidden="true"></div>
+      <div class="welcome-title">BUREAU TERMINAL</div>
+      <div class="welcome-sub">REALITY MANAGEMENT DIVISION — TRAINING SYSTEM</div>
+      <p class="welcome-body">
+        You were never taught how your world works.<br><br>
+        The plumbing. The wiring. The engines. The infrastructure.<br>
+        <em>Everything around you is a system. Nothing is magic.</em><br><br>
+        This terminal exists to change that.
+      </p>
+      <button class="btn-primary" onclick="loadModule('m001')">
+        ACCESS TRAINING FILES
+      </button>
+    </div>
+
+    <!-- Module content area (hidden until module loads) -->
+    <div id="module-content" style="display:none;"></div>
+
+  </main>
+
+  <!-- ===================== FOOTER ===================== -->
+  <footer id="bureau-footer">
+    <div class="footer-left">
+      <div class="status-indicator">
+        <div class="status-dot-sm"></div>
+        <span>SYSTEM STATUS: ONLINE</span>
+      </div>
+      <span id="footer-module">MODULE — STANDBY</span>
+    </div>
+    <div class="footer-right">
+      <span class="footer-time" id="footer-time">--:--:--</span>
+      <span>BUREAU TERMINAL v2.1</span>
+    </div>
+  </footer>
+
+</div>
+
+<!-- ===================== SETTINGS MODAL ===================== -->
+<div id="settings-modal" role="dialog" aria-modal="true" aria-label="Terminal Settings">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title">TERMINAL SETTINGS</div>
+      <button class="modal-close" onclick="closeSettings()" aria-label="Close settings">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="setting-row">
+        <span class="setting-name">TEXT SIZE</span>
+        <div class="setting-value">
+          <button class="setting-opt active" onclick="setTextSize('normal', this)">NORMAL</button>
+          <button class="setting-opt" onclick="setTextSize('large', this)">LARGE</button>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <span class="setting-name">CONTRAST</span>
+        <div class="setting-value">
+          <button class="setting-opt active" onclick="setContrast('normal', this)">NORMAL</button>
+          <button class="setting-opt" onclick="setContrast('high', this)">HIGH</button>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <span class="setting-name">ANIMATIONS</span>
+        <div class="setting-value">
+          <button class="setting-opt active" onclick="setAnim('on', this)">ON</button>
+          <button class="setting-opt" onclick="setAnim('off', this)">OFF</button>
+        </div>
+      </div>
+
+      <div class="setting-row">
+        <span class="setting-name">NAV PANEL</span>
+        <div class="setting-value">
+          <button class="setting-opt active" onclick="setNav('expanded', this)">EXPANDED</button>
+          <button class="setting-opt" onclick="setNav('collapsed', this)">COLLAPSED</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ===================== MODULE DATA ===================== -->
+<script src="modules.js"></script>
+<script>
+// Engine — module data loaded from modules.js
+
+// ============================================================
+// MODULE LOADER
+// ============================================================
+let currentModule = null;
+let navOpen = true;
+
+function loadModule(id) {
+  const mod = MODULES[id];
+  if (!mod) return;
+
+  // Mobile: close nav after selection
+  if (window.innerWidth <= 700) {
+    document.getElementById('nav-panel').classList.remove('mobile-open');
+  }
+
+  // Mark active in nav
+  document.querySelectorAll('.module-item').forEach(el => el.classList.remove('active'));
+  const navItem = document.querySelector(`[data-module="${id}"]`);
+  if (navItem) navItem.classList.add('active');
+
+  // Update footer
+  document.getElementById('footer-module').textContent = mod.num + ' — ' + mod.title.split(' — ')[0];
+
+  // Show decrypt animation
+  runDecrypt(() => renderModule(mod));
+}
+
+function runDecrypt(callback) {
+  const screen = document.getElementById('decrypt-screen');
+  const fill = document.getElementById('decrypt-fill');
+  const status = document.getElementById('decrypt-status');
+
+  const messages = [
+    'LOCATING FILE...',
+    'VERIFYING CLEARANCE...',
+    'REMOVING REDACTIONS...',
+    'DECRYPTING CONTENT...',
+    'ACCESS GRANTED'
+  ];
+
+  screen.classList.remove('hidden');
+  document.getElementById('welcome-screen').style.display = 'none';
+  document.getElementById('module-content').style.display = 'none';
+
+  let pct = 0;
+  let msgIdx = 0;
+
+  const interval = setInterval(() => {
+    pct += Math.random() * 18 + 4;
+    if (pct > 100) pct = 100;
+    fill.style.width = pct + '%';
+
+    if (msgIdx < messages.length && pct > (msgIdx + 1) * 20) {
+      status.textContent = messages[msgIdx];
+      msgIdx++;
+    }
+
+    if (pct >= 100) {
+      clearInterval(interval);
+      setTimeout(() => {
+        screen.classList.add('hidden');
+        callback();
+      }, 400);
+    }
+  }, 60);
+}
+
+function renderModule(mod) {
+  const content = document.getElementById('module-content');
+  content.style.display = 'block';
+
+  let html = '';
+
+  // Bureau header
+  html += `
+    <div class="module-bureau-header" data-clearance="${mod.clearance}">
+      <div class="bureau-module-num">${mod.num} — DECLASSIFIED TRAINING FILE</div>
+      <div class="bureau-module-title">${mod.title}</div>
+      <div class="bureau-flavor">${mod.flavor}</div>
+    </div>
+  `;
+
+  // Content sections
+  mod.sections.forEach((sec, i) => {
+    html += `<div class="content-section">`;
+    html += `<div class="section-label">${sec.label}</div>`;
+    html += `<div class="section-title">${sec.title}</div>`;
+
+    if (sec.isFlow) {
+      sec.steps.forEach(step => {
+        html += `
+          <div class="flow-step">
+            <div class="step-num">${step.num}</div>
+            <div class="step-body">
+              <div class="step-title">${step.title}</div>
+              <div class="step-text">${step.text}</div>
+            </div>
+          </div>
+        `;
+      });
+    } else if (sec.isFlowchart) {
+      html += `<pre class="flowchart">${sec.chart}</pre>`;
+    } else {
+      html += `<div class="section-body">${sec.body}</div>`;
+    }
+
+    html += `</div>`;
+  });
+
+  // Diagram slot
+  // Diagram slot — show image if available, else placeholder
+  if (mod.diagram) {
+    html += `
+      <div class="diagram-slot" style="padding:0;min-height:auto;">
+        <img src="${mod.diagram}" alt="${mod.diagramLabel}" style="width:100%;display:block;border:none;">
+      </div>
+    `;
+  } else {
+    html += `
+      <div class="diagram-slot">
+        <div class="diagram-placeholder-icon">⬡</div>
+        <div class="diagram-placeholder-text">
+          DIAGRAM SLOT — ${mod.num}<br>
+          ${mod.diagramLabel || 'DIAGRAM DESCRIPTION AVAILABLE'}<br>
+          VISUAL ASSET: PENDING UPLOAD
+        </div>
+      </div>
+    `;
+  }
+
+  // Interactive sim slot — route by mod.sim property
+  if (mod.sim === 'toilet') html += buildToiletSim();
+  else if (mod.sim === 'breaker') html += buildBreakerSim();
+  else if (mod.sim === 'ptrap') html += buildPtrapSim();
+  else if (mod.sim === 'oil') html += buildOilSim();
+  else if (mod.sim === 'heater') html += buildHeaterSim();
+  else if (mod.sim === 'hvac') html += buildHvacSim();
+  else if (mod.sim === 'ground') html += buildGroundSim();
+  else if (mod.sim === 'drain') html += buildDrainSim();
+
+  content.innerHTML = html;
+  content.scrollTop = 0;
+
+  // Init simulators that require post-render setup
+  if (mod.sim === 'ptrap') {
+    clearInterval(ptrap.loop);
+    ptrap = { waterLevel:85, ventPressure:100, evapRate:EVAP_RATES.temperate,
+      gasLevel:0, blockage:0, state:'SEALED', climate:'temperate',
+      drainEvent:false, loop:null };
+    initPtrapSim();
+  }
+  if (mod.sim === 'oil') { initOilSim(); }
+  if (mod.sim === 'heater') { initHeaterSim(); }
+  if (mod.sim === 'hvac') { initHvacSim(); }
+  if (mod.sim === 'ground') { initGroundSim(); }
+  if (mod.sim === 'drain') { initDrainSim(); }
+}
+
+// ============================================================
+// TOILET SIMULATOR
+// ============================================================
+let simState = {
+  tankLevel: 85,
+  flushing: false,
+  faults: { flapper: false, chain: false, rimJets: false, drySeal: false },
+  diagnosing: false
+};
+
+function buildToiletSim() {
+  return `
+    <div class="sim-slot">
+      <div class="sim-header">
+        <div class="sim-title">SIPHON ENGINE SIMULATOR</div>
+        <div class="sim-status">● SYSTEM READY</div>
+      </div>
+      <div class="sim-body">
+        <div class="toilet-sim">
+
+          <div class="sim-visual" id="sim-visual">
+            <svg class="toilet-svg" viewBox="0 0 180 260" xmlns="http://www.w3.org/2000/svg">
+              <!-- Tank -->
+              <rect x="30" y="10" width="100" height="70" rx="3" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+              <!-- Tank water -->
+              <rect id="svg-tank-water" x="33" y="30" width="94" height="47" fill="#003355" opacity="0.9"/>
+              <!-- Tank water level label -->
+              <text x="80" y="58" fill="#00aaff" font-size="8" text-anchor="middle" font-family="monospace">WATER</text>
+              <!-- Flapper -->
+              <ellipse id="svg-flapper" cx="80" cy="80" rx="14" ry="4" fill="#ffb000" opacity="0.9"/>
+              <!-- Float -->
+              <circle id="svg-float" cx="120" cy="38" r="7" fill="#555" stroke="#888" stroke-width="1"/>
+              <line x1="120" y1="45" x2="105" y2="56" stroke="#888" stroke-width="1"/>
+              <!-- Overflow tube -->
+              <rect x="72" y="20" width="4" height="60" fill="none" stroke="#333" stroke-width="1"/>
+              <text x="66" y="18" fill="#333" font-size="7" font-family="monospace">OVF</text>
+              <!-- Handle -->
+              <rect x="20" y="30" width="18" height="6" rx="2" fill="#1f1f1f" stroke="#555" stroke-width="1"/>
+              <line x1="38" y1="33" x2="62" y2="76" stroke="#555" stroke-width="1" id="svg-chain"/>
+
+              <!-- Bowl -->
+              <ellipse cx="80" cy="105" rx="50" ry="14" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+              <rect x="30" y="105" width="100" height="80" fill="#141414" stroke="none"/>
+              <path d="M30 105 Q15 160 40 200 Q60 230 80 235 Q100 230 120 200 Q145 160 130 105" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+              <!-- Bowl water seal -->
+              <ellipse id="svg-bowl-water" cx="80" cy="185" rx="30" ry="8" fill="#003355" opacity="0.8"/>
+              <text x="80" y="188" fill="#00aaff" font-size="7" text-anchor="middle" font-family="monospace">SEAL</text>
+              <!-- Rim jets -->
+              <circle cx="45" cy="115" r="2" fill="#004466" id="jet-l"/>
+              <circle cx="115" cy="115" r="2" fill="#004466" id="jet-r"/>
+              <!-- Siphon jet -->
+              <rect x="68" y="215" width="24" height="5" rx="1" fill="#004466" id="svg-siphon-jet"/>
+              <text x="80" y="219" fill="#00aaff" font-size="6" text-anchor="middle" font-family="monospace">JET</text>
+
+              <!-- Trapway (S-curve) -->
+              <path d="M80 230 Q80 248 65 252 Q50 256 50 248 Q50 240 65 240 Q78 240 78 255" fill="none" stroke="#2a2a2a" stroke-width="6"/>
+              <text x="42" y="255" fill="#333" font-size="7" font-family="monospace">TRAP</text>
+
+              <!-- Drain -->
+              <line x1="78" y1="255" x2="78" y2="270" stroke="#1f1f1f" stroke-width="6"/>
+              <text x="84" y="268" fill="#333" font-size="7" font-family="monospace">DRAIN</text>
+
+              <!-- Flow arrows (hidden by default) -->
+              <g id="svg-flow-arrows" opacity="0">
+                <path d="M80 82 L80 108" stroke="#00aaff" stroke-width="2" marker-end="url(#arrow)"/>
+                <path d="M47 117 L47 130" stroke="#00aaff" stroke-width="1.5" marker-end="url(#arrow)"/>
+                <path d="M113 117 L113 130" stroke="#00aaff" stroke-width="1.5" marker-end="url(#arrow)"/>
+              </g>
+
+              <!-- Sewer gas warning (hidden) -->
+              <g id="svg-gas-warning" opacity="0">
+                <circle cx="80" cy="200" r="18" fill="rgba(255,51,51,0.15)" stroke="#ff3333" stroke-width="1"/>
+                <text x="80" y="197" fill="#ff3333" font-size="8" text-anchor="middle" font-family="monospace">GAS</text>
+                <text x="80" y="207" fill="#ff3333" font-size="8" text-anchor="middle" font-family="monospace">RISK</text>
+              </g>
+
+              <defs>
+                <marker id="arrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                  <path d="M0,0 L0,6 L6,3 z" fill="#00aaff"/>
+                </marker>
+              </defs>
+            </svg>
+          </div>
+
+          <div class="sim-controls">
+            <div class="sim-section-label">CONTROLS</div>
+
+            <div class="sim-slider-row">
+              <span class="sim-slider-label">TANK LEVEL</span>
+              <input type="range" class="sim-slider" id="tank-slider" min="20" max="100" value="85" oninput="setTankLevel(this.value)">
+              <span class="sim-value" id="tank-val">85%</span>
+            </div>
+
+            <button class="sim-btn" id="btn-flush" onclick="doFlush()">▶ FLUSH</button>
+            <button class="sim-btn" onclick="resetSim()">↺ RESET</button>
+
+            <div class="sim-section-label" style="margin-top:16px">INJECT FAULT</div>
+
+            <button class="sim-btn" id="fault-flapper" onclick="toggleFault('flapper')">⚠ WORN FLAPPER</button>
+            <button class="sim-btn" id="fault-chain" onclick="toggleFault('chain')">⚠ BROKEN CHAIN</button>
+            <button class="sim-btn" id="fault-rim" onclick="toggleFault('rimJets')">⚠ CLOGGED RIM JETS</button>
+            <button class="sim-btn" id="fault-seal" onclick="toggleFault('drySeal')">⚠ DRY TRAP SEAL</button>
+
+            <div class="sim-readout" id="sim-readout">
+              <div class="readout-line"><span class="readout-tag">STATUS</span><span class="readout-val ok" id="rd-status">STANDBY — ALL SYSTEMS NOMINAL</span></div>
+              <div class="readout-line"><span class="readout-tag">TANK</span><span class="readout-val" id="rd-tank">85% — READY TO FLUSH</span></div>
+              <div class="readout-line"><span class="readout-tag">SEAL</span><span class="readout-val ok" id="rd-seal">INTACT — SEWER GAS BLOCKED</span></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// SIMULATOR LOGIC
+// ============================================================
+function setTankLevel(val) {
+  simState.tankLevel = parseInt(val);
+  document.getElementById('tank-val').textContent = val + '%';
+
+  const waterEl = document.getElementById('svg-tank-water');
+  const floatEl = document.getElementById('svg-float');
+  if (waterEl) {
+    const h = Math.round(47 * val / 100);
+    waterEl.setAttribute('height', h);
+    waterEl.setAttribute('y', 80 - h);
+  }
+  if (floatEl) {
+    const floatY = 38 - Math.round(12 * (val - 50) / 50);
+    floatEl.setAttribute('cy', floatY);
+  }
+
+  const rdTank = document.getElementById('rd-tank');
+  if (rdTank) {
+    if (val >= 80) {
+      rdTank.textContent = val + '% — READY TO FLUSH';
+      rdTank.className = 'readout-val ok';
+    } else if (val >= 50) {
+      rdTank.textContent = val + '% — LOW — WEAK FLUSH POSSIBLE';
+      rdTank.className = 'readout-val';
+    } else {
+      rdTank.textContent = val + '% — CRITICALLY LOW — SIPHON MAY FAIL';
+      rdTank.className = 'readout-val warn';
+    }
+  }
+}
+
+function doFlush() {
+  if (simState.flushing) return;
+
+  if (simState.faults.chain) {
+    updateReadout('FAULT DETECTED — CHAIN DISCONNECTED', 'warn', 'NO FLUSH POSSIBLE — REATTACH CHAIN');
+    return;
+  }
+
+  simState.flushing = true;
+  const btn = document.getElementById('btn-flush');
+  if (btn) { btn.textContent = '⏳ FLUSHING...'; btn.disabled = true; }
+
+  const arrows = document.getElementById('svg-flow-arrows');
+  if (arrows) arrows.style.opacity = '1';
+
+  // Stage 1
+  updateReadout('FLUSH INITIATED — FLAPPER OPEN', null, null);
+  setTimeout(() => {
+    if (simState.faults.rimJets) {
+      updateReadout('⚠ RIM JETS BLOCKED — PARTIAL COVERAGE', 'warn', null);
+    } else {
+      updateReadout('RIM JETS ACTIVE — BOWL COVERAGE NOMINAL', null, null);
+    }
+  }, 600);
+
+  setTimeout(() => {
+    updateReadout('SIPHON JET FIRING — TRAPWAY FILLING', null, null);
+  }, 1200);
+
+  setTimeout(() => {
+    if (simState.tankLevel < 50) {
+      updateReadout('⚠ SIPHON FAILURE — INSUFFICIENT WATER VOLUME', 'warn', 'INCREASE TANK LEVEL TO FLUSH EFFECTIVELY');
+    } else if (simState.faults.rimJets) {
+      updateReadout('⚠ PARTIAL SIPHON — INCOMPLETE EVACUATION', 'warn', 'CLEAR RIM JETS TO RESTORE FULL FLUSH');
+    } else {
+      updateReadout('SIPHON ESTABLISHED — ATMOSPHERIC PRESSURE ACTIVE', null, null);
+    }
+  }, 1800);
+
+  setTimeout(() => {
+    if (arrows) arrows.style.opacity = '0';
+    if (simState.faults.flapper) {
+      updateReadout('⚠ FLAPPER FAULT — WATER LEAKING INTO BOWL', 'warn', 'REPLACE FLAPPER — WATER WASTING CONTINUOUSLY');
+    } else {
+      updateReadout('SIPHON BROKEN — BOWL REFILLING', null, null);
+    }
+  }, 2600);
+
+  setTimeout(() => {
+    simState.flushing = false;
+    if (btn) { btn.textContent = '▶ FLUSH'; btn.disabled = false; }
+    if (!simState.faults.flapper) {
+      updateReadout('CYCLE COMPLETE — SYSTEM RESET TO STANDBY', 'ok', null);
+    }
+  }, 3800);
+}
+
+function toggleFault(fault) {
+  simState.faults[fault] = !simState.faults[fault];
+  const on = simState.faults[fault];
+
+  const ids = { flapper: 'fault-flapper', chain: 'fault-chain', rimJets: 'fault-rim', drySeal: 'fault-seal' };
+  const btn = document.getElementById(ids[fault]);
+  if (btn) btn.classList.toggle('fault', on);
+
+  const labels = { flapper: 'WORN FLAPPER', chain: 'BROKEN CHAIN', rimJets: 'CLOGGED RIM JETS', drySeal: 'DRY TRAP SEAL' };
+
+  if (fault === 'drySeal') {
+    const gasWarn = document.getElementById('svg-gas-warning');
+    const sealEl = document.getElementById('svg-bowl-water');
+    if (gasWarn) gasWarn.style.opacity = on ? '1' : '0';
+    if (sealEl) sealEl.setAttribute('fill', on ? '#220000' : '#003355');
+    const rdSeal = document.getElementById('rd-seal');
+    if (rdSeal) {
+      rdSeal.textContent = on ? 'DRY — SEWER GAS PATHWAY OPEN' : 'INTACT — SEWER GAS BLOCKED';
+      rdSeal.className = on ? 'readout-val warn' : 'readout-val ok';
+    }
+  }
+
+  if (fault === 'flapper' && on) {
+    updateReadout('FAULT ACTIVE — FLAPPER LEAKING — WATER RUNNING', 'warn', null);
+  }
+
+  if (!on) {
+    updateReadout('FAULT CLEARED — SYSTEM NOMINAL', 'ok', null);
+  }
+}
+
+function updateReadout(statusText, statusClass, tankText) {
+  const rdStatus = document.getElementById('rd-status');
+  if (rdStatus) {
+    rdStatus.textContent = statusText;
+    rdStatus.className = 'readout-val' + (statusClass ? ' ' + statusClass : '');
+  }
+  if (tankText) {
+    const rdTank = document.getElementById('rd-tank');
+    if (rdTank) {
+      rdTank.textContent = tankText;
+      rdTank.className = 'readout-val' + (statusClass ? ' ' + statusClass : '');
+    }
+  }
+}
+
+function resetSim() {
+  simState = { tankLevel: 85, flushing: false, faults: { flapper: false, chain: false, rimJets: false, drySeal: false }, diagnosing: false };
+
+  const slider = document.getElementById('tank-slider');
+  if (slider) { slider.value = 85; setTankLevel(85); }
+
+  ['fault-flapper','fault-chain','fault-rim','fault-seal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('fault');
+  });
+
+  const gasWarn = document.getElementById('svg-gas-warning');
+  if (gasWarn) gasWarn.style.opacity = '0';
+
+  const sealEl = document.getElementById('svg-bowl-water');
+  if (sealEl) sealEl.setAttribute('fill', '#003355');
+
+  const rdSeal = document.getElementById('rd-seal');
+  if (rdSeal) { rdSeal.textContent = 'INTACT — SEWER GAS BLOCKED'; rdSeal.className = 'readout-val ok'; }
+
+  updateReadout('RESET COMPLETE — ALL SYSTEMS NOMINAL', 'ok', '85% — READY TO FLUSH');
+}
+
+// ============================================================
+// BREAKER PANEL SIMULATOR
+// ============================================================
+const CIRCUITS = [
+  { id:'c1',  label:'KITCHEN',      rated:20, load:0 },
+  { id:'c2',  label:'LIVING ROOM',  rated:15, load:0 },
+  { id:'c3',  label:'BEDROOM 1',    rated:15, load:0 },
+  { id:'c4',  label:'BATHROOM',     rated:20, load:0 },
+  { id:'c5',  label:'DRYER (240V)', rated:30, load:0, double:true },
+  { id:'c6',  label:'GARAGE',       rated:20, load:0 },
+];
+
+let breakerState = {};
+
+function initBreakerState() {
+  breakerState = {};
+  CIRCUITS.forEach(c => {
+    breakerState[c.id] = { on: true, tripped: false, load: 0 };
+  });
+}
+initBreakerState();
+
+function buildBreakerSim() {
+  let circuitRows = CIRCUITS.map(c => `
+    <div class="bc-row" id="bcrow-${c.id}">
+      <div class="bc-label">${c.label}</div>
+      <div class="bc-rated">${c.rated}A</div>
+      <div class="bc-slider-wrap">
+        <input type="range" class="sim-slider" min="0" max="${Math.round(c.rated*1.4)}"
+          value="0" oninput="setBreakerLoad('${c.id}', this.value, ${c.rated})"
+          aria-label="${c.label} load">
+        <span class="bc-load-val" id="bcload-${c.id}">0A</span>
+      </div>
+      <div class="bc-switch-wrap">
+        <button class="bc-switch" id="bcsw-${c.id}" onclick="toggleBreaker('${c.id}')">ON</button>
+      </div>
+      <div class="bc-bar-wrap">
+        <div class="bc-bar-track">
+          <div class="bc-bar-fill" id="bcbar-${c.id}" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  return `
+    <div class="sim-slot">
+      <div class="sim-header">
+        <div class="sim-title">OVERLOAD GATE SIMULATOR</div>
+        <div class="sim-status">● PANEL ONLINE</div>
+      </div>
+      <div class="sim-body">
+        <div class="bc-layout">
+          <div class="bc-panel">
+            <div class="bc-panel-header">
+              <span class="bc-panel-title">LOAD CENTER</span>
+              <button class="bc-main-btn" id="bc-main" onclick="toggleMain()">MAIN ● ON</button>
+            </div>
+            <div class="bc-circuits">
+              <div class="bc-col-labels">
+                <span>CIRCUIT</span><span>RATED</span><span>LOAD SLIDER</span><span>STATE</span><span>LOAD %</span>
+              </div>
+              ${circuitRows}
+            </div>
+          </div>
+          <div class="bc-readout-panel">
+            <div class="sim-section-label">PANEL STATUS</div>
+            <div class="sim-readout" id="bc-readout" style="min-height:80px">
+              <div class="readout-line"><span class="readout-tag">MAIN</span><span class="readout-val ok" id="bc-rd-main">ON — POWER FLOWING</span></div>
+              <div class="readout-line"><span class="readout-tag">ALERT</span><span class="readout-val" id="bc-rd-alert">ALL CIRCUITS NOMINAL</span></div>
+              <div class="readout-line"><span class="readout-tag">TOTAL</span><span class="readout-val" id="bc-rd-total">0A / 200A CAPACITY</span></div>
+            </div>
+            <div class="sim-section-label" style="margin-top:14px">INJECT FAULT</div>
+            <button class="sim-btn" onclick="injectShort()">⚡ SHORT CIRCUIT</button>
+            <button class="sim-btn" onclick="injectOverload()">🔥 SUSTAINED OVERLOAD</button>
+            <button class="sim-btn" onclick="resetBreakers()">↺ RESET ALL</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+      .bc-layout { display:grid; grid-template-columns:1fr 220px; gap:16px; }
+      @media(max-width:600px){ .bc-layout{ grid-template-columns:1fr; } }
+      .bc-panel { background:var(--bg2); border:1px solid var(--border); padding:14px; }
+      .bc-panel-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+      .bc-panel-title { font-family:var(--mono); font-size:9px; letter-spacing:3px; color:var(--amber-dim); }
+      .bc-main-btn { background:none; border:1px solid var(--green-dim); color:var(--green); font-family:var(--mono); font-size:9px; letter-spacing:2px; padding:5px 10px; cursor:pointer; transition:all 0.2s; }
+      .bc-main-btn.off { border-color:var(--red-dim); color:var(--red); }
+      .bc-col-labels { display:grid; grid-template-columns:110px 40px 1fr 60px 80px; gap:6px; font-family:var(--mono); font-size:8px; color:var(--text-faint); letter-spacing:1px; padding:0 0 6px; border-bottom:1px solid var(--border); margin-bottom:6px; }
+      .bc-row { display:grid; grid-template-columns:110px 40px 1fr 60px 80px; gap:6px; align-items:center; padding:5px 0; border-bottom:1px solid var(--border); transition:background 0.2s; }
+      .bc-row.tripped { background:rgba(255,51,51,0.07); }
+      .bc-label { font-family:var(--mono); font-size:10px; color:var(--text); letter-spacing:1px; }
+      .bc-rated { font-family:var(--mono); font-size:10px; color:var(--text-dim); }
+      .bc-slider-wrap { display:flex; align-items:center; gap:6px; }
+      .bc-load-val { font-family:var(--mono); font-size:9px; color:var(--amber); min-width:28px; text-align:right; }
+      .bc-switch-wrap { text-align:center; }
+      .bc-switch { background:none; border:1px solid var(--green-dim); color:var(--green); font-family:var(--mono); font-size:9px; letter-spacing:1px; padding:3px 8px; cursor:pointer; transition:all 0.15s; width:52px; }
+      .bc-switch.off { border-color:var(--border2); color:var(--text-faint); }
+      .bc-switch.tripped { border-color:var(--red-dim); color:var(--red); }
+      .bc-bar-track { height:6px; background:var(--border2); width:100%; }
+      .bc-bar-fill { height:100%; background:var(--green); transition:width 0.3s, background 0.3s; }
+      .bc-bar-fill.warn { background:var(--amber); }
+      .bc-bar-fill.over { background:var(--red); }
+    </style>
+  `;
+}
+
+let mainOn = true;
+
+function toggleMain() {
+  mainOn = !mainOn;
+  const btn = document.getElementById('bc-main');
+  const rdMain = document.getElementById('bc-rd-main');
+  if (btn) { btn.textContent = mainOn ? 'MAIN ● ON' : 'MAIN ○ OFF'; btn.classList.toggle('off', !mainOn); }
+  if (rdMain) { rdMain.textContent = mainOn ? 'ON — POWER FLOWING' : 'OFF — ALL CIRCUITS DEAD'; rdMain.className = mainOn ? 'readout-val ok' : 'readout-val warn'; }
+  // Visually grey out all switches when main is off
+  CIRCUITS.forEach(c => {
+    const sw = document.getElementById(`bcsw-${c.id}`);
+    if (sw && !breakerState[c.id].tripped) {
+      sw.style.opacity = mainOn ? '1' : '0.3';
+    }
+  });
+  updateBreakerAlert();
+}
+
+function setBreakerLoad(id, val, rated) {
+  val = parseInt(val);
+  breakerState[id].load = val;
+  const loadEl = document.getElementById(`bcload-${id}`);
+  const barEl = document.getElementById(`bcbar-${id}`);
+  const rowEl = document.getElementById(`bcrow-${id}`);
+  const sw = document.getElementById(`bcsw-${id}`);
+
+  if (loadEl) loadEl.textContent = val + 'A';
+
+  const pct = Math.min(100, Math.round(val / (rated * 1.4) * 100));
+  if (barEl) {
+    barEl.style.width = pct + '%';
+    barEl.className = 'bc-bar-fill' + (val > rated ? ' over' : val > rated * 0.8 ? ' warn' : '');
+  }
+
+  // Auto-trip on overload
+  if (val > rated && breakerState[id].on && !breakerState[id].tripped) {
+    setTimeout(() => tripBreaker(id), 800 + Math.random() * 400);
+  }
+
+  updateBreakerAlert();
+}
+
+function tripBreaker(id) {
+  if (!breakerState[id]) return;
+  breakerState[id].tripped = true;
+  breakerState[id].on = false;
+  const sw = document.getElementById(`bcsw-${id}`);
+  const row = document.getElementById(`bcrow-${id}`);
+  if (sw) { sw.textContent = 'TRIP'; sw.className = 'bc-switch tripped'; }
+  if (row) row.classList.add('tripped');
+  const alert = document.getElementById('bc-rd-alert');
+  const c = CIRCUITS.find(x => x.id === id);
+  if (alert && c) { alert.textContent = `⚠ ${c.label} TRIPPED — OVERLOAD`; alert.className = 'readout-val warn'; }
+}
+
+function toggleBreaker(id) {
+  if (!mainOn) return;
+  const state = breakerState[id];
+  if (state.tripped) {
+    // Reset: must go OFF first (simulate two-step)
+    state.tripped = false;
+    state.on = false;
+    const sw = document.getElementById(`bcsw-${id}`);
+    const row = document.getElementById(`bcrow-${id}`);
+    if (sw) { sw.textContent = 'OFF'; sw.className = 'bc-switch off'; }
+    if (row) row.classList.remove('tripped');
+    const alert = document.getElementById('bc-rd-alert');
+    if (alert) { alert.textContent = 'BREAKER RESET TO OFF — PUSH ON TO RESTORE'; alert.className = 'readout-val'; }
+  } else if (!state.on) {
+    state.on = true;
+    const sw = document.getElementById(`bcsw-${id}`);
+    if (sw) { sw.textContent = 'ON'; sw.className = 'bc-switch'; }
+    updateBreakerAlert();
+  } else {
+    state.on = false;
+    const sw = document.getElementById(`bcsw-${id}`);
+    if (sw) { sw.textContent = 'OFF'; sw.className = 'bc-switch off'; }
+    updateBreakerAlert();
+  }
+}
+
+function updateBreakerAlert() {
+  const totalLoad = CIRCUITS.reduce((sum, c) => sum + (breakerState[c.id].on ? breakerState[c.id].load : 0), 0);
+  const totalEl = document.getElementById('bc-rd-total');
+  if (totalEl) totalEl.textContent = totalLoad + 'A / 200A CAPACITY';
+  if (!mainOn) return;
+  const tripped = CIRCUITS.filter(c => breakerState[c.id].tripped);
+  const overloaded = CIRCUITS.filter(c => breakerState[c.id].on && breakerState[c.id].load > CIRCUITS.find(x=>x.id===c.id).rated);
+  const alert = document.getElementById('bc-rd-alert');
+  if (!alert) return;
+  if (tripped.length > 0) {
+    alert.textContent = `⚠ ${tripped.length} CIRCUIT(S) TRIPPED`;
+    alert.className = 'readout-val warn';
+  } else if (overloaded.length > 0) {
+    alert.textContent = `⚠ ${overloaded.length} CIRCUIT(S) NEAR LIMIT`;
+    alert.className = 'readout-val warn';
+  } else {
+    alert.textContent = 'ALL CIRCUITS NOMINAL';
+    alert.className = 'readout-val ok';
+  }
+}
+
+function injectShort() {
+  // Pick a random on circuit and trip it instantly
+  const onCircuits = CIRCUITS.filter(c => breakerState[c.id].on && !breakerState[c.id].tripped);
+  if (!onCircuits.length) { updateBreakerAlertMsg('NO ACTIVE CIRCUITS TO FAULT'); return; }
+  const target = onCircuits[Math.floor(Math.random() * onCircuits.length)];
+  tripBreaker(target.id);
+  const alert = document.getElementById('bc-rd-alert');
+  if (alert) { alert.textContent = `⚡ SHORT CIRCUIT — ${target.label} — MAGNETIC TRIP`; alert.className = 'readout-val warn'; }
+}
+
+function injectOverload() {
+  const onCircuits = CIRCUITS.filter(c => breakerState[c.id].on && !breakerState[c.id].tripped);
+  if (!onCircuits.length) return;
+  const target = onCircuits[Math.floor(Math.random() * onCircuits.length)];
+  const c = CIRCUITS.find(x => x.id === target.id);
+  const overAmt = c.rated + Math.round(c.rated * 0.3);
+  breakerState[target.id].load = overAmt;
+  const loadEl = document.getElementById(`bcload-${target.id}`);
+  const barEl = document.getElementById(`bcbar-${target.id}`);
+  const slider = document.querySelector(`#bcrow-${target.id} input`);
+  if (loadEl) loadEl.textContent = overAmt + 'A';
+  if (barEl) { barEl.style.width = '100%'; barEl.className = 'bc-bar-fill over'; }
+  if (slider) slider.value = overAmt;
+  const alert = document.getElementById('bc-rd-alert');
+  if (alert) { alert.textContent = `🔥 OVERLOAD — ${target.label} — THERMAL TRIP PENDING`; alert.className = 'readout-val warn'; }
+  setTimeout(() => tripBreaker(target.id), 1200);
+}
+
+function resetBreakers() {
+  initBreakerState();
+  mainOn = true;
+  const mainBtn = document.getElementById('bc-main');
+  if (mainBtn) { mainBtn.textContent = 'MAIN ● ON'; mainBtn.classList.remove('off'); }
+  CIRCUITS.forEach(c => {
+    const sw = document.getElementById(`bcsw-${c.id}`);
+    const bar = document.getElementById(`bcbar-${c.id}`);
+    const load = document.getElementById(`bcload-${c.id}`);
+    const row = document.getElementById(`bcrow-${c.id}`);
+    const slider = document.querySelector(`#bcrow-${c.id} input`);
+    if (sw) { sw.textContent = 'ON'; sw.className = 'bc-switch'; sw.style.opacity = '1'; }
+    if (bar) { bar.style.width = '0%'; bar.className = 'bc-bar-fill'; }
+    if (load) load.textContent = '0A';
+    if (row) row.classList.remove('tripped');
+    if (slider) slider.value = 0;
+  });
+  const rdMain = document.getElementById('bc-rd-main');
+  const rdAlert = document.getElementById('bc-rd-alert');
+  const rdTotal = document.getElementById('bc-rd-total');
+  if (rdMain) { rdMain.textContent = 'ON — POWER FLOWING'; rdMain.className = 'readout-val ok'; }
+  if (rdAlert) { rdAlert.textContent = 'ALL CIRCUITS NOMINAL'; rdAlert.className = 'readout-val ok'; }
+  if (rdTotal) rdTotal.textContent = '0A / 200A CAPACITY';
+}
+
+// ============================================================
+// P-TRAP GAS WALL SIMULATOR
+// ============================================================
+
+let ptrap = {
+  waterLevel: 85,
+  ventPressure: 100,
+  evapRate: 0.15,       // % per tick
+  gasLevel: 0,
+  blockage: 0,
+  state: 'SEALED',
+  climate: 'temperate', // dry | temperate | humid
+  drainEvent: false,
+  loop: null
+};
+
+function buildPtrapSim() {
+  return `
+    <div class="sim-slot" id="ptrap-slot">
+      <div class="sim-header">
+        <div class="sim-title">GAS WALL SIMULATOR</div>
+        <div class="sim-status" id="ptrap-status-badge">● SEAL INTACT</div>
+      </div>
+      <div class="sim-body">
+        <div class="ptrap-layout">
+
+          <!-- LEFT: ANIMATED DIAGRAM -->
+          <div class="ptrap-diagram" id="ptrap-diagram">
+            <svg id="ptrap-svg" viewBox="0 0 200 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:220px;">
+
+              <!-- Drain pipe from fixture (top) -->
+              <rect x="84" y="0" width="32" height="50" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1.5"/>
+              <text x="100" y="30" fill="#555" font-size="8" text-anchor="middle" font-family="monospace">FROM</text>
+              <text x="100" y="42" fill="#555" font-size="8" text-anchor="middle" font-family="monospace">FIXTURE</text>
+
+              <!-- Inlet arm -->
+              <rect x="84" y="50" width="32" height="60" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+
+              <!-- Trap dip (the curve) — bottom of P -->
+              <path d="M84 110 Q84 160 100 165 Q116 160 116 110" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+
+              <!-- WATER SEAL — dynamic height -->
+              <clipPath id="trapClip">
+                <path d="M86 112 Q86 158 100 163 Q114 158 114 112 Z"/>
+              </clipPath>
+              <rect id="ptrap-water" x="86" y="112" width="28" height="50"
+                fill="#003355" opacity="0.95" clip-path="url(#trapClip)"/>
+              <text id="ptrap-water-label" x="100" y="145" fill="#00aaff" font-size="7"
+                text-anchor="middle" font-family="monospace">SEAL</text>
+
+              <!-- GAS PLUME — rises when seal is low -->
+              <g id="ptrap-gas" opacity="0">
+                <ellipse cx="100" cy="90" rx="10" ry="6" fill="rgba(255,51,51,0.15)" stroke="#ff3333" stroke-width="0.5"/>
+                <ellipse cx="100" cy="75" rx="7" ry="4" fill="rgba(255,51,51,0.1)"/>
+                <ellipse cx="100" cy="62" rx="5" ry="3" fill="rgba(255,51,51,0.07)"/>
+                <text x="100" y="58" fill="#ff3333" font-size="7" text-anchor="middle" font-family="monospace">GAS</text>
+              </g>
+
+              <!-- Outlet arm (horizontal to wall) -->
+              <rect x="116" y="130" width="60" height="24" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+              <text x="147" y="146" fill="#555" font-size="7" text-anchor="middle" font-family="monospace">TO DRAIN</text>
+
+              <!-- Vent pipe (right side, vertical) -->
+              <rect x="158" y="0" width="16" height="130" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+              <text x="166" y="65" fill="#555" font-size="7" text-anchor="middle" font-family="monospace" transform="rotate(-90,166,65)">VENT STACK</text>
+              <!-- Vent indicator -->
+              <circle id="ptrap-vent-dot" cx="166" cy="12" r="5" fill="#00ff88"/>
+              <text id="ptrap-vent-label" x="166" y="28" fill="#00ff88" font-size="6" text-anchor="middle" font-family="monospace">OPEN</text>
+
+              <!-- Debris pile in trap dip -->
+              <g id="ptrap-debris" opacity="0">
+                <ellipse cx="100" cy="162" rx="12" ry="4" fill="#3a2a1a" stroke="#5a4a2a" stroke-width="0.5"/>
+                <ellipse cx="96" cy="160" rx="6" ry="2" fill="#4a3a2a"/>
+                <ellipse cx="104" cy="161" rx="5" ry="2" fill="#3a2a1a"/>
+                <text x="100" y="175" fill="#7a5500" font-size="6" text-anchor="middle" font-family="monospace">DEBRIS</text>
+              </g>
+
+              <!-- Slip joints -->
+              <rect x="82" y="106" width="36" height="8" rx="2" fill="#1f1f1f" stroke="#333" stroke-width="1"/>
+              <rect x="112" y="126" width="8" height="32" rx="2" fill="#1f1f1f" stroke="#333" stroke-width="1"/>
+
+              <!-- SEWER GAS ZONE label -->
+              <rect x="0" y="215" width="200" height="85" fill="rgba(255,0,0,0.04)" stroke="#330000" stroke-width="0.5"/>
+              <text x="100" y="240" fill="#330000" font-size="8" text-anchor="middle" font-family="monospace">SEWER SYSTEM</text>
+              <text x="100" y="255" fill="#330000" font-size="7" text-anchor="middle" font-family="monospace">H₂S · CH₄ · PATHOGENS</text>
+              <!-- Drain line going down -->
+              <rect x="84" y="154" width="32" height="66" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+
+              <!-- State label -->
+              <rect x="10" y="10" width="66" height="18" rx="2" fill="#0a0a0a" stroke="#2a2a2a" stroke-width="1"/>
+              <text id="ptrap-state-svg" x="43" y="22" fill="#ffb000" font-size="8" text-anchor="middle" font-family="monospace">SEALED</text>
+
+            </svg>
+          </div>
+
+          <!-- RIGHT: CONTROLS -->
+          <div class="ptrap-controls">
+
+            <div class="sim-section-label">CLIMATE MODE</div>
+            <div style="display:flex;gap:5px;margin-bottom:10px;">
+              <button class="sim-btn ptrap-climate active" id="climate-temperate" onclick="setPtrapClimate('temperate',this)" style="flex:1;padding:6px 4px;">TEMPERATE</button>
+              <button class="sim-btn ptrap-climate" id="climate-dry" onclick="setPtrapClimate('dry',this)" style="flex:1;padding:6px 4px;">DRY</button>
+              <button class="sim-btn ptrap-climate" id="climate-humid" onclick="setPtrapClimate('humid',this)" style="flex:1;padding:6px 4px;">HUMID</button>
+            </div>
+
+            <div class="sim-section-label">ACTIONS</div>
+            <button class="sim-btn" onclick="ptrapAction('water')">💧 RUN WATER</button>
+            <button class="sim-btn" onclick="ptrapAction('wait')">⏱ WAIT (TIME PASSES)</button>
+            <button class="sim-btn" onclick="ptrapAction('inspectVent')">🔍 INSPECT VENT</button>
+            <button class="sim-btn" onclick="ptrapAction('clearVent')">✓ CLEAR VENT</button>
+            <button class="sim-btn" onclick="ptrapAction('addDebris')">🗑 ADD DEBRIS</button>
+            <button class="sim-btn" onclick="ptrapAction('cleanTrap')">🔧 CLEAN TRAP</button>
+            <button class="sim-btn" onclick="ptrapAction('reset')" style="margin-top:4px">↺ RESET</button>
+
+            <div class="sim-readout" id="ptrap-readout" style="margin-top:12px;">
+              <div class="readout-line"><span class="readout-tag">STATE</span><span class="readout-val ok" id="pt-rd-state">SEALED</span></div>
+              <div class="readout-line"><span class="readout-tag">WATER</span><span class="readout-val ok" id="pt-rd-water">85%</span></div>
+              <div class="readout-line"><span class="readout-tag">VENT</span><span class="readout-val ok" id="pt-rd-vent">100% — OPEN</span></div>
+              <div class="readout-line"><span class="readout-tag">GAS</span><span class="readout-val ok" id="pt-rd-gas">0% — CONTAINED</span></div>
+              <div class="readout-line"><span class="readout-tag">BLOCKAGE</span><span class="readout-val ok" id="pt-rd-block">0% — CLEAR</span></div>
+            </div>
+
+            <div class="sim-readout" id="ptrap-log" style="margin-top:8px;min-height:48px;font-size:10px;line-height:1.8;">
+              <span style="color:var(--amber-dim)">SYSTEM LOG</span><br>
+              <span id="ptrap-log-line" style="color:var(--text-dim)">Trap seal is intact. Sewer gas is contained.</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+      .ptrap-layout { display:grid; grid-template-columns:220px 1fr; gap:16px; align-items:start; }
+      @media(max-width:600px){ .ptrap-layout{ grid-template-columns:1fr; } }
+      .ptrap-diagram { display:flex; justify-content:center; background:var(--bg2); border:1px solid var(--border); padding:12px; }
+      .ptrap-controls { }
+      .ptrap-climate.active { border-color:var(--amber); color:var(--amber); background:var(--amber-glow); }
+    </style>
+  `;
+}
+
+// ---- P-TRAP STATE ENGINE ----
+
+const EVAP_RATES = { dry: 0.6, temperate: 0.2, humid: 0.07 };
+
+function ptrapTick() {
+  const p = ptrap;
+
+  // Evaporation
+  p.waterLevel -= p.evapRate;
+  if (p.waterLevel < 0) p.waterLevel = 0;
+
+  // Gas intrusion when seal is low
+  if (p.waterLevel < 20) {
+    p.gasLevel += (20 - p.waterLevel) * 0.25;
+  } else {
+    p.gasLevel = Math.max(0, p.gasLevel - 0.5);
+  }
+  p.gasLevel = Math.min(100, p.gasLevel);
+
+  // Drain speed affected by blockage
+  p.drainSpeed = p.blockage > 70 ? 0.2 : 1.0;
+
+  // Determine state
+  if (p.waterLevel < 20) p.state = 'DRY';
+  else if (p.blockage > 70) p.state = 'BLOCKED';
+  else p.state = 'SEALED';
+
+  updatePtrapUI();
+}
+
+function ptrapAction(action) {
+  const p = ptrap;
+
+  if (action === 'water') {
+    p.waterLevel = 100;
+    p.drainEvent = true;
+    // Siphon check: low vent + drain event
+    if (p.ventPressure < 40) {
+      setTimeout(() => {
+        p.waterLevel = 0;
+        p.state = 'SIPHONED';
+        ptrapLog('⚠ SIPHON EVENT — vent blocked. Drain pulled trap seal dry. Gas pathway open.');
+        updatePtrapUI();
+      }, 800);
+      ptrapLog('Drain event triggered. Vent pressure critical — siphon likely...');
+    } else if (p.blockage > 70) {
+      ptrapLog('Water added. Blocked trap — draining slowly. Seal partially restored.');
+    } else {
+      ptrapLog('Water added. Trap seal fully restored. Sewer gas contained.');
+    }
+    setTimeout(() => { p.drainEvent = false; }, 1000);
+  }
+
+  else if (action === 'wait') {
+    // Accelerated time — 10 ticks at once
+    for (let i = 0; i < 10; i++) {
+      p.waterLevel -= p.evapRate;
+      if (p.waterLevel < 0) p.waterLevel = 0;
+      if (p.waterLevel < 20) p.gasLevel += (20 - p.waterLevel) * 0.25;
+    }
+    p.gasLevel = Math.min(100, p.gasLevel);
+    const days = p.climate === 'dry' ? 'a few days' : p.climate === 'humid' ? 'several weeks' : 'about two weeks';
+    ptrapLog(`Time passes (${days} equivalent). Water level: ${Math.round(p.waterLevel)}%.`);
+  }
+
+  else if (action === 'inspectVent') {
+    if (p.ventPressure >= 80) ptrapLog('Vent stack: OPEN. Airflow nominal. Siphon risk: LOW.');
+    else if (p.ventPressure >= 40) ptrapLog('⚠ Vent partially blocked. Siphon risk: MODERATE. Consider clearing vent.');
+    else ptrapLog('⚠ VENT BLOCKED. Siphon risk: HIGH. Running water may pull trap seal dry.');
+  }
+
+  else if (action === 'clearVent') {
+    p.ventPressure = 100;
+    ptrapLog('Vent stack cleared. Airflow restored. Siphon risk eliminated.');
+  }
+
+  else if (action === 'addDebris') {
+    const amt = 10 + Math.round(Math.random() * 15);
+    p.blockage = Math.min(100, p.blockage + amt);
+    ptrapLog(`Debris added (+${amt}%). Blockage now ${Math.round(p.blockage)}%. ${p.blockage > 70 ? 'Drain is now SLOW.' : 'Drain still functional.'}`);
+  }
+
+  else if (action === 'cleanTrap') {
+    p.blockage = 0;
+    p.waterLevel = 100;
+    ptrapLog('Trap cleaned. Blockage cleared. Seal restored to 100%.');
+  }
+
+  else if (action === 'reset') {
+    clearInterval(ptrap.loop);
+    ptrap = { waterLevel:85, ventPressure:100, evapRate:EVAP_RATES.temperate,
+      gasLevel:0, blockage:0, state:'SEALED', climate:'temperate',
+      drainEvent:false, loop:null };
+    ['climate-dry','climate-temperate','climate-humid'].forEach(id => {
+      const b = document.getElementById(id);
+      if (b) b.classList.remove('active');
+    });
+    const tb = document.getElementById('climate-temperate');
+    if (tb) tb.classList.add('active');
+    startPtrapLoop();
+    ptrapLog('System reset. Trap seal restored. All conditions nominal.');
+  }
+
+  updatePtrapUI();
+}
+
+function setPtrapClimate(mode, btn) {
+  ptrap.climate = mode;
+  ptrap.evapRate = EVAP_RATES[mode];
+  document.querySelectorAll('.ptrap-climate').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const labels = { dry:'DRY — rapid evaporation. Check trap every 2 weeks.', temperate:'TEMPERATE — moderate evaporation.', humid:'HUMID — slow evaporation. Seal lasts months.' };
+  ptrapLog(labels[mode]);
+}
+
+function startPtrapLoop() {
+  if (ptrap.loop) clearInterval(ptrap.loop);
+  ptrap.loop = setInterval(ptrapTick, 1200);
+}
+
+function updatePtrapUI() {
+  const p = ptrap;
+
+  // Water fill in SVG — maps 0-100% to Y position in the trap dip
+  const waterEl = document.getElementById('ptrap-water');
+  const waterLabel = document.getElementById('ptrap-water-label');
+  if (waterEl) {
+    const maxH = 50; // full height of water rect
+    const h = Math.round(maxH * p.waterLevel / 100);
+    const y = 112 + (maxH - h);
+    waterEl.setAttribute('y', y);
+    waterEl.setAttribute('height', h);
+    waterEl.setAttribute('fill', p.waterLevel < 20 ? '#1a0000' : p.waterLevel < 50 ? '#002244' : '#003355');
+  }
+  if (waterLabel) {
+    waterLabel.textContent = p.waterLevel < 5 ? 'DRY' : 'SEAL';
+    waterLabel.setAttribute('fill', p.waterLevel < 20 ? '#ff3333' : '#00aaff');
+  }
+
+  // Gas plume
+  const gasEl = document.getElementById('ptrap-gas');
+  if (gasEl) gasEl.style.opacity = p.gasLevel > 15 ? Math.min(1, p.gasLevel / 60).toFixed(2) : '0';
+
+  // Debris
+  const debrisEl = document.getElementById('ptrap-debris');
+  if (debrisEl) debrisEl.style.opacity = p.blockage > 40 ? Math.min(1, p.blockage / 80).toFixed(2) : '0';
+
+  // Vent indicator
+  const ventDot = document.getElementById('ptrap-vent-dot');
+  const ventLabel = document.getElementById('ptrap-vent-label');
+  if (ventDot) ventDot.setAttribute('fill', p.ventPressure >= 60 ? '#00ff88' : p.ventPressure >= 30 ? '#ffb000' : '#ff3333');
+  if (ventLabel) {
+    ventLabel.textContent = p.ventPressure >= 60 ? 'OPEN' : p.ventPressure >= 30 ? 'PARTIAL' : 'BLOCKED';
+    ventLabel.setAttribute('fill', p.ventPressure >= 60 ? '#00ff88' : p.ventPressure >= 30 ? '#ffb000' : '#ff3333');
+  }
+
+  // State badge
+  const badge = document.getElementById('ptrap-status-badge');
+  const svgState = document.getElementById('ptrap-state-svg');
+  const stateColors = { SEALED:'ok', DRY:'warn', BLOCKED:'warn', SIPHONED:'warn' };
+  const stateMsgs = { SEALED:'● SEAL INTACT', DRY:'⚠ SEAL DRY — GAS BREACH', BLOCKED:'⚠ DRAIN BLOCKED', SIPHONED:'⚠ SIPHON EVENT' };
+  if (badge) { badge.textContent = stateMsgs[p.state] || p.state; badge.className = 'sim-status'; badge.style.color = p.state === 'SEALED' ? 'var(--green)' : 'var(--red)'; }
+  if (svgState) { svgState.textContent = p.state; svgState.setAttribute('fill', p.state === 'SEALED' ? '#00ff88' : '#ff3333'); }
+
+  // Readout panel
+  const rdState = document.getElementById('pt-rd-state');
+  const rdWater = document.getElementById('pt-rd-water');
+  const rdVent  = document.getElementById('pt-rd-vent');
+  const rdGas   = document.getElementById('pt-rd-gas');
+  const rdBlock = document.getElementById('pt-rd-block');
+
+  if (rdState) { rdState.textContent = p.state; rdState.className = 'readout-val ' + (p.state === 'SEALED' ? 'ok' : 'warn'); }
+  if (rdWater) {
+    rdWater.textContent = Math.round(p.waterLevel) + '% — ' + (p.waterLevel >= 40 ? 'SEALED' : p.waterLevel >= 20 ? 'LOW' : 'DRY');
+    rdWater.className = 'readout-val ' + (p.waterLevel >= 40 ? 'ok' : 'warn');
+  }
+  if (rdVent) {
+    rdVent.textContent = Math.round(p.ventPressure) + '% — ' + (p.ventPressure >= 60 ? 'OPEN' : p.ventPressure >= 30 ? 'PARTIAL' : 'BLOCKED');
+    rdVent.className = 'readout-val ' + (p.ventPressure >= 60 ? 'ok' : 'warn');
+  }
+  if (rdGas) {
+    rdGas.textContent = Math.round(p.gasLevel) + '% — ' + (p.gasLevel < 10 ? 'CONTAINED' : p.gasLevel < 40 ? 'TRACE DETECTED' : 'BREACH');
+    rdGas.className = 'readout-val ' + (p.gasLevel < 10 ? 'ok' : 'warn');
+  }
+  if (rdBlock) {
+    rdBlock.textContent = Math.round(p.blockage) + '% — ' + (p.blockage < 40 ? 'CLEAR' : p.blockage < 70 ? 'PARTIAL' : 'SLOW DRAIN');
+    rdBlock.className = 'readout-val ' + (p.blockage < 40 ? 'ok' : 'warn');
+  }
+}
+
+function ptrapLog(msg) {
+  const el = document.getElementById('ptrap-log-line');
+  if (el) el.textContent = msg;
+}
+
+// Auto-start loop when ptrap sim is rendered
+// Called from renderModule after innerHTML is set
+function initPtrapSim() {
+  startPtrapLoop();
+  updatePtrapUI();
+}
+
+
+
+// ============================================================
+// ENGINE OIL — LIQUID ARMOR SIMULATOR
+// ============================================================
+
+const OIL_CLAMP = (v,lo,hi) => Math.max(lo, Math.min(hi, v));
+
+let oil = {
+  running: false,
+  failed: false,
+  pressure: 0,
+  temp: 72,
+  viscosity: 100,
+  contamination: 0,
+  level: 95,
+  state: 'OFF',
+  failureTimer: 0,
+  failureCause: '',
+  mode: 'idle',   // idle | rev | drive
+  contRate: 0.04,
+  loop: null
+};
+
+// ---- BUILD SIM HTML ----
+function buildOilSim() {
+  return `
+    <div class="sim-slot" id="oil-slot">
+      <div class="sim-header">
+        <div class="sim-title">LIQUID ARMOR SIMULATOR</div>
+        <div class="sim-status" id="oil-badge">● ENGINE OFF</div>
+      </div>
+      <div class="sim-body">
+        <div class="oil-layout">
+
+          <!-- LEFT: ENGINE DIAGRAM -->
+          <div class="oil-diagram">
+            <svg id="oil-svg" viewBox="0 0 200 320" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:220px;">
+              <defs>
+                <marker id="oarrow" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto">
+                  <path d="M0,0 L0,5 L5,2.5 z" fill="#ffb000" id="arrow-head"/>
+                </marker>
+                <filter id="glow-red">
+                  <feGaussianBlur stdDeviation="3" result="blur"/>
+                  <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                </filter>
+              </defs>
+
+              <!-- ENGINE BLOCK -->
+              <rect x="30" y="40" width="140" height="160" rx="4" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+              <text x="100" y="58" fill="#333" font-size="8" text-anchor="middle" font-family="monospace">ENGINE BLOCK</text>
+
+              <!-- CRANKSHAFT BEARING -->
+              <ellipse cx="100" cy="130" rx="22" ry="10" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1.5"/>
+              <ellipse id="oil-crank-film" cx="100" cy="130" rx="19" ry="7" fill="#003355" opacity="0.8"/>
+              <text x="100" y="134" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">CRANK</text>
+
+              <!-- CAMSHAFT -->
+              <rect x="48" y="72" width="60" height="14" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1.5"/>
+              <rect id="oil-cam-film" x="50" y="74" width="56" height="10" rx="2" fill="#003355" opacity="0.8"/>
+              <text x="78" y="82" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">CAMSHAFT</text>
+
+              <!-- PISTONS -->
+              <rect x="118" y="72" width="34" height="50" rx="2" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1.5"/>
+              <rect id="oil-piston-film" x="120" y="74" width="30" height="14" rx="1" fill="#003355" opacity="0.7"/>
+              <text x="135" y="98" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">PISTON</text>
+              <text x="135" y="108" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">WALLS</text>
+
+              <!-- OIL FILTER (side) -->
+              <rect x="172" y="100" width="20" height="40" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1.5"/>
+              <rect id="oil-filter-fill" x="174" y="102" width="16" height="36" rx="2" fill="#003322" opacity="0.9"/>
+              <text x="182" y="124" fill="#555" font-size="6" text-anchor="middle" font-family="monospace" transform="rotate(90,182,124)">FILTER</text>
+
+              <!-- OIL PUMP -->
+              <ellipse cx="60" cy="195" rx="18" ry="14" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1.5"/>
+              <ellipse id="oil-pump-spin" cx="60" cy="195" rx="10" ry="10" fill="none" stroke="#ffb000" stroke-width="1.5" stroke-dasharray="8,6"/>
+              <text x="60" y="199" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">PUMP</text>
+
+              <!-- OIL SUMP (pan) -->
+              <rect x="30" y="220" width="140" height="45" rx="3" fill="#0f1a0f" stroke="#1a2a1a" stroke-width="1.5"/>
+              <rect id="oil-sump-level" x="32" y="240" width="136" height="23" fill="#1a3300" opacity="0.9"/>
+              <text x="100" y="257" fill="#336600" font-size="7" text-anchor="middle" font-family="monospace">OIL SUMP</text>
+
+              <!-- FLOW PATHS — pickup to pump -->
+              <line id="flow-pickup" x1="80" y1="240" x2="78" y2="209" stroke="#ffb000" stroke-width="2" opacity="0.4" marker-end="url(#oarrow)"/>
+              <!-- pump to filter -->
+              <line id="flow-pump-filter" x1="78" y1="190" x2="170" y2="130" stroke="#ffb000" stroke-width="2" opacity="0.4" marker-end="url(#oarrow)"/>
+              <!-- filter to galleries -->
+              <line id="flow-gallery" x1="172" y1="108" x2="150" y2="80" stroke="#ffb000" stroke-width="1.5" opacity="0.4" marker-end="url(#oarrow)"/>
+              <line id="flow-crank" x1="150" y1="120" x2="122" y2="128" stroke="#ffb000" stroke-width="1.5" opacity="0.4" marker-end="url(#oarrow)"/>
+              <!-- return drain -->
+              <line id="flow-return" x1="40" y1="200" x2="40" y2="222" stroke="#7a5500" stroke-width="1.5" opacity="0.3" marker-end="url(#oarrow)"/>
+
+              <!-- TEMP GAUGE -->
+              <rect x="6" y="40" width="16" height="80" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+              <rect id="oil-temp-bar" x="8" y="100" width="12" height="18" fill="#00aaff"/>
+              <text x="14" y="132" fill="#555" font-size="5" text-anchor="middle" font-family="monospace">°F</text>
+              <line x1="6" y1="67" x2="22" y2="67" stroke="#ff3333" stroke-width="0.5" stroke-dasharray="2,2"/>
+              <text x="4" y="65" fill="#ff3333" font-size="5" font-family="monospace" text-anchor="end">260</text>
+
+              <!-- PRESSURE GAUGE -->
+              <rect x="178" y="155" width="16" height="60" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+              <rect id="oil-psi-bar" x="180" y="190" width="12" height="23" fill="#00ff88"/>
+              <text x="186" y="225" fill="#555" font-size="5" text-anchor="middle" font-family="monospace">PSI</text>
+              <line x1="178" y1="175" x2="194" y2="175" stroke="#ff3333" stroke-width="0.5" stroke-dasharray="2,2"/>
+              <text x="196" y="173" fill="#ff3333" font-size="5" font-family="monospace">MIN</text>
+
+              <!-- STATE LABEL -->
+              <rect x="30" y="12" width="140" height="20" rx="2" fill="#0a0a0a" stroke="#2a2a2a" stroke-width="1"/>
+              <text id="oil-state-svg" x="100" y="25" fill="#ffb000" font-size="9" text-anchor="middle" font-family="monospace">ENGINE OFF</text>
+
+              <!-- FAILURE OVERLAY -->
+              <g id="oil-failure-overlay" opacity="0">
+                <rect x="30" y="40" width="140" height="160" rx="4" fill="rgba(255,0,0,0.12)"/>
+                <text x="100" y="160" fill="#ff3333" font-size="11" text-anchor="middle" font-family="monospace" font-weight="bold">SEIZED</text>
+              </g>
+
+            </svg>
+          </div>
+
+          <!-- RIGHT: CONTROLS -->
+          <div class="oil-controls">
+
+            <div class="sim-section-label">ENGINE CONTROLS</div>
+            <button class="sim-btn" id="oil-btn-start" onclick="oilAction('start')">▶ START ENGINE</button>
+            <button class="sim-btn" id="oil-btn-rev"   onclick="oilAction('rev')"   disabled>⚡ REV ENGINE</button>
+            <button class="sim-btn" id="oil-btn-drive" onclick="oilAction('drive')" disabled>🔥 DRIVE HARD</button>
+            <button class="sim-btn" id="oil-btn-idle"  onclick="oilAction('idle')"  disabled>〜 LET IDLE</button>
+            <button class="sim-btn" id="oil-btn-stop"  onclick="oilAction('stop')"  disabled>■ STOP ENGINE</button>
+
+            <div class="sim-section-label" style="margin-top:12px">MAINTENANCE</div>
+            <button class="sim-btn" onclick="oilAction('changeoil')">🔧 CHANGE OIL</button>
+            <button class="sim-btn" onclick="oilAction('filter')">🔩 REPLACE FILTER</button>
+            <button class="sim-btn" onclick="oilAction('drain')" id="oil-btn-drain">💧 DRAIN 2QT (SIMULATE LEAK)</button>
+            <button class="sim-btn" onclick="oilAction('reset')" style="margin-top:4px">↺ RESET</button>
+
+            <div class="sim-readout" id="oil-readout" style="margin-top:12px;">
+              <div class="readout-line"><span class="readout-tag">STATE</span><span class="readout-val" id="ol-rd-state">ENGINE OFF</span></div>
+              <div class="readout-line"><span class="readout-tag">PRESSURE</span><span class="readout-val" id="ol-rd-psi">0 PSI</span></div>
+              <div class="readout-line"><span class="readout-tag">TEMP</span><span class="readout-val" id="ol-rd-temp">72 °F</span></div>
+              <div class="readout-line"><span class="readout-tag">VISCOSITY</span><span class="readout-val" id="ol-rd-visc">100% — COLD</span></div>
+              <div class="readout-line"><span class="readout-tag">CONTAMINATION</span><span class="readout-val" id="ol-rd-cont">0%</span></div>
+              <div class="readout-line"><span class="readout-tag">OIL LEVEL</span><span class="readout-val" id="ol-rd-level">95%</span></div>
+            </div>
+
+            <div class="sim-readout" id="oil-log" style="margin-top:8px;min-height:52px;font-size:10px;line-height:1.8;">
+              <span style="color:var(--amber-dim)">SYSTEM LOG</span><br>
+              <span id="oil-log-line" style="color:var(--text-dim)">Engine cold. All systems ready. Start engine to begin.</span>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <style>
+      .oil-layout { display:grid; grid-template-columns:220px 1fr; gap:16px; align-items:start; }
+      @media(max-width:600px){ .oil-layout{ grid-template-columns:1fr; } }
+      .oil-diagram { display:flex; justify-content:center; background:var(--bg2); border:1px solid var(--border); padding:12px; }
+      .oil-controls {}
+      @keyframes pump-spin { from { stroke-dashoffset:0; } to { stroke-dashoffset:-28; } }
+      @keyframes oil-flash-red { 0%,100%{opacity:0.12} 50%{opacity:0.35} }
+      @keyframes flow-pulse { 0%,100%{opacity:0.4} 50%{opacity:0.9} }
+      .pump-running { animation: pump-spin 0.6s linear infinite; }
+      .flow-active  { animation: flow-pulse 0.8s ease infinite; }
+      .failure-flash { animation: oil-flash-red 0.4s ease infinite; }
+    </style>
+  `;
+}
+
+// ---- OIL SIM ENGINE ----
+
+function oilTick() {
+  const o = oil;
+  if (!o.running || o.failed) return;
+
+  const dt = 1; // seconds per tick
+  const modeRates = { idle: 1, rev: 3, drive: 2 };
+  const rate = modeRates[o.mode] || 1;
+
+  // Temperature rise/fall by mode
+  const targetTemps = { idle: 190, rev: 250, drive: 235 };
+  const target = targetTemps[o.mode] || 190;
+  o.temp += (target - o.temp) * 0.06 * rate;
+  o.temp = OIL_CLAMP(o.temp, 70, 310);
+
+  // Viscosity inversely tracks temp
+  o.viscosity = OIL_CLAMP(100 - (o.temp - 100) * 0.28, 0, 100);
+
+  // Contamination rises with runtime
+  o.contamination += dt * o.contRate * rate;
+  o.contamination = OIL_CLAMP(o.contamination, 0, 100);
+
+  // Pressure formula from spec
+  o.pressure = OIL_CLAMP(
+    (o.level * 0.6) + (o.viscosity * 0.4) - (o.contamination * 0.3),
+    0, 100
+  );
+
+  // Overheat penalty
+  if (o.temp > 260) {
+    o.pressure -= (o.temp - 260) * 0.15;
+    o.pressure = OIL_CLAMP(o.pressure, 0, 100);
+  }
+
+  // Failure timer: sustained zero pressure
+  if (o.pressure <= 2) {
+    o.failureTimer += dt;
+    if (o.failureTimer >= 5) {
+      triggerOilFailure('OIL STARVATION — BEARING SEIZURE');
+      return;
+    }
+  } else {
+    o.failureTimer = 0;
+  }
+
+  // Hard failure thresholds
+  if (o.temp >= 305) { triggerOilFailure('THERMAL RUNAWAY — ENGINE DESTROYED'); return; }
+  if (o.contamination >= 100) { triggerOilFailure('SLUDGE SEIZURE — OIL COMPLETELY DEGRADED'); return; }
+
+  // Determine state
+  if (o.pressure < 30 && o.temp <= 260 && o.contamination <= 70) o.state = 'LOW PRESSURE';
+  else if (o.temp > 260) o.state = 'OVERHEATED';
+  else if (o.contamination > 70) o.state = 'DIRTY FILTER';
+  else o.state = 'NORMAL';
+
+  updateOilUI();
+}
+
+function triggerOilFailure(cause) {
+  oil.failed = true;
+  oil.running = false;
+  oil.state = 'ENGINE FAILURE';
+  oil.failureCause = cause;
+  oil.pressure = 0;
+  clearInterval(oil.loop);
+  oil.loop = null;
+
+  // Failure animations
+  const overlay = document.getElementById('oil-failure-overlay');
+  if (overlay) { overlay.style.opacity = '1'; overlay.classList.add('failure-flash'); }
+  stopFlowAnims();
+
+  const badge = document.getElementById('oil-badge');
+  if (badge) { badge.textContent = '💀 ENGINE FAILURE'; badge.style.color = 'var(--red)'; }
+  const svgState = document.getElementById('oil-state-svg');
+  if (svgState) { svgState.textContent = 'FAILURE'; svgState.setAttribute('fill', '#ff3333'); }
+
+  setOilBtns(false);
+  oilLog(`💀 ENGINE FAILURE — ${cause}. Rebuild or replacement required. Cost: $3,000–$8,000+.`);
+  updateOilReadout();
+}
+
+function oilAction(action) {
+  const o = oil;
+
+  if (action === 'start') {
+    if (o.failed) { oilLog('Engine has failed. Reset to continue.'); return; }
+    o.running = true;
+    o.mode = 'idle';
+    o.state = 'NORMAL';
+    o.failureTimer = 0;
+    setOilBtns(true);
+    startOilLoop();
+    startFlowAnims();
+    oilLog('Engine started. Oil pump pressurizing. Allow warm-up before driving.');
+    updateOilUI();
+  }
+
+  else if (action === 'rev') {
+    if (!o.running) return;
+    o.mode = 'rev';
+    oilLog('Revving engine. RPM rising. Temperature climbing rapidly. Pressure spiking.');
+    setTimeout(() => { if (o.running && o.mode === 'rev') { o.mode = 'idle'; oilLog('RPM returning to idle.'); }}, 4000);
+  }
+
+  else if (action === 'drive') {
+    if (!o.running) return;
+    o.mode = 'drive';
+    oilLog('Driving hard. Sustained load. Temperature rising. Contamination accumulating faster.');
+  }
+
+  else if (action === 'idle') {
+    if (!o.running) return;
+    o.mode = 'idle';
+    oilLog('Idling. Temperature stabilizing. Pressure normalizing.');
+  }
+
+  else if (action === 'stop') {
+    o.running = false;
+    o.mode = 'idle';
+    o.state = 'OFF';
+    o.failureTimer = 0;
+    clearInterval(o.loop); o.loop = null;
+    stopFlowAnims();
+    const badge = document.getElementById('oil-badge');
+    if (badge) { badge.textContent = '● ENGINE OFF'; badge.style.color = 'var(--text-dim)'; }
+    const svgState = document.getElementById('oil-state-svg');
+    if (svgState) { svgState.textContent = 'ENGINE OFF'; svgState.setAttribute('fill', '#ffb000'); }
+    setOilBtns(false);
+    oilLog('Engine stopped. Oil draining to sump.');
+    updateOilReadout();
+  }
+
+  else if (action === 'changeoil') {
+    o.level = 100;
+    o.contamination = 0;
+    o.viscosity = 100;
+    const wasRunning = o.running;
+    if (wasRunning) { o.temp = Math.max(o.temp - 40, 72); }
+    else { o.temp = 72; }
+    o.failureTimer = 0;
+    if (o.failed) {
+      oilLog('Oil changed. But engine has seized — oil change cannot fix mechanical failure.');
+    } else {
+      oilLog('Oil changed. Contamination cleared. Viscosity restored. Filter should also be replaced.');
+    }
+    updateOilUI();
+  }
+
+  else if (action === 'filter') {
+    o.contamination = OIL_CLAMP(o.contamination - 40, 0, 100);
+    oilLog(`Filter replaced. Contamination reduced to ${Math.round(o.contamination)}%. Oil flow improved.`);
+    updateOilUI();
+  }
+
+  else if (action === 'drain') {
+    o.level = OIL_CLAMP(o.level - 22, 0, 100);
+    if (o.level < 25) {
+      oilLog(`⚠ CRITICAL — Oil level ${Math.round(o.level)}%. Pressure collapse imminent. STOP ENGINE.`);
+    } else {
+      oilLog(`Oil level dropped to ${Math.round(o.level)}%. Pressure affected. Check dipstick.`);
+    }
+    updateOilUI();
+  }
+
+  else if (action === 'reset') {
+    clearInterval(oil.loop);
+    oil = { running:false, failed:false, pressure:0, temp:72, viscosity:100,
+      contamination:0, level:95, state:'OFF', failureTimer:0, failureCause:'',
+      mode:'idle', contRate:0.04, loop:null };
+    stopFlowAnims();
+    const overlay = document.getElementById('oil-failure-overlay');
+    if (overlay) { overlay.style.opacity = '0'; overlay.classList.remove('failure-flash'); }
+    const badge = document.getElementById('oil-badge');
+    if (badge) { badge.textContent = '● ENGINE OFF'; badge.style.color = 'var(--text-dim)'; }
+    const svgState = document.getElementById('oil-state-svg');
+    if (svgState) { svgState.textContent = 'ENGINE OFF'; svgState.setAttribute('fill', '#ffb000'); }
+    setOilBtns(false);
+    oilLog('System reset. Engine cold. All conditions nominal.');
+    updateOilUI();
+  }
+}
+
+function setOilBtns(engineOn) {
+  const ids = ['oil-btn-rev','oil-btn-drive','oil-btn-idle','oil-btn-stop'];
+  ids.forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.disabled = !engineOn;
+  });
+  const startBtn = document.getElementById('oil-btn-start');
+  if (startBtn) startBtn.disabled = engineOn;
+}
+
+function startOilLoop() {
+  if (oil.loop) clearInterval(oil.loop);
+  oil.loop = setInterval(oilTick, 1000);
+}
+
+function startFlowAnims() {
+  ['flow-pickup','flow-pump-filter','flow-gallery','flow-crank','flow-return'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('flow-active');
+  });
+  const pump = document.getElementById('oil-pump-spin');
+  if (pump) pump.classList.add('pump-running');
+}
+
+function stopFlowAnims() {
+  ['flow-pickup','flow-pump-filter','flow-gallery','flow-crank','flow-return'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('flow-active');
+  });
+  const pump = document.getElementById('oil-pump-spin');
+  if (pump) pump.classList.remove('pump-running');
+}
+
+function updateOilUI() {
+  const o = oil;
+
+  // Temp bar: maps 72–310 °F to 80px bar height
+  const tempBar = document.getElementById('oil-temp-bar');
+  if (tempBar) {
+    const pct = (o.temp - 72) / (310 - 72);
+    const h = Math.round(pct * 78);
+    tempBar.setAttribute('y', 120 - h);
+    tempBar.setAttribute('height', h);
+    tempBar.setAttribute('fill', o.temp > 260 ? '#ff3333' : o.temp > 220 ? '#ffb000' : '#00aaff');
+  }
+
+  // Pressure bar: maps 0–100 to 50px height
+  const psiBar = document.getElementById('oil-psi-bar');
+  if (psiBar) {
+    const h = Math.round((o.pressure / 100) * 58);
+    psiBar.setAttribute('y', 213 - h);
+    psiBar.setAttribute('height', h);
+    psiBar.setAttribute('fill', o.pressure < 30 ? '#ff3333' : o.pressure < 50 ? '#ffb000' : '#00ff88');
+  }
+
+  // Sump level
+  const sump = document.getElementById('oil-sump-level');
+  if (sump) {
+    const h = Math.round((o.level / 100) * 23);
+    sump.setAttribute('y', 263 - h);
+    sump.setAttribute('height', h);
+    sump.setAttribute('fill', o.level < 25 ? '#330000' : o.level < 50 ? '#332200' : '#1a3300');
+  }
+
+  // Oil film color on bearing surfaces
+  const filmColor = o.pressure < 20 ? '#330000' : o.temp > 260 ? '#441100' : o.pressure < 50 ? '#002244' : '#003355';
+  ['oil-crank-film','oil-cam-film','oil-piston-film'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.setAttribute('fill', filmColor);
+  });
+
+  // Filter color
+  const filter = document.getElementById('oil-filter-fill');
+  if (filter) filter.setAttribute('fill', o.contamination > 70 ? '#330a00' : o.contamination > 40 ? '#332200' : '#003322');
+
+  // Flow arrow colors
+  const flowColor = o.pressure < 30 ? '#ff3333' : o.temp > 260 ? '#ff6600' : '#ffb000';
+  const arrowHead = document.getElementById('arrow-head');
+  if (arrowHead) arrowHead.setAttribute('fill', flowColor);
+  ['flow-pickup','flow-pump-filter','flow-gallery','flow-crank'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.setAttribute('stroke', flowColor);
+  });
+
+  // State SVG label
+  const svgState = document.getElementById('oil-state-svg');
+  if (svgState && !o.failed) {
+    const stateColor = { NORMAL:'#00ff88', 'LOW PRESSURE':'#ffb000', OVERHEATED:'#ff6600', 'DIRTY FILTER':'#ffb000', OFF:'#ffb000' };
+    svgState.textContent = o.state;
+    svgState.setAttribute('fill', stateColor[o.state] || '#ffb000');
+  }
+
+  // Badge
+  const badge = document.getElementById('oil-badge');
+  if (badge && !o.failed) {
+    const msgs = { NORMAL:'● RUNNING — NOMINAL', 'LOW PRESSURE':'⚠ LOW PRESSURE', OVERHEATED:'⚠ OVERHEATED', 'DIRTY FILTER':'⚠ DIRTY FILTER', OFF:'● ENGINE OFF' };
+    badge.textContent = msgs[o.state] || o.state;
+    badge.style.color = o.state === 'NORMAL' ? 'var(--green)' : o.state === 'OFF' ? 'var(--text-dim)' : 'var(--red)';
+  }
+
+  updateOilReadout();
+}
+
+function updateOilReadout() {
+  const o = oil;
+
+  const psiPct = Math.round(o.pressure);
+  const psiLabel = psiPct < 15 ? 'CRITICAL' : psiPct < 30 ? 'LOW' : psiPct < 50 ? 'MARGINAL' : 'NOMINAL';
+  const psiClass = psiPct < 30 ? 'warn' : 'ok';
+
+  const tempLabel = o.temp > 260 ? 'DANGER' : o.temp > 220 ? 'HIGH' : o.temp > 180 ? 'NORMAL' : 'COLD';
+  const tempClass = o.temp > 260 ? 'warn' : 'ok';
+
+  const viscLabel = o.viscosity < 20 ? 'BREAKDOWN' : o.viscosity < 40 ? 'THIN' : o.viscosity < 60 ? 'NORMAL' : 'COLD/THICK';
+  const contLabel = o.contamination > 70 ? 'CHANGE NOW' : o.contamination > 40 ? 'DEGRADED' : 'CLEAN';
+  const contClass = o.contamination > 70 ? 'warn' : 'ok';
+  const levelLabel = o.level < 25 ? 'CRITICAL' : o.level < 50 ? 'LOW' : 'OK';
+  const levelClass = o.level < 50 ? 'warn' : 'ok';
+
+  const set = (id, text, cls) => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = text; el.className = 'readout-val ' + (cls || ''); }
+  };
+
+  set('ol-rd-state', o.state, o.state === 'NORMAL' ? 'ok' : o.state === 'OFF' ? '' : 'warn');
+  set('ol-rd-psi',   `${psiPct} PSI — ${psiLabel}`, psiClass);
+  set('ol-rd-temp',  `${Math.round(o.temp)} °F — ${tempLabel}`, tempClass);
+  set('ol-rd-visc',  `${Math.round(o.viscosity)}% — ${viscLabel}`, o.viscosity < 30 ? 'warn' : '');
+  set('ol-rd-cont',  `${Math.round(o.contamination)}% — ${contLabel}`, contClass);
+  set('ol-rd-level', `${Math.round(o.level)}% — ${levelLabel}`, levelClass);
+}
+
+function oilLog(msg) {
+  const el = document.getElementById('oil-log-line');
+  if (el) el.textContent = msg;
+}
+
+function initOilSim() {
+  oil = { running:false, failed:false, pressure:0, temp:72, viscosity:100,
+    contamination:0, level:95, state:'OFF', failureTimer:0, failureCause:'',
+    mode:'idle', contRate:0.04, loop:null };
+  setOilBtns(false);
+  updateOilUI();
+}
+
+
+
+// ============================================================
+// MODULE 005 — WATER HEATER PRESSURE CHAMBER SIM
+// ============================================================
+let wh = {};
+function initHeaterSim() {
+  clearInterval(wh.loop);
+  wh = { temp:65, setTemp:120, pressure:45, anodeLife:80, sediment:0,
+    tpOpen:false, running:true, state:'HEATING', failTimer:0, loop:null };
+  startWhLoop(); updateWhUI();
+}
+function buildHeaterSim() {
+  return `<div class="sim-slot"><div class="sim-header"><div class="sim-title">PRESSURE CHAMBER SIMULATOR</div><div class="sim-status" id="wh-badge">● HEATING</div></div><div class="sim-body"><div class="two-col-sim">
+  <div class="oil-diagram">
+    <svg viewBox="0 0 160 300" style="width:100%;max-width:180px;" xmlns="http://www.w3.org/2000/svg">
+      <!-- Tank body -->
+      <rect x="30" y="30" width="100" height="200" rx="8" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+      <!-- Water fill -->
+      <rect id="wh-water" x="32" y="32" width="96" height="196" rx="7" fill="#002233" opacity="0.9"/>
+      <!-- Anode rod -->
+      <rect id="wh-anode" x="75" y="35" width="10" height="100" rx="3" fill="#ffb000" opacity="0.9"/>
+      <text x="80" y="145" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">ANODE</text>
+      <!-- Dip tube -->
+      <rect x="60" y="35" width="5" height="130" fill="none" stroke="#00aaff" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <text x="58" y="175" fill="#003355" font-size="6" text-anchor="end" font-family="monospace">DIP</text>
+      <!-- Sediment layer -->
+      <rect id="wh-sediment" x="32" y="215" width="96" height="0" fill="#3a2a00" opacity="0.8"/>
+      <!-- Burner -->
+      <rect x="30" y="234" width="100" height="18" rx="3" fill="#1a0a00" stroke="#331100" stroke-width="1"/>
+      <ellipse id="wh-flame" cx="80" cy="234" rx="20" ry="6" fill="#ff6600" opacity="0"/>
+      <text x="80" y="247" fill="#331100" font-size="6" text-anchor="middle" font-family="monospace">BURNER</text>
+      <!-- T&P valve -->
+      <rect id="wh-tp" x="130" y="60" width="22" height="14" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+      <text x="141" y="70" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">T&amp;P</text>
+      <!-- T&P discharge line -->
+      <line id="wh-tp-line" x1="141" y1="74" x2="141" y2="110" stroke="#333" stroke-width="2"/>
+      <!-- Temp gauge bar -->
+      <rect x="8" y="40" width="14" height="120" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+      <rect id="wh-temp-bar" x="10" y="140" width="10" height="18" fill="#00aaff"/>
+      <line x1="8" y1="66" x2="22" y2="66" stroke="#ff3333" stroke-width="0.5" stroke-dasharray="2,2"/>
+      <text x="6" y="64" fill="#ff3333" font-size="5" text-anchor="end" font-family="monospace">210</text>
+      <text x="15" y="168" fill="#555" font-size="5" text-anchor="middle" font-family="monospace">°F</text>
+      <!-- Pressure gauge -->
+      <rect x="138" y="155" width="14" height="70" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+      <rect id="wh-psi-bar" x="140" y="200" width="10" height="23" fill="#00ff88"/>
+      <line x1="138" y1="172" x2="152" y2="172" stroke="#ff3333" stroke-width="0.5" stroke-dasharray="2,2"/>
+      <text x="145" y="232" fill="#555" font-size="5" text-anchor="middle" font-family="monospace">PSI</text>
+      <!-- State label -->
+      <rect x="30" y="10" width="100" height="16" rx="2" fill="#0a0a0a" stroke="#2a2a2a"/>
+      <text id="wh-state-svg" x="80" y="21" fill="#ffb000" font-size="8" text-anchor="middle" font-family="monospace">HEATING</text>
+      <!-- TP open spray -->
+      <g id="wh-tp-spray" opacity="0">
+        <line x1="152" y1="67" x2="170" y2="55" stroke="#00aaff" stroke-width="2"/>
+        <line x1="152" y1="67" x2="168" y2="67" stroke="#00aaff" stroke-width="2"/>
+        <line x1="152" y1="67" x2="170" y2="79" stroke="#00aaff" stroke-width="2"/>
+        <text x="165" y="52" fill="#00aaff" font-size="6" font-family="monospace">VENT!</text>
+      </g>
+    </svg>
+  </div>
+  <div class="oil-controls">
+    <div class="sim-section-label">CONTROLS</div>
+    <button class="sim-btn" onclick="whAction('draw')">🚿 HOT WATER DRAW</button>
+    <button class="sim-btn" onclick="whAction('overheat')">🔥 BYPASS THERMOSTAT</button>
+    <button class="sim-btn" onclick="whAction('testTP')">⚠ TEST T&amp;P VALVE</button>
+    <button class="sim-btn" onclick="whAction('flush')">🔧 FLUSH SEDIMENT</button>
+    <button class="sim-btn" onclick="whAction('replaceAnode')">✦ REPLACE ANODE ROD</button>
+    <button class="sim-btn" onclick="whAction('reset')">↺ RESET</button>
+    <div class="sim-readout" style="margin-top:12px">
+      <div class="readout-line"><span class="readout-tag">STATE</span><span class="readout-val ok" id="wh-rd-state">HEATING</span></div>
+      <div class="readout-line"><span class="readout-tag">TEMP</span><span class="readout-val ok" id="wh-rd-temp">65 °F</span></div>
+      <div class="readout-line"><span class="readout-tag">PRESSURE</span><span class="readout-val ok" id="wh-rd-psi">45 PSI</span></div>
+      <div class="readout-line"><span class="readout-tag">ANODE ROD</span><span class="readout-val ok" id="wh-rd-anode">80% REMAINING</span></div>
+      <div class="readout-line"><span class="readout-tag">SEDIMENT</span><span class="readout-val ok" id="wh-rd-sed">0%</span></div>
+    </div>
+    <div class="sim-readout" style="margin-top:8px;font-size:10px;line-height:1.8">
+      <span style="color:var(--amber-dim)">SYSTEM LOG</span><br>
+      <span id="wh-log" style="color:var(--text-dim)">Water heater cold. Burner igniting. Heating to 120°F.</span>
+    </div>
+  </div>
+</div></div></div>`;
+}
+function startWhLoop() { if(wh.loop) clearInterval(wh.loop); wh.loop = setInterval(whTick,1000); }
+function whTick() {
+  if(!wh.running) return;
+  // Heat toward setTemp unless bypassed
+  if(wh.state==='BYPASSED') { wh.temp += 1.2; }
+  else if(wh.temp < wh.setTemp) { wh.temp += 0.8 * (1 - wh.sediment/200); }
+  else { wh.temp = Math.max(wh.temp - 0.1, wh.setTemp); }
+  wh.temp = Math.min(wh.temp, 220);
+  // Pressure tracks temp
+  wh.pressure = 40 + (wh.temp - 65) * 0.55 + wh.sediment * 0.2;
+  // Sediment grows slowly
+  wh.sediment = Math.min(100, wh.sediment + 0.02);
+  // Anode depletes slowly
+  wh.anodeLife = Math.max(0, wh.anodeLife - 0.01);
+  // T&P opens at 210F or 150PSI
+  if(wh.temp >= 210 || wh.pressure >= 150) {
+    wh.tpOpen = true;
+    wh.temp = Math.max(wh.temp - 2, 120);
+    wh.pressure = Math.max(wh.pressure - 5, 80);
+  } else { wh.tpOpen = false; }
+  // State
+  if(wh.state !== 'BYPASSED') {
+    if(wh.tpOpen) wh.state='T&P VENTING';
+    else if(wh.anodeLife < 10) wh.state='ANODE DEPLETED';
+    else if(wh.sediment > 70) wh.state='SEDIMENT HIGH';
+    else if(wh.temp >= wh.setTemp - 2) wh.state='STANDBY';
+    else wh.state='HEATING';
+  }
+  updateWhUI();
+}
+function whAction(a) {
+  if(a==='draw') { wh.temp=Math.max(wh.temp-18,65); wh.state='HEATING'; whLog('Hot water drawn. Cold water entering tank. Burner reigniting.'); }
+  else if(a==='overheat') { wh.state='BYPASSED'; whLog('⚠ Thermostat bypassed. Temperature rising uncontrolled. T&P valve is now the only safety device.'); }
+  else if(a==='testTP') { wh.tpOpen=true; setTimeout(()=>{wh.tpOpen=false;},2000); whLog('T&P valve tested. Water flowing through discharge pipe. Valve reseated after release.'); }
+  else if(a==='flush') { wh.sediment=0; whLog('Sediment flushed. Tank efficiency restored. Burner contact with tank base improved.'); }
+  else if(a==='replaceAnode') { wh.anodeLife=100; whLog('Anode rod replaced. Sacrificial protection restored. Tank corrosion clock reset.'); }
+  else if(a==='reset') { clearInterval(wh.loop); initHeaterSim(); whLog('System reset.'); }
+  updateWhUI();
+}
+function whLog(m) { const e=document.getElementById('wh-log'); if(e) e.textContent=m; }
+function updateWhUI() {
+  const w=wh;
+  // Temp bar: 65-220F over 120px
+  const tb=document.getElementById('wh-temp-bar');
+  if(tb){const h=Math.round((w.temp-65)/(220-65)*118);tb.setAttribute('y',158-h);tb.setAttribute('height',h);tb.setAttribute('fill',w.temp>200?'#ff3333':w.temp>160?'#ffb000':'#00aaff');}
+  // Pressure bar
+  const pb=document.getElementById('wh-psi-bar');
+  if(pb){const h=Math.round(Math.min(w.pressure,160)/160*68);pb.setAttribute('y',223-h);pb.setAttribute('height',h);pb.setAttribute('fill',w.pressure>130?'#ff3333':w.pressure>100?'#ffb000':'#00ff88');}
+  // Water color
+  const ww=document.getElementById('wh-water');
+  if(ww) ww.setAttribute('fill',w.temp>180?'#220a00':w.temp>120?'#001a22':'#002233');
+  // Sediment
+  const ss=document.getElementById('wh-sediment');
+  if(ss){const h=Math.round(w.sediment/100*30);ss.setAttribute('height',h);ss.setAttribute('y',228-h);}
+  // Anode
+  const an=document.getElementById('wh-anode');
+  if(an){const h=Math.round(w.anodeLife/100*100);an.setAttribute('height',h);an.setAttribute('fill',w.anodeLife<20?'#333':w.anodeLife<50?'#7a5500':'#ffb000');}
+  // Flame
+  const fl=document.getElementById('wh-flame');
+  if(fl) fl.setAttribute('opacity',w.temp<w.setTemp||w.state==='BYPASSED'?'0.8':'0');
+  // T&P
+  const tp=document.getElementById('wh-tp');
+  const ts=document.getElementById('wh-tp-spray');
+  if(tp) tp.setAttribute('stroke',w.tpOpen?'#ff3333':'#2a2a2a');
+  if(ts) ts.style.opacity=w.tpOpen?'1':'0';
+  // Readout
+  const sc=w.state==='STANDBY'||w.state==='HEATING'?'ok':'warn';
+  const set=(id,t,c)=>{const e=document.getElementById(id);if(e){e.textContent=t;e.className='readout-val '+(c||'');}};
+  set('wh-rd-state',w.state,sc);
+  set('wh-rd-temp',`${Math.round(w.temp)} °F — ${w.temp>=210?'DANGER':w.temp>=180?'HOT':'HEATING'}`,w.temp>=210?'warn':'ok');
+  set('wh-rd-psi',`${Math.round(w.pressure)} PSI — ${w.pressure>=150?'CRITICAL':w.pressure>=120?'HIGH':'NORMAL'}`,w.pressure>=130?'warn':'ok');
+  set('wh-rd-anode',`${Math.round(w.anodeLife)}% — ${w.anodeLife<10?'REPLACE NOW':w.anodeLife<30?'DEPLETING':'OK'}`,w.anodeLife<20?'warn':'ok');
+  set('wh-rd-sed',`${Math.round(w.sediment)}% — ${w.sediment>70?'HIGH — FLUSH':w.sediment>40?'MODERATE':'LOW'}`,w.sediment>70?'warn':'ok');
+  const bg=document.getElementById('wh-badge');
+  if(bg){bg.textContent=w.state==='T&P VENTING'?'⚠ T&P VENTING':w.state==='BYPASSED'?'⚠ RUNAWAY':w.tpOpen?'⚠ PRESSURE VENTING':'● '+w.state;bg.style.color=sc==='ok'?'var(--green)':'var(--red)';}
+  const sv=document.getElementById('wh-state-svg');
+  if(sv){sv.textContent=w.state;sv.setAttribute('fill',sc==='ok'?'#00ff88':'#ff3333');}
+}
+
+// ============================================================
+// MODULE 006 — HVAC FILTER SIM
+// ============================================================
+let hv = {};
+function initHvacSim() {
+  clearInterval(hv.loop);
+  hv = { filterLoad:0, merv:8, airflow:100, coilTemp:45, iceLevel:0,
+    runtime:0, state:'NORMAL', loop:null };
+  startHvLoop(); updateHvUI();
+}
+function buildHvacSim() {
+  return `<div class="sim-slot"><div class="sim-header"><div class="sim-title">AIRBORNE FILTER SIMULATOR</div><div class="sim-status" id="hv-badge">● AIRFLOW NOMINAL</div></div><div class="sim-body"><div class="two-col-sim">
+  <div class="oil-diagram">
+    <svg viewBox="0 0 180 280" style="width:100%;max-width:200px;" xmlns="http://www.w3.org/2000/svg">
+      <!-- Return duct -->
+      <rect x="60" y="10" width="60" height="30" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+      <text x="90" y="29" fill="#555" font-size="7" text-anchor="middle" font-family="monospace">RETURN AIR</text>
+      <!-- FILTER -->
+      <rect id="hv-filter" x="55" y="40" width="70" height="20" rx="2" fill="#004400" stroke="#00ff88" stroke-width="1.5"/>
+      <text x="90" y="54" fill="#00ff88" font-size="7" text-anchor="middle" font-family="monospace" id="hv-filter-label">FILTER — CLEAN</text>
+      <!-- Air handler box -->
+      <rect x="30" y="65" width="120" height="120" rx="4" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+      <text x="90" y="82" fill="#333" font-size="7" text-anchor="middle" font-family="monospace">AIR HANDLER</text>
+      <!-- Blower -->
+      <ellipse cx="90" cy="105" rx="28" ry="28" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1.5"/>
+      <ellipse id="hv-blower" cx="90" cy="105" rx="18" ry="18" fill="none" stroke="#ffb000" stroke-width="1.5" stroke-dasharray="10,8"/>
+      <text x="90" y="109" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">BLOWER</text>
+      <!-- Evap coil -->
+      <rect x="35" y="148" width="110" height="28" rx="3" fill="#003333" stroke="#006666" stroke-width="1.5"/>
+      <rect id="hv-ice" x="35" y="148" width="0" height="28" rx="3" fill="#aaddff" opacity="0.7"/>
+      <text x="90" y="166" fill="#006666" font-size="6" text-anchor="middle" font-family="monospace">EVAPORATOR COIL</text>
+      <!-- Supply duct -->
+      <rect x="60" y="190" width="60" height="30" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+      <text x="90" y="208" fill="#555" font-size="7" text-anchor="middle" font-family="monospace">SUPPLY AIR</text>
+      <!-- Airflow arrows -->
+      <g id="hv-flow">
+        <line x1="90" y1="10" x2="90" y2="40" stroke="#00aaff" stroke-width="1.5" marker-end="url(#oarrow)" opacity="0.6"/>
+        <line x1="90" y1="62" x2="90" y2="75" stroke="#00aaff" stroke-width="1.5" marker-end="url(#oarrow)" opacity="0.6"/>
+        <line x1="90" y1="138" x2="90" y2="150" stroke="#00aaff" stroke-width="1.5" marker-end="url(#oarrow)" opacity="0.6"/>
+        <line x1="90" y1="178" x2="90" y2="190" stroke="#00aaff" stroke-width="1.5" marker-end="url(#oarrow)" opacity="0.6"/>
+      </g>
+      <!-- Airflow % gauge -->
+      <rect x="6" y="65" width="16" height="120" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+      <rect id="hv-flow-bar" x="8" y="67" width="12" height="116" fill="#00aaff" opacity="0.8"/>
+      <text x="14" y="194" fill="#555" font-size="5" text-anchor="middle" font-family="monospace">CFM</text>
+      <!-- State label -->
+      <rect x="30" y="228" width="120" height="16" rx="2" fill="#0a0a0a" stroke="#2a2a2a"/>
+      <text id="hv-state-svg" x="90" y="239" fill="#00ff88" font-size="8" text-anchor="middle" font-family="monospace">NORMAL</text>
+    </svg>
+  </div>
+  <div class="oil-controls">
+    <div class="sim-section-label">FILTER MERV RATING</div>
+    <div style="display:flex;gap:4px;margin-bottom:8px">
+      <button class="sim-btn" id="merv4" onclick="setMerv(4,this)" style="flex:1;padding:5px 2px">MERV 4</button>
+      <button class="sim-btn active" id="merv8" onclick="setMerv(8,this)" style="flex:1;padding:5px 2px">MERV 8</button>
+      <button class="sim-btn" id="merv13" onclick="setMerv(13,this)" style="flex:1;padding:5px 2px">MERV 13</button>
+    </div>
+    <div class="sim-section-label">ACTIONS</div>
+    <button class="sim-btn" onclick="hvAction('run')">▶ RUN SYSTEM</button>
+    <button class="sim-btn" onclick="hvAction('replace')">🔧 REPLACE FILTER</button>
+    <button class="sim-btn" onclick="hvAction('thaw')">❄ THAW COIL (FAN ONLY)</button>
+    <button class="sim-btn" onclick="hvAction('reset')">↺ RESET</button>
+    <div class="sim-readout" style="margin-top:12px">
+      <div class="readout-line"><span class="readout-tag">STATE</span><span class="readout-val ok" id="hv-rd-state">NORMAL</span></div>
+      <div class="readout-line"><span class="readout-tag">AIRFLOW</span><span class="readout-val ok" id="hv-rd-flow">100%</span></div>
+      <div class="readout-line"><span class="readout-tag">FILTER LOAD</span><span class="readout-val ok" id="hv-rd-filter">0%</span></div>
+      <div class="readout-line"><span class="readout-tag">COIL TEMP</span><span class="readout-val ok" id="hv-rd-coil">45 °F</span></div>
+      <div class="readout-line"><span class="readout-tag">ICE BUILDUP</span><span class="readout-val ok" id="hv-rd-ice">0%</span></div>
+    </div>
+    <div class="sim-readout" style="margin-top:8px;font-size:10px;line-height:1.8">
+      <span style="color:var(--amber-dim)">SYSTEM LOG</span><br>
+      <span id="hv-log" style="color:var(--text-dim)">System ready. Filter clean. Airflow unrestricted.</span>
+    </div>
+  </div>
+</div></div></div>`;
+}
+function startHvLoop() { if(hv.loop) clearInterval(hv.loop); hv.loop=setInterval(hvTick,900); }
+let hvRunning=false;
+function hvTick() {
+  if(!hvRunning) return;
+  const mervPenalty = {4:0.3, 8:0.6, 13:1.0}[hv.merv]||0.6;
+  hv.filterLoad = Math.min(100, hv.filterLoad + 0.15 * mervPenalty);
+  hv.airflow = Math.max(10, 100 - hv.filterLoad * 0.7 - (hv.merv===13?15:0));
+  // Coil icing when airflow drops
+  if(hv.airflow < 50) { hv.iceLevel = Math.min(100, hv.iceLevel + (50-hv.airflow)*0.08); }
+  else { hv.iceLevel = Math.max(0, hv.iceLevel - 0.5); }
+  // Coil temp
+  hv.coilTemp = 45 - (100-hv.airflow)*0.2 + hv.iceLevel*0.1;
+  // State
+  if(hv.iceLevel>70) hv.state='COIL FROZEN';
+  else if(hv.iceLevel>30) hv.state='ICING';
+  else if(hv.airflow<50) hv.state='RESTRICTED';
+  else if(hv.filterLoad>80) hv.state='REPLACE FILTER';
+  else hv.state='NORMAL';
+  updateHvUI();
+}
+function hvAction(a) {
+  if(a==='run'){hvRunning=true;hvLog('System running. Filter loading with particulates over time.');}
+  else if(a==='replace'){hv.filterLoad=0;hv.airflow=100-(hv.merv===13?15:0);hvLog('Filter replaced. Airflow restored. Write installation date on frame in marker.');}
+  else if(a==='thaw'){hvRunning=false;hv.iceLevel=Math.max(0,hv.iceLevel-40);hvLog('Fan-only mode. Coil thawing. Replace filter before restarting cooling.');}
+  else if(a==='reset'){clearInterval(hv.loop);hvRunning=false;initHvacSim();hvLog('System reset.');}
+  updateHvUI();
+}
+function setMerv(v,btn) {
+  hv.merv=v;
+  document.querySelectorAll('#merv4,#merv8,#merv13').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const labels={4:'Low efficiency. Protects equipment. Minimal air quality.',8:'Standard. Good balance of filtration and airflow.',13:'High efficiency. May restrict airflow in older systems.'};
+  hvLog(labels[v]);
+}
+function hvLog(m){const e=document.getElementById('hv-log');if(e)e.textContent=m;}
+function updateHvUI(){
+  const h=hv;
+  const filt=document.getElementById('hv-filter');
+  const flab=document.getElementById('hv-filter-label');
+  if(filt){filt.setAttribute('fill',h.filterLoad>80?'#330000':h.filterLoad>50?'#332200':'#004400');filt.setAttribute('stroke',h.filterLoad>80?'#ff3333':h.filterLoad>50?'#ffb000':'#00ff88');}
+  if(flab){flab.textContent=`FILTER — ${h.filterLoad>80?'REPLACE':h.filterLoad>50?'LOADING':'CLEAN'}`;flab.setAttribute('fill',h.filterLoad>80?'#ff3333':h.filterLoad>50?'#ffb000':'#00ff88');}
+  const fb=document.getElementById('hv-flow-bar');
+  if(fb){const fh=Math.round(h.airflow/100*116);fb.setAttribute('y',183-fh);fb.setAttribute('height',fh);fb.setAttribute('fill',h.airflow<40?'#ff3333':h.airflow<70?'#ffb000':'#00aaff');}
+  const ice=document.getElementById('hv-ice');
+  if(ice) ice.setAttribute('width',Math.round(h.iceLevel/100*110));
+  const blw=document.getElementById('hv-blower');
+  if(blw) blw.style.animation=hvRunning?'pump-spin 0.8s linear infinite':'none';
+  const sc=h.state==='NORMAL'?'ok':'warn';
+  const set=(id,t,c)=>{const e=document.getElementById(id);if(e){e.textContent=t;e.className='readout-val '+(c||'');}};
+  set('hv-rd-state',h.state,sc);
+  set('hv-rd-flow',`${Math.round(h.airflow)}% — ${h.airflow<40?'CRITICAL':h.airflow<70?'RESTRICTED':'NOMINAL'}`,h.airflow<70?'warn':'ok');
+  set('hv-rd-filter',`${Math.round(h.filterLoad)}% — ${h.filterLoad>80?'REPLACE NOW':h.filterLoad>50?'LOADING':'CLEAN'}`,h.filterLoad>80?'warn':'ok');
+  set('hv-rd-coil',`${Math.round(h.coilTemp)} °F — ${h.coilTemp<32?'FREEZING':h.coilTemp<40?'NEAR FREEZE':'OK'}`,h.coilTemp<35?'warn':'ok');
+  set('hv-rd-ice',`${Math.round(h.iceLevel)}% — ${h.iceLevel>70?'FROZEN':h.iceLevel>30?'ICING':'CLEAR'}`,h.iceLevel>30?'warn':'ok');
+  const bg=document.getElementById('hv-badge');
+  if(bg){bg.textContent=h.state==='NORMAL'?'● AIRFLOW NOMINAL':'⚠ '+h.state;bg.style.color=sc==='ok'?'var(--green)':'var(--red)';}
+  const sv=document.getElementById('hv-state-svg');
+  if(sv){sv.textContent=h.state;sv.setAttribute('fill',sc==='ok'?'#00ff88':'#ff3333');}
+}
+
+// ============================================================
+// MODULE 007 — ELECTRICAL GROUNDING SIM
+// ============================================================
+let gnd = {};
+function initGroundSim() { gnd={grounded:true,gfci:false,fault:false,bodyPath:false,chassisV:0,state:'SAFE'}; updateGndUI(); }
+function buildGroundSim() {
+  return `<div class="sim-slot"><div class="sim-header"><div class="sim-title">SAFETY SINK SIMULATOR</div><div class="sim-status" id="gnd-badge">● SYSTEM GROUNDED</div></div><div class="sim-body"><div class="two-col-sim">
+  <div class="oil-diagram">
+    <svg viewBox="0 0 180 300" style="width:100%;max-width:200px;" xmlns="http://www.w3.org/2000/svg">
+      <!-- Panel -->
+      <rect x="10" y="10" width="50" height="80" rx="3" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+      <text x="35" y="26" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">PANEL</text>
+      <rect x="18" y="32" width="12" height="8" rx="1" fill="#1f1f1f" stroke="#ff4444" stroke-width="1"/>
+      <text x="24" y="39" fill="#ff4444" font-size="5" text-anchor="middle" font-family="monospace">HOT</text>
+      <rect x="18" y="46" width="12" height="8" rx="1" fill="#1f1f1f" stroke="#cccccc" stroke-width="1"/>
+      <text x="24" y="53" fill="#aaa" font-size="5" text-anchor="middle" font-family="monospace">NEU</text>
+      <rect x="18" y="60" width="12" height="8" rx="1" fill="#1f1f1f" stroke="#00ff88" stroke-width="1"/>
+      <text x="24" y="67" fill="#00ff88" font-size="5" text-anchor="middle" font-family="monospace">GND</text>
+      <!-- Hot wire -->
+      <line x1="60" y1="36" x2="110" y2="36" stroke="#ff4444" stroke-width="2"/>
+      <!-- Neutral wire -->
+      <line x1="60" y1="50" x2="110" y2="50" stroke="#aaaaaa" stroke-width="2"/>
+      <!-- Ground wire -->
+      <line id="gnd-wire" x1="60" y1="64" x2="110" y2="140" stroke="#00ff88" stroke-width="2"/>
+      <!-- Outlet -->
+      <rect x="100" y="28" width="30" height="32" rx="3" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+      <circle cx="109" cy="40" r="3" fill="#ff4444" opacity="0.6"/>
+      <circle cx="122" cy="40" r="3" fill="#aaaaaa" opacity="0.6"/>
+      <circle id="gnd-hole" cx="116" cy="52" r="3" fill="#00ff88"/>
+      <!-- Appliance -->
+      <rect x="95" y="80" width="60" height="50" rx="4" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+      <text x="125" y="100" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">APPLIANCE</text>
+      <text x="125" y="114" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">CHASSIS</text>
+      <!-- Chassis voltage indicator -->
+      <circle id="gnd-chassis-v" cx="125" cy="125" r="6" fill="#00ff88" opacity="0.3"/>
+      <!-- Fault wire (hot to chassis - shown when fault injected) -->
+      <line id="gnd-fault-wire" x1="125" y1="80" x2="125" y2="68" stroke="#ff4444" stroke-width="1.5" stroke-dasharray="3,2" opacity="0"/>
+      <!-- Ground path from chassis to panel -->
+      <line id="gnd-safe-path" x1="110" y1="130" x2="60" y2="64" stroke="#00ff88" stroke-width="2.5" opacity="0"/>
+      <!-- Person -->
+      <circle cx="50" cy="155" r="12" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1.5"/>
+      <text x="50" y="159" fill="#555" font-size="7" text-anchor="middle" font-family="monospace">👤</text>
+      <rect x="44" y="167" width="12" height="30" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1.5"/>
+      <line x1="44" y1="175" x2="30" y2="188" stroke="#2a2a2a" stroke-width="1.5"/>
+      <line id="gnd-hand" x1="56" y1="175" x2="95" y2="120" stroke="#2a2a2a" stroke-width="1.5"/>
+      <!-- Body current path (danger!) -->
+      <line id="gnd-body-current" x1="56" y1="175" x2="95" y2="120" stroke="#ff3333" stroke-width="3" opacity="0"/>
+      <!-- Ground rod -->
+      <rect x="20" y="220" width="8" height="60" rx="2" fill="#7a5500" stroke="#ffb000" stroke-width="1"/>
+      <text x="24" y="215" fill="#7a5500" font-size="6" text-anchor="middle" font-family="monospace">ROD</text>
+      <line x1="24" y1="220" x2="35" y2="90" stroke="#00ff88" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <!-- GFCI indicator -->
+      <rect x="130" y="10" width="38" height="20" rx="3" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="1"/>
+      <text id="gnd-gfci-label" x="149" y="23" fill="#333" font-size="6" text-anchor="middle" font-family="monospace">GFCI: OFF</text>
+      <!-- State -->
+      <rect x="30" y="258" width="120" height="16" rx="2" fill="#0a0a0a" stroke="#2a2a2a"/>
+      <text id="gnd-state-svg" x="90" y="269" fill="#00ff88" font-size="8" text-anchor="middle" font-family="monospace">SAFE</text>
+    </svg>
+  </div>
+  <div class="oil-controls">
+    <div class="sim-section-label">SYSTEM CONFIGURATION</div>
+    <button class="sim-btn active" id="gnd-btn-grounded" onclick="gndConfig('grounded')">✓ GROUNDED OUTLET</button>
+    <button class="sim-btn" id="gnd-btn-ungrounded" onclick="gndConfig('ungrounded')">✕ UNGROUNDED (2-PRONG)</button>
+    <button class="sim-btn" id="gnd-btn-gfci" onclick="gndConfig('gfci')">⚡ ENABLE GFCI</button>
+    <div class="sim-section-label" style="margin-top:10px">INJECT FAULT</div>
+    <button class="sim-btn" onclick="gndAction('fault')">⚡ WIRE CONTACTS CHASSIS</button>
+    <button class="sim-btn" onclick="gndAction('touch')">👤 PERSON TOUCHES CHASSIS</button>
+    <button class="sim-btn" onclick="gndAction('reset')">↺ RESET</button>
+    <div class="sim-readout" style="margin-top:12px">
+      <div class="readout-line"><span class="readout-tag">STATE</span><span class="readout-val ok" id="gnd-rd-state">SAFE</span></div>
+      <div class="readout-line"><span class="readout-tag">GROUNDING</span><span class="readout-val ok" id="gnd-rd-ground">PRESENT</span></div>
+      <div class="readout-line"><span class="readout-tag">CHASSIS V</span><span class="readout-val ok" id="gnd-rd-chassis">0V — SAFE</span></div>
+      <div class="readout-line"><span class="readout-tag">GFCI</span><span class="readout-val" id="gnd-rd-gfci">DISABLED</span></div>
+      <div class="readout-line"><span class="readout-tag">FAULT PATH</span><span class="readout-val ok" id="gnd-rd-path">NONE</span></div>
+    </div>
+    <div class="sim-readout" style="margin-top:8px;font-size:10px;line-height:1.8">
+      <span style="color:var(--amber-dim)">SYSTEM LOG</span><br>
+      <span id="gnd-log" style="color:var(--text-dim)">System grounded. Fault current path: ground wire → breaker trips. Person: safe.</span>
+    </div>
+  </div>
+</div></div></div>`;
+}
+function gndConfig(mode) {
+  ['gnd-btn-grounded','gnd-btn-ungrounded','gnd-btn-gfci'].forEach(id=>{const b=document.getElementById(id);if(b)b.classList.remove('active');});
+  if(mode==='grounded'){gnd.grounded=true;gnd.gfci=false;document.getElementById('gnd-btn-grounded').classList.add('active');gndLog('Grounded outlet. Fault current path: chassis → ground wire → panel → breaker trips.');}
+  else if(mode==='ungrounded'){gnd.grounded=false;gnd.gfci=false;document.getElementById('gnd-btn-ungrounded').classList.add('active');gndLog('⚠ Ungrounded outlet. No fault path except through a person. Chassis can sit at 120V silently.');}
+  else if(mode==='gfci'){gnd.grounded=false;gnd.gfci=true;document.getElementById('gnd-btn-gfci').classList.add('active');gndLog('GFCI enabled. Detects 5mA imbalance. Trips in 1/40 sec. Protects even without ground wire.');}
+  gnd.fault=false;gnd.bodyPath=false;gnd.chassisV=0;gnd.state='SAFE';
+  updateGndUI();
+}
+function gndAction(a) {
+  if(a==='fault') {
+    gnd.fault=true;
+    gnd.chassisV=gnd.grounded?0:120;
+    if(gnd.grounded){gnd.state='FAULT — BREAKER TRIPPED';gndLog('Fault detected. Current flowed: chassis → ground wire → panel. Breaker tripped. Chassis now 0V. Person safe.');}
+    else if(gnd.gfci){gnd.state='FAULT — GFCI TRIPPED';gndLog('Fault detected. GFCI sensed imbalance. Tripped in <25ms. Chassis de-energized. Person safe even without ground wire.');}
+    else{gnd.state='FAULT — CHASSIS ENERGIZED';gndLog('⚠ DANGER. Fault present. No ground path. Chassis sitting at 120V. No breaker tripped. No warning. Waiting for a person to complete the circuit.');}
+  }
+  else if(a==='touch') {
+    if(!gnd.fault){gndLog('No fault present. Chassis at 0V. Contact is safe.');return;}
+    gnd.bodyPath=true;
+    if(gnd.grounded){gnd.state='SAFE — GROUND PROTECTED';gndLog('Person touched chassis. Chassis was already de-energized by ground wire. No shock.');}
+    else if(gnd.gfci){gnd.state='SAFE — GFCI PROTECTED';gndLog('Person touched chassis. GFCI already tripped. Chassis de-energized. No shock.');}
+    else{gnd.state='ELECTROCUTION RISK';gndLog('💀 Person is now the fault path. 120V across body. Current through torso. Ventricular fibrillation threshold: 100mA. This current: potentially lethal.');}
+  }
+  else if(a==='reset'){gnd.fault=false;gnd.bodyPath=false;gnd.chassisV=0;gnd.state='SAFE';gndLog('System reset.');}
+  updateGndUI();
+}
+function gndLog(m){const e=document.getElementById('gnd-log');if(e)e.textContent=m;}
+function updateGndUI(){
+  const g=gnd;
+  const safe=g.state==='SAFE'||g.state==='SAFE — GROUND PROTECTED'||g.state==='SAFE — GFCI PROTECTED'||g.state==='FAULT — BREAKER TRIPPED'||g.state==='FAULT — GFCI TRIPPED';
+  // Ground wire visibility
+  const gw=document.getElementById('gnd-wire');
+  if(gw) gw.setAttribute('stroke',g.grounded?'#00ff88':'#333');
+  const gh=document.getElementById('gnd-hole');
+  if(gh) gh.setAttribute('fill',g.grounded?'#00ff88':'#333');
+  // Fault wire
+  const fw=document.getElementById('gnd-fault-wire');
+  if(fw) fw.style.opacity=g.fault?'1':'0';
+  // Chassis voltage indicator
+  const cv=document.getElementById('gnd-chassis-v');
+  if(cv){cv.setAttribute('fill',g.chassisV>0?'#ff3333':'#00ff88');cv.setAttribute('opacity',g.chassisV>0?'0.7':'0.3');}
+  // Safe path flash
+  const sp=document.getElementById('gnd-safe-path');
+  if(sp) sp.style.opacity=(g.fault&&(g.grounded||g.gfci))?'0.8':'0';
+  // Body current
+  const bc=document.getElementById('gnd-body-current');
+  if(bc) bc.style.opacity=(g.bodyPath&&!safe)?'1':'0';
+  // GFCI label
+  const gfl=document.getElementById('gnd-gfci-label');
+  if(gfl){gfl.textContent=g.gfci?'GFCI: ON':'GFCI: OFF';gfl.setAttribute('fill',g.gfci?'#00ff88':'#333');}
+  // State svg
+  const sv=document.getElementById('gnd-state-svg');
+  if(sv){sv.textContent=g.state.length>14?g.state.split('—')[0].trim():g.state;sv.setAttribute('fill',safe?'#00ff88':'#ff3333');}
+  // Badge
+  const bg=document.getElementById('gnd-badge');
+  if(bg){bg.textContent=safe?'● SYSTEM SAFE':'⚠ '+g.state;bg.style.color=safe?'var(--green)':'var(--red)';}
+  const set=(id,t,c)=>{const e=document.getElementById(id);if(e){e.textContent=t;e.className='readout-val '+(c||'');}};
+  set('gnd-rd-state',g.state,safe?'ok':'warn');
+  set('gnd-rd-ground',g.grounded?'PRESENT — FAULT PATH ACTIVE':g.gfci?'ABSENT — GFCI COMPENSATING':'ABSENT — NO FAULT PATH',g.grounded?'ok':g.gfci?'':'warn');
+  set('gnd-rd-chassis',`${g.chassisV}V — ${g.chassisV>0?'ENERGIZED — DANGER':'SAFE'}`,g.chassisV>0?'warn':'ok');
+  set('gnd-rd-gfci',g.gfci?'ENABLED — ACTIVE':'DISABLED',g.gfci?'ok':'');
+  set('gnd-rd-path',g.bodyPath&&!safe?'BODY — LETHAL RISK':g.fault&&(g.grounded||g.gfci)?'GROUND/GFCI — SAFE':'NONE',g.bodyPath&&!safe?'warn':'ok');
+}
+
+// ============================================================
+// MODULE 008 — DRAIN SYSTEM SIM
+// ============================================================
+let drn = {};
+function initDrainSim() {
+  drn={
+    fixtures:{kitchen:0,bath:0,shower:0,toilet:0,basement:0},
+    blockage:{kitchen:0,bath:0,shower:0,branch:0,stack:0,main:0},
+    vent:100, state:'CLEAR',
+    log:'DWV system clear. All traps sealed. Vent stack open.'
+  };
+  updateDrnUI();
+}
+function buildDrainSim() {
+  const fix=['kitchen','bath','shower','toilet','basement'];
+  const rows=fix.map(f=>`
+    <div class="drn-row" id="drn-row-${f}">
+      <span class="drn-fix-label">${f.toUpperCase()}</span>
+      <div class="drn-status-dot" id="drn-dot-${f}"></div>
+      <button class="sim-btn" style="padding:4px 8px;font-size:9px;margin-bottom:0" onclick="drnDrain('${f}')">DRAIN</button>
+      <button class="sim-btn" style="padding:4px 8px;font-size:9px;margin-bottom:0" onclick="drnBlock('${f}')">BLOCK</button>
+    </div>`).join('');
+  return `<div class="sim-slot"><div class="sim-header"><div class="sim-title">GRAVITY NETWORK SIMULATOR</div><div class="sim-status" id="drn-badge">● DWV CLEAR</div></div><div class="sim-body"><div class="two-col-sim">
+  <div class="oil-diagram">
+    <svg viewBox="0 0 180 300" style="width:100%;max-width:200px;" xmlns="http://www.w3.org/2000/svg">
+      <!-- Vent stack (roof) -->
+      <rect x="82" y="0" width="16" height="50" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+      <text x="90" y="14" fill="#555" font-size="5" text-anchor="middle" font-family="monospace">VENT</text>
+      <circle id="drn-vent-top" cx="90" cy="5" r="5" fill="#00ff88"/>
+      <!-- Main stack -->
+      <rect x="82" y="50" width="16" height="190" fill="#141414" stroke="#2a2a2a" stroke-width="1.5" id="drn-main-stack"/>
+      <text x="90" y="155" fill="#333" font-size="6" text-anchor="middle" font-family="monospace" transform="rotate(90,90,155)">MAIN STACK</text>
+      <!-- Branch drain (horizontal) -->
+      <rect x="30" y="90" width="52" height="10" fill="#141414" stroke="#2a2a2a" stroke-width="1.5" id="drn-branch"/>
+      <rect x="30" y="140" width="52" height="10" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+      <rect x="30" y="190" width="52" height="10" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+      <!-- Right branches -->
+      <rect x="98" y="90" width="52" height="10" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+      <rect x="98" y="140" width="52" height="10" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+      <!-- Building drain (bottom horizontal) -->
+      <rect x="30" y="245" width="120" height="14" rx="3" fill="#141414" stroke="#2a2a2a" stroke-width="1.5" id="drn-building"/>
+      <!-- Sewer exit -->
+      <rect x="140" y="245" width="30" height="14" rx="3" fill="#0f0f0f" stroke="#1a1a1a" stroke-width="1"/>
+      <text x="155" y="255" fill="#333" font-size="5" text-anchor="middle" font-family="monospace">SEWER</text>
+      <!-- Fixture labels -->
+      <text x="42" y="88" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">KITCHEN</text>
+      <text x="42" y="138" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">BATH</text>
+      <text x="42" y="188" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">SHOWER</text>
+      <text x="124" y="88" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">TOILET</text>
+      <text x="120" y="138" fill="#555" font-size="6" text-anchor="middle" font-family="monospace">BASEMENT</text>
+      <!-- Flow dots (animated when draining) -->
+      <circle id="drn-flow-kitchen" cx="60" cy="95" r="3" fill="#00aaff" opacity="0"/>
+      <circle id="drn-flow-bath" cx="60" cy="145" r="3" fill="#00aaff" opacity="0"/>
+      <circle id="drn-flow-shower" cx="60" cy="195" r="3" fill="#00aaff" opacity="0"/>
+      <circle id="drn-flow-toilet" cx="110" cy="95" r="4" fill="#7a5500" opacity="0"/>
+      <circle id="drn-flow-basement" cx="110" cy="145" r="3" fill="#00aaff" opacity="0"/>
+      <!-- Backup warning -->
+      <g id="drn-backup" opacity="0">
+        <rect x="30" y="232" width="120" height="14" fill="rgba(255,0,0,0.2)" stroke="#ff3333" stroke-width="1"/>
+        <text x="90" y="242" fill="#ff3333" font-size="7" text-anchor="middle" font-family="monospace">BACKUP</text>
+      </g>
+      <!-- State label -->
+      <rect x="30" y="270" width="120" height="16" rx="2" fill="#0a0a0a" stroke="#2a2a2a"/>
+      <text id="drn-state-svg" x="90" y="281" fill="#00ff88" font-size="8" text-anchor="middle" font-family="monospace">CLEAR</text>
+    </svg>
+  </div>
+  <div class="oil-controls">
+    <div class="sim-section-label">FIXTURES</div>
+    <style>.drn-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}.drn-fix-label{font-family:var(--mono);font-size:9px;color:var(--text-dim);min-width:56px;letter-spacing:1px}.drn-status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}</style>
+    ${rows}
+    <div class="sim-section-label" style="margin-top:10px">SYSTEM ACTIONS</div>
+    <button class="sim-btn" onclick="drnAction('blockVent')">🌿 BLOCK VENT STACK</button>
+    <button class="sim-btn" onclick="drnAction('clearVent')">✓ CLEAR VENT STACK</button>
+    <button class="sim-btn" onclick="drnAction('blockMain')">🔧 BLOCK MAIN LINE</button>
+    <button class="sim-btn" onclick="drnAction('snakeMain')">🐍 SNAKE MAIN LINE</button>
+    <button class="sim-btn" onclick="drnAction('reset')">↺ RESET</button>
+    <div class="sim-readout" style="margin-top:10px;font-size:10px;line-height:1.8">
+      <span style="color:var(--amber-dim)">DIAGNOSIS</span><br>
+      <span id="drn-log" style="color:var(--text-dim)">DWV system clear. All traps sealed. Vent stack open.</span>
+    </div>
+  </div>
+</div></div></div>`;
+}
+function drnDrain(fix) {
+  const b=drn.blockage;
+  const mainBlocked=b.main>70||b.stack>80;
+  const el=document.getElementById(`drn-flow-${fix}`);
+  if(el){el.style.opacity='0.9';setTimeout(()=>el.style.opacity='0',1200);}
+  if(mainBlocked){drnLog(`⚠ BACKUP — ${fix.toUpperCase()} drain backing up. Main line or stack blocked. Stop using water.`);drn.state='SEWER BACKUP';const bu=document.getElementById('drn-backup');if(bu)bu.style.opacity='1';}
+  else if(drn.vent<30&&(b.kitchen>50||b.bath>50||b.shower>50)){drnLog(`Gurgling at ${fix.toUpperCase()}. Vent blocked — drain siphoning trap seals. Sewer smell likely.`);drn.state='VENT BLOCKED';}
+  else if(b[fix]>70){drnLog(`${fix.toUpperCase()} draining slowly. Localized blockage in trap or branch drain. Clean P-trap first.`);drn.state='BLOCKED';}
+  else{drnLog(`${fix.toUpperCase()} draining normally.`);drn.state='CLEAR';}
+  updateDrnUI();
+}
+function drnBlock(fix) {
+  drn.blockage[fix]=Math.min(100,(drn.blockage[fix]||0)+35);
+  drnLog(`Debris added to ${fix.toUpperCase()} drain. Blockage: ${Math.round(drn.blockage[fix])}%.`);
+  updateDrnUI();
+}
+function drnAction(a) {
+  if(a==='blockVent'){drn.vent=15;drnLog('Vent stack blocked (debris/birds nest). Siphon risk on all drains. Gurgling likely.');}
+  else if(a==='clearVent'){drn.vent=100;drnLog('Vent stack cleared. Air pressure equalized. Trap seals protected.');}
+  else if(a==='blockMain'){drn.blockage.main=90;drnLog('⚠ Main line blocked. All drains will back up. Stop using water. Call plumber.');}
+  else if(a==='snakeMain'){drn.blockage.main=0;drn.blockage.stack=0;const bu=document.getElementById('drn-backup');if(bu)bu.style.opacity='0';drnLog('Main line cleared. All drains flowing. Monitor for recurrence.');}
+  else if(a==='reset'){initDrainSim();drnLog('System reset.');}
+  updateDrnUI();
+}
+function drnLog(m){const e=document.getElementById('drn-log');if(e)e.textContent=m;}
+function updateDrnUI(){
+  const d=drn;
+  const allClear=d.state==='CLEAR';
+  // Vent
+  const vt=document.getElementById('drn-vent-top');
+  if(vt) vt.setAttribute('fill',d.vent>60?'#00ff88':d.vent>30?'#ffb000':'#ff3333');
+  // Main stack color
+  const ms=document.getElementById('drn-main-stack');
+  if(ms) ms.setAttribute('stroke',d.blockage.main>70?'#ff3333':'#2a2a2a');
+  // Building drain
+  const bd=document.getElementById('drn-building');
+  if(bd) bd.setAttribute('stroke',d.blockage.main>70?'#ff3333':'#2a2a2a');
+  // Branch
+  const br=document.getElementById('drn-branch');
+  if(br) br.setAttribute('stroke',(d.blockage.kitchen>70||d.blockage.bath>70)?'#ffb000':'#2a2a2a');
+  // Fixture dots
+  ['kitchen','bath','shower','toilet','basement'].forEach(f=>{
+    const dot=document.getElementById(`drn-dot-${f}`);
+    if(dot) dot.style.background=(d.blockage[f]||0)>70?'#ff3333':(d.blockage[f]||0)>40?'#ffb000':'#00ff88';
+  });
+  // State
+  const sv=document.getElementById('drn-state-svg');
+  if(sv){sv.textContent=d.state;sv.setAttribute('fill',allClear?'#00ff88':'#ff3333');}
+  const bg=document.getElementById('drn-badge');
+  if(bg){bg.textContent=allClear?'● DWV CLEAR':'⚠ '+d.state;bg.style.color=allClear?'var(--green)':'var(--red)';}
+}
+
+function toggleNav() {
+  const nav = document.getElementById('nav-panel');
+  if (window.innerWidth <= 700) {
+    nav.classList.toggle('mobile-open');
+  } else {
+    navOpen = !navOpen;
+    nav.classList.toggle('collapsed', !navOpen);
+  }
+}
+
+// ============================================================
+// WELCOME
+// ============================================================
+function showWelcome() {
+  document.getElementById('welcome-screen').style.display = 'flex';
+  document.getElementById('module-content').style.display = 'none';
+  document.getElementById('decrypt-screen').classList.add('hidden');
+  document.getElementById('footer-module').textContent = 'MODULE — STANDBY';
+  document.querySelectorAll('.module-item').forEach(el => el.classList.remove('active'));
+  if (window.innerWidth <= 700) {
+    document.getElementById('nav-panel').classList.remove('mobile-open');
+  }
+}
+
+// ============================================================
+// SETTINGS
+// ============================================================
+function openSettings() { document.getElementById('settings-modal').classList.add('open'); }
+function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+
+function setTextSize(size, btn) {
+  document.querySelectorAll('#settings-modal .setting-row:nth-child(1) .setting-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.body.classList.toggle('large-text', size === 'large');
+}
+
+function setContrast(mode, btn) {
+  document.querySelectorAll('#settings-modal .setting-row:nth-child(2) .setting-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.body.classList.toggle('high-contrast', mode === 'high');
+}
+
+function setAnim(mode, btn) {
+  document.querySelectorAll('#settings-modal .setting-row:nth-child(3) .setting-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.body.style.setProperty('animation', mode === 'off' ? 'none' : '');
+  if (mode === 'off') {
+    document.querySelectorAll('*').forEach(el => {
+      el.style.animationDuration = '0s';
+      el.style.transitionDuration = '0s';
+    });
+  }
+}
+
+function setNav(state, btn) {
+  document.querySelectorAll('#settings-modal .setting-row:nth-child(4) .setting-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const nav = document.getElementById('nav-panel');
+  nav.classList.toggle('collapsed', state === 'collapsed');
+  navOpen = state === 'expanded';
+}
+
+// Close modal on backdrop click
+document.getElementById('settings-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeSettings();
+});
+
+// ============================================================
+// FOOTER CLOCK
+// ============================================================
+function updateClock() {
+  const now = new Date();
+  const t = now.toTimeString().slice(0, 8);
+  document.getElementById('footer-time').textContent = t;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+</script>
+</body>
+</html>
