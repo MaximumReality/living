@@ -739,7 +739,8 @@ const MODULES = {
     num: 'MODULE 008',
     title: 'THE DRAIN SYSTEM — GRAVITY NETWORK',
     clearance: 'CLEARANCE: CIVILIAN',
-    diagram: null,
+    diagram: 'assets/diagrams/m008-drainsystem-gravitynetwork.PNG',
+
     diagramLabel: 'DRAIN/WASTE/VENT SYSTEM — WHOLE HOUSE DIAGRAM',
     sim: 'drain',
     flavor: `Behind every wall and under every floor of your home runs a silent network of pipes that operates entirely on gravity. No pump. No motor. No pressure. Just slope, diameter, and air — working together to move waste from every fixture in your home to the municipal sewer or septic system. Most people think of plumbing as water coming in. The drain system is everything going out, and it is far more complex than the supply side. Get any part of it wrong — the slope, the venting, the trap — and the whole system fails.`,
