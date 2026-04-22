@@ -640,7 +640,7 @@ const MODULES = {
     num: 'MODULE 007',
     title: 'ELECTRICAL GROUNDING — THE SAFETY SINK',
     clearance: 'CLEARANCE: CIVILIAN',
-    diagram: null,
+    diagram: 'assets/diagrams/m007-grounding-safetysink.PNG',
     diagramLabel: 'ELECTRICAL GROUNDING DIAGRAM — FAULT CURRENT PATH',
     sim: 'ground',
     flavor: `Every outlet in a modern home has three holes. Most people know the two vertical slots carry electricity. Almost nobody knows what the round hole at the bottom actually does — or why its absence turns any appliance into a potential electrocution device. That round hole is a direct wire connection to a metal rod buried in the earth outside your home. It is not there to make the outlet work. It is there to give fault current somewhere to go that is not through your body.`,
