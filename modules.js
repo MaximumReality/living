@@ -541,7 +541,8 @@ const MODULES = {
     num: 'MODULE 006',
     title: 'THE HVAC FILTER — THE AIRBORNE',
     clearance: 'CLEARANCE: CIVILIAN',
-    diagram: null,
+    diagram: 'assets/diagrams/m006-hvacfilter-airborne.PNG',
+
     diagramLabel: 'HVAC FILTER SYSTEM — AIRFLOW DIAGRAM',
     sim: 'hvac',
     flavor: `Somewhere in your home, a fan is pulling air through a rectangle of pleated material and pushing it through ductwork to every room. That filter is the only barrier between your air handler and everything floating in your home — dust, pet dander, mold spores, pollen, skin cells, combustion particles. Most people change it when they remember, which is never often enough. A clogged filter does not just reduce air quality. It starves your HVAC system of airflow and can destroy the equipment it was meant to protect.`,
