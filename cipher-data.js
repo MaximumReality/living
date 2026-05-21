@@ -9,7 +9,7 @@ const ZONES = [
   { name:'PHASE 3: SIGNAL STORM', subtitle:'Encrypted interference',        color:'#ff00aa', ciphersPerPhase:4 },
   { name:'PHASE 4: CORE BREACH',  subtitle:'Maximum threat — crack or die', color:'#ff2244', ciphersPerPhase:3 },
 ];
-const TOTAL_CIPHERS = 15; // 4+4+4+3
+const TOTAL_CIPHERS = 15;
 
 const PUZZLES = [
   // FOOD
@@ -44,11 +44,13 @@ const PUZZLES = [
 ];
 
 const PASSIVE_ITEMS = [
-  { id:'rust_filter',    name:'Rust Filter',     icon:'🔩', desc:'Water loss reduced on cipher failures',      effect:'rustFilter' },
-  { id:'signal_anchor',  name:'Signal Anchor',   icon:'⚓', desc:'+1 free attempt each phase',                effect:'signalAnchor' },
-  { id:'drone_overclock',name:'Drone Overclock', icon:'⚡', desc:'Hints cost 1% survival instead of 3%',      effect:'droneOverclock' },
-  { id:'scrap_blade',    name:'Scrap Blade',     icon:'🗡️', desc:'+3% survival bonus on every solved cipher', effect:'scrapBlade' },
-  { id:'static_filter',  name:'Static Filter',   icon:'📶', desc:'Failure survival loss reduced by 2',        effect:'staticFilter' },
+  { id:'rust_filter',    name:'Rust Filter',     icon:'🔩', desc:'Water loss reduced on cipher failures' },
+  { id:'signal_anchor',  name:'Signal Anchor',   icon:'⚓', desc:'+1 free attempt each phase' },
+  { id:'drone_overclock',name:'Drone Overclock', icon:'⚡', desc:'Hints cost 1% survival instead of 3%' },
+  { id:'scrap_blade',    name:'Scrap Blade',     icon:'🗡️', desc:'+3% survival bonus on every solved cipher' },
+  { id:'static_filter',  name:'Static Filter',   icon:'📶', desc:'Failure survival loss reduced by 2' },
+  { id:'glitch_ward',    name:'Glitch Ward',     icon:'🌀', desc:'Shrine sacrifice costs 5% less survival' },
+  { id:'trader_eye',     name:'Trader Eye',      icon:'👁️', desc:'Trader always offers one extra item' },
 ];
 
 const ENCOUNTER_TYPES = {
@@ -57,7 +59,28 @@ const ENCOUNTER_TYPES = {
   tech:   { label:'TECH VAULT',    color:'#ff00aa', diffLabel:'HARD',   attemptsBonus:-1, reward:'tech boost · passive item chance' },
   void:   { label:'VOID ANOMALY',  color:'#cc44ff', diffLabel:'HARD',   attemptsBonus:-1, reward:'rare loot · ◈ +2 frags' },
   signal: { label:'SIGNAL CACHE',  color:'#00ff88', diffLabel:'MEDIUM', attemptsBonus: 0, reward:'mixed boost · ◈ +1 frag' },
+  trader: { label:'WASTELAND TRADER', color:'#ffd700', diffLabel:'EVENT', attemptsBonus:0, reward:'spend frags for items or survival' },
+  shrine: { label:'GLITCH SHRINE', color:'#cc44ff', diffLabel:'EVENT',  attemptsBonus:0, reward:'sacrifice survival for a powerful relic' },
 };
+
+// Trader item pool — costs in shards, effect applied immediately
+const TRADER_ITEMS = [
+  { id:'ration_pack',   name:'Emergency Ration', icon:'🥫', cost:2, desc:'Restore +15% survival',        effect:'survival', value:15 },
+  { id:'hint_chip',     name:'Hint Chip',         icon:'💡', cost:2, desc:'Free hint next cipher',        effect:'freeHint', value:1 },
+  { id:'cipher_spike',  name:'Cipher Spike',      icon:'⚡', cost:3, desc:'Auto-solve one letter',        effect:'autoLetter', value:1 },
+  { id:'static_bomb',   name:'Static Bomb',       icon:'💣', cost:3, desc:'Reroll current cipher word',   effect:'reroll', value:1 },
+  { id:'iron_ration',   name:'Iron Ration',       icon:'🔩', cost:4, desc:'Restore +25% survival',        effect:'survival', value:25 },
+  { id:'passive_cache', name:'Passive Cache',     icon:'📦', cost:5, desc:'Random passive item',          effect:'passive', value:1 },
+];
+
+// Shrine relics — cost survival, grant powerful passives
+const SHRINE_RELICS = [
+  { id:'void_eye',     name:'Void Eye',     icon:'👁️', cost:15, desc:'See the answer first letter free every cipher' },
+  { id:'iron_cloak',   name:'Iron Cloak',   icon:'🛡️', cost:12, desc:'Reduce all failure losses by half this run' },
+  { id:'echo_core',    name:'Echo Core',    icon:'🔮', cost:18, desc:'+5% survival for every phase you reach' },
+  { id:'dead_signal',  name:'Dead Signal',  icon:'📡', cost:10, desc:'Double shards earned this run' },
+  { id:'null_filter',  name:'Null Filter',  icon:'🌀', cost:20, desc:'Failures never end a cipher — infinite attempts this run' },
+];
 
 const UNLOCKS = [
   { id:'extra_survival', name:'HARDENED CLOAK',   cost:5,  desc:'+10% starting survival on every run' },
@@ -65,6 +88,34 @@ const UNLOCKS = [
   { id:'void_ciphers',   name:'VOID CIPHER PACK', cost:10, desc:'Unlocks VOID ANOMALY encounter type' },
   { id:'start_passive',  name:'FIELD CACHE',      cost:12, desc:'Start each run with a random passive item' },
   { id:'calm_bonus',     name:'CALM PROTOCOL',    cost:6,  desc:'Calm zones restore +8% survival (base: +5%)' },
+  { id:'trader_access',  name:'BLACK MARKET',     cost:8,  desc:'Unlocks Wasteland Trader encounter type' },
+  { id:'shrine_access',  name:'GLITCH FAITH',     cost:10, desc:'Unlocks Glitch Shrine encounter type' },
+];
+
+// Achievements — checked at end of run and on key events
+const ACHIEVEMENTS = [
+  { id:'first_blood',   name:'FIRST CONTACT',    icon:'🩸', desc:'Complete your first run',                  check: (s) => s.score >= 1 },
+  { id:'phase2',        name:'RUST RUNNER',       icon:'⚙️', desc:'Reach Phase 2',                           check: (s) => s.phase >= 1 },
+  { id:'phase3',        name:'STORM RIDER',       icon:'⚡', desc:'Reach Phase 3',                           check: (s) => s.phase >= 2 },
+  { id:'phase4',        name:'CORE BREACH',       icon:'💀', desc:'Reach Phase 4',                           check: (s) => s.phase >= 3 },
+  { id:'sector_clear',  name:'SECTOR CLEARED',    icon:'🏆', desc:'Complete a full run',                     check: (s) => s.score >= TOTAL_CIPHERS },
+  { id:'no_hints',      name:'GHOST SIGNAL',      icon:'👻', desc:'Finish a run without using any hints',    check: (s) => s.score >= TOTAL_CIPHERS && !s.hintUsedEver },
+  { id:'streak5',       name:'CIPHER CHAIN',      icon:'🔥', desc:'Get a 5-cipher streak in one run',        check: (s) => s.maxStreak >= 5 },
+  { id:'perfect_phase', name:'CLEAN SWEEP',       icon:'✨', desc:'Complete any phase without a wrong answer',check: (s) => s.perfectPhase },
+  { id:'passive3',      name:'FULLY LOADED',      icon:'📦', desc:'Hold 3 passive items at once',            check: (s) => s.passives.length >= 3 },
+  { id:'shrine_used',   name:'GLITCH FAITH',      icon:'🌀', desc:'Use a Glitch Shrine',                     check: (s) => s.shrineUsed },
+  { id:'survived_low',  name:'FLATLINE',          icon:'❤️', desc:'Survive with 5% or less survival',        check: (s) => s.lowestSurvival <= 5 && !s.gameOver },
+  { id:'void_crack',    name:'VOID WALKER',        icon:'🕳️', desc:'Crack a Void Anomaly cipher',            check: (s) => s.voidCracked },
+];
+
+// Lore logs — unlocked by milestone, shown in BRM
+const LORE_LOGS = [
+  { id:'log_deadzone',  unlock:'phase2',       title:'DEADZONE FIELD REPORT',    text:'Signal recovered from sector 7-G. The ruins here predate the collapse by decades. Someone was preparing. The drone keeps finding identical coordinates burned into wall circuits. V0ID-WALKER doesn\'t ask why anymore.' },
+  { id:'log_markets',   unlock:'phase3',       title:'RUST MARKETS INTERCEPT',   text:'Intercepted trader comms. The Markets aren\'t black market — they\'re the only market. Everything that survived the collapse passes through here. Someone is cataloging it all. The drone\'s facial recognition keeps triggering on someone it can\'t identify.' },
+  { id:'log_storm',     unlock:'phase4',       title:'SIGNAL STORM ORIGIN',      text:'The storm isn\'t weather. It\'s broadcast interference from something in the Core. The Bureau of Reality Management flagged this frequency seventeen years ago and classified it. Whatever they were hiding — it\'s still transmitting.' },
+  { id:'log_core',      unlock:'sector_clear', title:'CORE BREACH DEBRIEF',      text:'You made it. The Core was a server farm, not a weapon. Someone uploaded everything — memories, names, the whole pre-collapse record. The drone\'s memory chip is full. You don\'t delete any of it. You carry it out instead.' },
+  { id:'log_shrine',    unlock:'shrine_used',  title:'GLITCH SHRINE ANALYSIS',   text:'The shrines are real. They\'re not religious. They\'re terminals — someone built prayer interfaces into derelict hardware. Leave something of yourself, take something back. The Bureau called them anomalies. They were wrong. They\'re the only honest machines left.' },
+  { id:'log_void',      unlock:'void_crack',   title:'VOID ANOMALY REPORT',      text:'The Void isn\'t empty. The drone\'s sensors found structured data in what should be noise — a whole compressed archive of transmissions that never arrived. Someone was sending messages to the future. Some of them are addressed to you.' },
 ];
 
 const CALM_TEXTS = [
